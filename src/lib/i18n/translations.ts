@@ -540,9 +540,9 @@ export const translations = {
     recoveryLabel: 'recovery',
 
     // Landing
-    landingHero1: 'Performance is a System.',
-    landingHero2: 'Model Adaptation. Predict Output.',
-    landingHero3: 'From Training Load to Performance Outcome.',
+    landingHero1: 'Performance',
+    landingHero2: 'is a System.',
+    landingHero3: 'Model. Predict. Adapt.',
     landingSubHero: 'Vector (Impulse) translates physiology, biomechanics and training stress into precise mathematical models. Forecast form, simulate tapering, understand adaptation.',
     landingExplore: 'Explore Vector',
     landingLogin: 'Login',
@@ -1153,9 +1153,9 @@ export const translations = {
     recoveryLabel: 'recuperación',
 
     // Landing
-    landingHero1: 'El Rendimiento es un Sistema.',
-    landingHero2: 'Modela la Adaptación. Predice el Resultado.',
-    landingHero3: 'De la Carga de Entrenamiento al Rendimiento.',
+    landingHero1: 'Rendimiento',
+    landingHero2: 'es un Sistema.',
+    landingHero3: 'Modela. Predice. Adapta.',
     landingSubHero: 'Vector (Impulso) traduce fisiología, biomecánica y estrés de entrenamiento en modelos matemáticos precisos. Proyecta la forma, simula tapering, comprende la adaptación.',
     landingExplore: 'Explorar Vector',
     landingLogin: 'Iniciar Sesión',

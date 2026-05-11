@@ -327,10 +327,10 @@ export function LandingPage({ onLogin }: LandingPageProps) {
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
             Performance Intelligence · Mathematical Modeling
           </div>
-          <h1 className="font-heading font-black leading-[1.05] mb-6" style={{ fontSize: 'clamp(2.4rem, 6vw, 5rem)' }}>
+          <h1 className="font-heading font-black leading-[1.0] mb-6" style={{ fontSize: 'clamp(3.5rem, 9vw, 8rem)' }}>
             <span className="block text-white">{t('landingHero1')}</span>
             <span className="block" style={{ color: '#fdda36' }}>{t('landingHero2')}</span>
-            <span className="block text-white/70">{t('landingHero3')}</span>
+            <span className="block text-white/50" style={{ fontSize: 'clamp(1.4rem, 3.5vw, 3rem)' }}>{t('landingHero3')}</span>
           </h1>
           <p className="font-body text-[15px] text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
             {t('landingSubHero')}
