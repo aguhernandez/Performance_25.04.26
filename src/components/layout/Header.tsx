@@ -1,4 +1,4 @@
-import { Activity, Zap, LogOut } from 'lucide-react';
+import { Zap, LogOut } from 'lucide-react';
 import type { Athlete } from '../../lib/database.types';
 import ModeToggle from '../dev/ModeToggle';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -25,12 +25,7 @@ export function Header({ athlete, onSignOut }: HeaderProps) {
     <header className="hidden lg:flex fixed top-0 left-0 right-0 z-40 bg-white border-b border-[#e5e7eb] h-16 items-center justify-between px-8">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <Activity className="w-5 h-5" style={{ color: '#514163' }} />
-            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
-          </div>
-          <span className="font-heading font-bold tracking-tight text-[16px]" style={{ color: '#514163' }}>ASC</span>
-          <span className="font-heading font-bold tracking-tight text-[16px]" style={{ color: '#fdda36' }}>Impulse</span>
+          <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-7 w-auto" />
           <span className="font-body font-light text-[13px] ml-1 text-gray-400">{t('performanceVector')}</span>
         </div>
         <div className="h-5 w-px bg-gray-200 mx-1" />

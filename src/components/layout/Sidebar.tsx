@@ -43,7 +43,7 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <div className="relative w-64 bg-white flex flex-col h-full shadow-xl">
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
-              <span className="font-heading text-[15px] font-bold" style={{ color: '#514163' }}>ASC Impulse</span>
+              <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-7 w-auto" />
               <button onClick={() => setMobileOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-4 h-4" />
               </button>
@@ -69,8 +69,13 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         </div>
       )}
 
-      <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-white border-r border-[#e5e7eb] flex-col py-4 transition-all duration-300 ease-in-out group z-40">
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+      <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-white border-r border-[#e5e7eb] flex-col transition-all duration-300 ease-in-out group z-40">
+        {/* Logo strip */}
+        <div className="flex items-center justify-center h-12 border-b border-[#e5e7eb] overflow-hidden px-3 shrink-0">
+          <img src="/Asciendefavicon.png" alt="Asciende" className="h-7 w-7 object-contain group-hover:hidden" />
+          <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="hidden group-hover:block h-7 w-auto object-contain" />
+        </div>
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map(({ view, label, icon: Icon }) => {
             const active = activeView === view;
             return (

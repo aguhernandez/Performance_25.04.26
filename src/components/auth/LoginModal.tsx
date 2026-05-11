@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Activity, ArrowRight, Eye, EyeOff, ExternalLink, X, Zap } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, ExternalLink, X, Zap } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -79,18 +79,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
 
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-0">
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <Activity className="w-5 h-5" style={{ color: '#514163' }} />
-              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading text-[13px] font-bold text-white">ASC</span>
-                <span className="font-heading text-[13px] font-bold" style={{ color: '#fdda36' }}>Impulse</span>
-              </div>
-              <span className="font-body text-[9px] text-gray-600 tracking-widest uppercase">Vector Engine</span>
-            </div>
+          <div className="flex flex-col gap-0.5">
+            <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-6 w-auto brightness-0 invert" />
+            <span className="font-body text-[9px] text-gray-600 tracking-widest uppercase">Vector Engine</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Language toggle */}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Activity, ArrowRight, BarChart2, Brain, ChevronRight, FlaskConical, Globe, Layers, TrendingUp, Zap } from 'lucide-react';
+import { ArrowRight, BarChart2, Brain, ChevronRight, FlaskConical, Globe, Layers, TrendingUp, Zap } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { LoginModal } from '../auth/LoginModal';
 import type { Lang } from '../../lib/i18n/translations';
@@ -274,12 +274,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
         style={{ background: 'linear-gradient(to bottom, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.0) 100%)' }}>
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <Activity className="w-5 h-5" style={{ color: '#514163' }} />
-            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
-          </div>
-          <span className="font-heading text-[15px] font-bold text-white tracking-tight">ASC</span>
-          <span className="font-heading text-[15px] font-bold tracking-tight" style={{ color: '#fdda36' }}>Impulse</span>
+          <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-7 w-auto brightness-0 invert" />
           <span className="hidden sm:inline font-body text-[10px] text-gray-600 ml-2 tracking-widest uppercase">Vector Engine</span>
         </div>
         <div className="flex items-center gap-3">
@@ -574,7 +569,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
       <footer className="border-t py-8 px-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4" style={{ color: '#514163' }} />
+            <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-5 w-auto brightness-0 invert opacity-40" />
             <span className="font-body text-[11px] text-gray-600">{t('landingFooterTagline')}</span>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-white/5 overflow-hidden">
