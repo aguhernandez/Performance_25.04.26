@@ -597,6 +597,21 @@ export const translations = {
     landingEco5Desc: 'Education layer, methodology',
     landingEcoCentral: 'Vector',
     landingEcoCentralDesc: 'Central Intelligence',
+
+    // Login Modal
+    loginModalTitle: 'Access Vector',
+    loginModalSubtitle: 'Sign in with your Asciende Hub credentials',
+    loginEmail: 'Email',
+    loginEmailPlaceholder: 'athlete@asciende.pro',
+    loginPassword: 'Password',
+    loginPasswordPlaceholder: '••••••••',
+    loginSubmit: 'Sign In',
+    loginSubmitting: 'Signing in...',
+    loginNoAccount: "Don't have an account?",
+    loginRegister: 'Register at Hub',
+    loginFallback: 'Or continue with Hub redirect',
+    loginGoHub: 'Go to Hub',
+    loginErrorGeneric: 'Authentication failed. Check your credentials.',
   },
 
   es: {
@@ -1195,6 +1210,21 @@ export const translations = {
     landingEco5Desc: 'Capa educativa, metodología',
     landingEcoCentral: 'Vector',
     landingEcoCentralDesc: 'Inteligencia Central',
+
+    // Login Modal
+    loginModalTitle: 'Acceder a Vector',
+    loginModalSubtitle: 'Inicia sesión con tus credenciales de Asciende Hub',
+    loginEmail: 'Correo electrónico',
+    loginEmailPlaceholder: 'atleta@asciende.pro',
+    loginPassword: 'Contraseña',
+    loginPasswordPlaceholder: '••••••••',
+    loginSubmit: 'Iniciar Sesión',
+    loginSubmitting: 'Iniciando sesión...',
+    loginNoAccount: '¿No tienes cuenta?',
+    loginRegister: 'Regístrate en Hub',
+    loginFallback: 'O continúa con redirección al Hub',
+    loginGoHub: 'Ir al Hub',
+    loginErrorGeneric: 'Autenticación fallida. Verifica tus credenciales.',
   },
 } as const;
 

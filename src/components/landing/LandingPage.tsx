@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Activity, ArrowRight, BarChart2, Brain, ChevronRight, FlaskConical, Globe, Layers, TrendingUp, Zap } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { LoginModal } from '../auth/LoginModal';
 import type { Lang } from '../../lib/i18n/translations';
 
 interface LandingPageProps {
@@ -253,6 +254,7 @@ const ECOSYSTEM = [
 export function LandingPage({ onLogin }: LandingPageProps) {
   const { t, lang, setLang } = useLanguage();
   const [heroVisible, setHeroVisible] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const id = setTimeout(() => setHeroVisible(true), 100);
@@ -263,8 +265,11 @@ export function LandingPage({ onLogin }: LandingPageProps) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const openLogin = () => setShowLogin(true);
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
         style={{ background: 'linear-gradient(to bottom, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.0) 100%)' }}>
@@ -299,7 +304,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
             {t('landingExplore')}
           </button>
           <button
-            onClick={onLogin}
+            onClick={openLogin}
             className="flex items-center gap-1.5 font-body text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
             style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
           >
@@ -340,7 +345,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
-              onClick={onLogin}
+              onClick={openLogin}
               className="flex items-center gap-2 font-body font-semibold text-[13px] px-7 py-3 rounded-xl border transition-all hover:bg-white/5 active:scale-95"
               style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}
             >
@@ -438,7 +443,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
               <h2 className="font-heading font-bold text-white mb-4" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>{t('landingWorkflowTitle')}</h2>
               <p className="font-body text-gray-500 text-[14px] leading-relaxed mb-8">{t('landingWorkflowSubtitle')}</p>
               <button
-                onClick={onLogin}
+                onClick={openLogin}
                 className="inline-flex items-center gap-2 font-body font-semibold text-[13px] px-6 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
                 style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
               >
@@ -555,7 +560,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
             {t('landingSubHero')}
           </p>
           <button
-            onClick={onLogin}
+            onClick={openLogin}
             className="inline-flex items-center gap-2 font-body font-bold text-[14px] px-10 py-4 rounded-xl transition-all hover:opacity-90 active:scale-95 shadow-lg"
             style={{ backgroundColor: '#fdda36', color: '#0a0a0f', boxShadow: '0 0 40px rgba(253,218,54,0.2)' }}
           >

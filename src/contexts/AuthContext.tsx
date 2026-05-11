@@ -79,6 +79,7 @@ interface AuthContextType {
   hasToken: boolean;
   isDevMode: boolean;
   login: () => void;
+  loginWithCredentials: (email: string, password: string) => Promise<{ error: string | null }>;
   logout: () => void;
   setDevProfile: (profile: Profile) => void;
   setUser: (user: HubUser) => void;
@@ -179,6 +180,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithCredentials = async (email: string, password: string): Promise<{ error: string | null }> => {
+    try {
+      const res = await fetch('https://ngkcbygyoobqhlmlnuvl.supabase.co/functions/v1/academy-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data?.error ?? data?.message ?? 'Authentication failed' };
+      }
+
+      const token: string | undefined = data?.token ?? data?.access_token ?? data?.session?.access_token;
+      if (!token) return { error: 'No token received from Hub' };
+
+      localStorage.setItem(SESSION_TOKEN_KEY, token);
+      setHasToken(true);
+
+      const payload = decodeJwtPayload(token);
+      if (!payload || isTokenExpired(payload)) {
+        localStorage.removeItem(SESSION_TOKEN_KEY);
+        setHasToken(false);
+        return { error: 'Invalid or expired token' };
+      }
+
+      const hubUser = extractUserFromPayload(payload);
+      if (!hubUser) {
+        localStorage.removeItem(SESSION_TOKEN_KEY);
+        setHasToken(false);
+        return { error: 'Could not extract user from token' };
+      }
+
+      setUserState(hubUser);
+      await syncProfile(hubUser);
+      return { error: null };
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Network error' };
+    }
+  };
+
   const login = () => {
     if (isDevMode) return;
     const currentUrl = window.location.href.split('?')[0];
@@ -229,6 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hasToken,
       isDevMode,
       login,
+      loginWithCredentials,
       logout,
       setDevProfile,
       setUser: setUserState,
