@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, BarChart2, Brain, ChevronRight, FlaskConical, Globe, Layers, TrendingUp, Zap } from 'lucide-react';
+import { Activity, ArrowRight, BarChart2, Brain, ChevronRight, FlaskConical, Globe, Layers, TrendingUp, Zap } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { LoginModal } from '../auth/LoginModal';
 import type { Lang } from '../../lib/i18n/translations';
