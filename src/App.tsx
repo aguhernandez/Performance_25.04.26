@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { useLanguage } from './contexts/LanguageContext';
 import LocalDevMode from './components/dev/LocalDevMode';
@@ -16,7 +16,8 @@ import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
-import { Activity, Zap } from 'lucide-react';
+import { LandingPage } from './components/landing/LandingPage';
+import { Activity } from 'lucide-react';
 
 type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
 
@@ -35,56 +36,10 @@ function LoadingScreen({ message }: { message: string }) {
   );
 }
 
-function HubRedirectScreen({ onLogin }: { onLogin: () => void }) {
-  const { t } = useLanguage();
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-amber-50 rounded-full blur-3xl opacity-40" />
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-slate-50 rounded-full blur-3xl opacity-40" />
-      </div>
-      <div className="w-full max-w-sm relative text-center">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="relative">
-            <Activity className="w-7 h-7" style={{ color: '#514163' }} />
-            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
-          </div>
-          <span className="font-heading text-2xl font-bold" style={{ color: '#514163' }}>ASC</span>
-          <span className="font-heading text-2xl font-bold" style={{ color: '#fdda36' }}>Impulse</span>
-        </div>
-        <div className="bg-white border border-[#e5e7eb] rounded-2xl p-8 shadow-sm">
-          <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#fdda36' }}>
-            <Zap className="w-6 h-6" style={{ color: '#514163' }} />
-          </div>
-          <h2 className="font-heading text-lg font-bold text-gray-900 mb-2">{t('authRequired')}</h2>
-          <p className="font-body text-[13px] text-gray-500 mb-6">
-            {t('authRedirecting')}
-          </p>
-          <button
-            onClick={onLogin}
-            className="btn-primary w-full text-[13px] py-2.5"
-          >
-            {t('goToHub')}
-          </button>
-        </div>
-        <p className="font-body text-[10px] text-gray-400 mt-4">
-          {t('brandTagline')}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function AppContent() {
   const { user, profile, loading, hasToken, isDevMode, login, logout, setDevProfile } = useAuth();
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<View>('dashboard');
-
-  useEffect(() => {
-    if (!loading && !user && !hasToken && !isDevMode) {
-      login();
-    }
-  }, [user, loading, hasToken, isDevMode, login]);
 
   const {
     athlete,
@@ -133,7 +88,7 @@ function AppContent() {
   }
 
   if (!user && !hasToken && !isDevMode) {
-    return <HubRedirectScreen onLogin={login} />;
+    return <LandingPage onLogin={login} />;
   }
 
   if (!user && !isDevMode) {
