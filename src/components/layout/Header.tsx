@@ -1,6 +1,5 @@
 import { Zap, LogOut } from 'lucide-react';
 import type { Athlete } from '../../lib/database.types';
-import ModeToggle from '../dev/ModeToggle';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,7 +36,6 @@ export function Header({ athlete, onSignOut }: HeaderProps) {
 
       <div className="flex items-center gap-4">
         <LanguageSwitcher />
-        <ModeToggle />
         {displayName && (
           <div className="flex items-center gap-3">
             <div className="text-right">
