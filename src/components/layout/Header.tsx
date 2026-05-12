@@ -11,12 +11,13 @@ interface HeaderProps {
 
 export function Header({ athlete, onSignOut }: HeaderProps) {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const displayName = user?.name || user?.email?.split('@')[0] || athlete?.name || '';
+  const role = profile?.role ?? (user?.role === 'trainer' ? 'coach' : user?.role);
   const roleLabel =
-    user?.role === 'admin' ? t('admin') ?? 'Admin' :
-    user?.role === 'trainer' ? t('coach') ?? 'Coach' :
+    role === 'admin' ? t('admin') :
+    role === 'coach' ? t('coach') :
     t('athlete');
   const avatarLetter = displayName.charAt(0).toUpperCase();
 

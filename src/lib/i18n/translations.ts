@@ -617,6 +617,26 @@ export const translations = {
     underConstructionTitle: 'Under Development',
     underConstructionMessage: 'This section is currently under development. We\'re working hard to bring you new features soon!',
     underConstructionButton: 'Got it',
+
+    // Roles
+    admin: 'Admin',
+    coach: 'Coach',
+
+    // Coach Dashboard
+    coachDashboard: 'Coach Dashboard',
+    coachDashboardSubtitle: 'Monitor all your athletes — fitness, fatigue, and readiness at a glance',
+    myAthletes: 'My Athletes',
+    noAthletesFound: 'No athletes found',
+    noAthletesDesc: 'Athletes will appear here once they register and are assigned to your profile',
+    viewAthlete: 'View Athlete',
+    backToAthletes: 'Back to Athletes',
+    loadingAthletes: 'Loading athletes...',
+    lastSession: 'Last Session',
+    noSessions: 'No sessions',
+    sessionCount: 'Sessions',
+    coachOverview: 'Overview',
+    athleteDetail: 'Athlete Detail',
+    coachAdmin: 'Coach',
   },
 
   es: {
@@ -1235,6 +1255,26 @@ export const translations = {
     underConstructionTitle: 'En Construcción',
     underConstructionMessage: '¡Esta sección está en desarrollo! Estamos trabajando duro para traerte nuevas características pronto.',
     underConstructionButton: 'Entendido',
+
+    // Roles
+    admin: 'Administrador',
+    coach: 'Entrenador',
+
+    // Coach Dashboard
+    coachDashboard: 'Panel del Entrenador',
+    coachDashboardSubtitle: 'Monitorea todos tus atletas — forma física, fatiga y preparación de un vistazo',
+    myAthletes: 'Mis Atletas',
+    noAthletesFound: 'No se encontraron atletas',
+    noAthletesDesc: 'Los atletas aparecerán aquí una vez que se registren y sean asignados a tu perfil',
+    viewAthlete: 'Ver Atleta',
+    backToAthletes: 'Volver a Atletas',
+    loadingAthletes: 'Cargando atletas...',
+    lastSession: 'Última Sesión',
+    noSessions: 'Sin sesiones',
+    sessionCount: 'Sesiones',
+    coachOverview: 'Resumen',
+    athleteDetail: 'Detalle del Atleta',
+    coachAdmin: 'Entrenador',
   },
 } as const;
 

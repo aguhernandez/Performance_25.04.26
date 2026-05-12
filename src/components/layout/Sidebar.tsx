@@ -1,4 +1,4 @@
-import { BarChart2, FlaskConical, Utensils, User, LayoutDashboard, TrendingUp, Heart, Menu, X, Settings } from 'lucide-react';
+import { BarChart2, FlaskConical, Utensils, User, LayoutDashboard, TrendingUp, Heart, Menu, X, Settings, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -7,13 +7,14 @@ type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analyt
 interface SidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
+  role?: 'athlete' | 'coach' | 'admin';
 }
 
-export function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useLanguage();
 
-  const navItems: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  const athleteNavItems: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { view: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { view: 'sessions', label: t('sessions'), icon: BarChart2 },
     { view: 'analytics', label: t('analytics'), icon: TrendingUp },
@@ -23,6 +24,13 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
     { view: 'profile', label: t('athleteProfile'), icon: User },
     { view: 'settings', label: 'Configuracion', icon: Settings },
   ];
+
+  const coachNavItems: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { view: 'dashboard', label: t('myAthletes'), icon: Users },
+    { view: 'settings', label: 'Configuracion', icon: Settings },
+  ];
+
+  const navItems = role === 'coach' ? coachNavItems : athleteNavItems;
 
   const handleNav = (view: View) => {
     onViewChange(view);
@@ -100,22 +108,24 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
           })}
         </nav>
 
-        <div className="px-3 pb-4">
-          <div className="rounded-xl bg-gray-50 border border-[#e5e7eb] p-3">
-            <p className="font-body text-[9px] text-gray-400 uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Model</p>
-            <p className="font-body text-[11px] text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{t('impulseResponse')}</p>
-            <div className="mt-2 space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex justify-between">
-                <span className="font-body text-[10px] text-gray-500">τ₁ {t('fitness')}</span>
-                <span className="font-body text-[10px] text-gray-400">30–50d</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-body text-[10px] text-gray-500">τ₂ {t('fatigue')}</span>
-                <span className="font-body text-[10px] text-gray-400">5–10d</span>
+        {role !== 'coach' && (
+          <div className="px-3 pb-4">
+            <div className="rounded-xl bg-gray-50 border border-[#e5e7eb] p-3">
+              <p className="font-body text-[9px] text-gray-400 uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Model</p>
+              <p className="font-body text-[11px] text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{t('impulseResponse')}</p>
+              <div className="mt-2 space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex justify-between">
+                  <span className="font-body text-[10px] text-gray-500">τ₁ {t('fitness')}</span>
+                  <span className="font-body text-[10px] text-gray-400">30–50d</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-body text-[10px] text-gray-500">τ₂ {t('fatigue')}</span>
+                  <span className="font-body text-[10px] text-gray-400">5–10d</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </aside>
     </>
   );

@@ -18,6 +18,7 @@ import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
 import { LandingPage } from './components/landing/LandingPage';
 import { UnderConstructionModal } from './components/UnderConstructionModal';
+import { CoachView } from './components/coach/CoachView';
 import { Activity } from 'lucide-react';
 
 type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
@@ -94,6 +95,25 @@ function AppContent() {
 
   if (!user && !isDevMode) {
     return <LoadingScreen message={t('initializing')} />;
+  }
+
+  // Coach role — bypass athlete data flow and show coach dashboard
+  if (profile?.role === 'coach') {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header athlete={null} onSignOut={logout} />
+        <Sidebar activeView={activeView} onViewChange={setActiveView} role="coach" />
+        <main className="pt-16 lg:pt-0 lg:pl-20 min-h-screen w-full">
+          <div className="p-6 w-full max-w-[1400px]">
+            {activeView === 'settings' ? (
+              <SettingsView />
+            ) : (
+              <CoachView coachId={user?.id ?? ''} />
+            )}
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (dataLoading) {
