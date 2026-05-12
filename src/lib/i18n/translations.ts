@@ -612,6 +612,11 @@ export const translations = {
     loginFallback: 'Or continue with Hub redirect',
     loginGoHub: 'Go to Hub',
     loginErrorGeneric: 'Authentication failed. Check your credentials.',
+
+    // Under Construction Modal
+    underConstructionTitle: 'Under Development',
+    underConstructionMessage: 'This section is currently under development. We\'re working hard to bring you new features soon!',
+    underConstructionButton: 'Got it',
   },
 
   es: {
@@ -1225,6 +1230,11 @@ export const translations = {
     loginFallback: 'O continúa con redirección al Hub',
     loginGoHub: 'Ir al Hub',
     loginErrorGeneric: 'Autenticación fallida. Verifica tus credenciales.',
+
+    // Under Construction Modal
+    underConstructionTitle: 'En Construcción',
+    underConstructionMessage: '¡Esta sección está en desarrollo! Estamos trabajando duro para traerte nuevas características pronto.',
+    underConstructionButton: 'Entendido',
   },
 } as const;
 

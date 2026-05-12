@@ -17,6 +17,7 @@ import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
 import { LandingPage } from './components/landing/LandingPage';
+import { UnderConstructionModal } from './components/UnderConstructionModal';
 import { Activity } from 'lucide-react';
 
 type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
@@ -110,6 +111,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white">
+      <UnderConstructionModal />
       <Header athlete={athlete} onSignOut={logout} />
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
