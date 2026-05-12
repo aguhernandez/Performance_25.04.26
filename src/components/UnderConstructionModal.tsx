@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import type { Lang } from '../lib/i18n/translations';
 
 export function UnderConstructionModal() {
-  const { language, setLanguage, t } = useLanguage();
+  const { lang, setLang, t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -21,9 +20,9 @@ export function UnderConstructionModal() {
         {/* Language Selector - Top Right */}
         <div className="flex justify-end gap-2">
           <button
-            onClick={() => setLanguage('en')}
+            onClick={() => setLang('en')}
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
-              language === 'en'
+              lang === 'en'
                 ? 'bg-[#fdda36] text-[#514163]'
                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
@@ -31,9 +30,9 @@ export function UnderConstructionModal() {
             EN
           </button>
           <button
-            onClick={() => setLanguage('es')}
+            onClick={() => setLang('es')}
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
-              language === 'es'
+              lang === 'es'
                 ? 'bg-[#fdda36] text-[#514163]'
                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
