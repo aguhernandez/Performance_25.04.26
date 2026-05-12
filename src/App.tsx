@@ -111,7 +111,6 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      <UnderConstructionModal />
       <Header athlete={athlete} onSignOut={logout} />
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
@@ -207,5 +206,10 @@ function AppContent() {
 }
 
 export default function App() {
-  return <AppContent />;
+  return (
+    <>
+      <UnderConstructionModal />
+      <AppContent />
+    </>
+  );
 }
