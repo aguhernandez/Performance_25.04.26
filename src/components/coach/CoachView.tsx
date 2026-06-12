@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Users, Activity, TrendingUp, Heart, Zap, Calendar, ChevronRight, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Users, Activity, TrendingUp, Heart, Zap, Calendar, ChevronRight, RefreshCw, CircleUser as UserCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCoachAthletes, type AthleteWithData } from '../../hooks/useCoachAthletes';
 import { useEngine } from '../../hooks/useEngine';
@@ -7,7 +7,6 @@ import { DashboardView } from '../dashboard/DashboardView';
 import { SessionList } from '../sessions/SessionList';
 import { AnalyticsView } from '../analytics/AnalyticsView';
 import { HrvView } from '../hrv/HrvView';
-import type { Athlete, Session } from '../../lib/database.types';
 
 type AthleteView = 'dashboard' | 'sessions' | 'analytics' | 'hrv';
 
@@ -17,9 +16,12 @@ interface AthleteDetailProps {
 }
 
 function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [activeView, setActiveView] = useState<AthleteView>('dashboard');
-  const engine = useEngine(athleteData.athlete, athleteData.sessions);
+  const engine = useEngine(
+    athleteData.hasLocalProfile ? athleteData.athlete : null,
+    athleteData.sessions
+  );
 
   const tabs: { view: AthleteView; label: string }[] = [
     { view: 'dashboard', label: t('dashboard') },
@@ -30,7 +32,6 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
 
   return (
     <div className="space-y-4">
-      {/* Back + athlete header */}
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
@@ -47,7 +48,14 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
         </div>
         <div>
           <h2 className="font-heading font-bold text-white text-xl">{athleteData.athlete.name}</h2>
-          <p className="font-body text-sm text-gray-400 capitalize">{athleteData.athlete.sport} · {athleteData.sessions.length} {t('sessionCount').toLowerCase()}</p>
+          <p className="font-body text-sm text-gray-400 capitalize">
+            {athleteData.athlete.sport} · {athleteData.sessions.length} {t('sessionCount').toLowerCase()}
+            {!athleteData.hasLocalProfile && (
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-900/30 text-blue-300 border border-blue-700/30">
+                Hub
+              </span>
+            )}
+          </p>
         </div>
         <div className="ml-auto flex gap-6 text-center">
           <div>
@@ -65,70 +73,90 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200">
-        {tabs.map(tab => (
-          <button
-            key={tab.view}
-            onClick={() => setActiveView(tab.view)}
-            className={`px-4 py-2 text-sm font-body font-medium transition-colors border-b-2 -mb-px ${
-              activeView === tab.view
-                ? 'border-[#514163] text-[#514163]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div>
-        {activeView === 'dashboard' && engine && (
-          <DashboardView
-            engine={engine}
-            athlete={athleteData.athlete}
-            sessions={athleteData.sessions}
-            nutritionLogs={[]}
-            userId={athleteData.athlete.user_id ?? ''}
-            hubConnected={false}
-            hubSnapshot={null}
-            hubLoading={false}
-            hubError={null}
-            athleteEmail={null}
-            onRefreshHub={() => {}}
-          />
-        )}
-        {activeView === 'sessions' && (
-          <SessionList
-            sessions={athleteData.sessions}
-            athlete={athleteData.athlete}
-            onAdd={async () => {}}
-            onDelete={async () => {}}
-          />
-        )}
-        {activeView === 'analytics' && engine && (
-          <AnalyticsView
-            sessions={athleteData.sessions}
-            athlete={athleteData.athlete}
-            labTests={athleteData.labTests}
-            engine={engine}
-          />
-        )}
-        {activeView === 'hrv' && (
-          <HrvView
-            hrvLogs={athleteData.hrvLogs}
-            athlete={athleteData.athlete}
-            onAdd={async () => {}}
-            onDelete={async () => {}}
-          />
-        )}
-        {activeView === 'dashboard' && !engine && (
-          <div className="py-20 text-center text-gray-400 font-body text-sm">
-            {t('noEngineData')}
+      {!athleteData.hasLocalProfile && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+          <UserCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-body text-sm font-medium text-blue-800">
+              {lang === 'es'
+                ? 'Este atleta aún no ha ingresado a Performance Vector'
+                : 'This athlete has not yet logged into Performance Vector'}
+            </p>
+            <p className="font-body text-xs text-blue-600 mt-0.5">
+              {lang === 'es'
+                ? 'Los datos de entrenamiento se mostrarán cuando el atleta inicie sesión y complete su perfil.'
+                : 'Training data will appear once the athlete logs in and completes their profile.'}
+            </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {athleteData.hasLocalProfile && (
+        <>
+          <div className="flex gap-1 border-b border-gray-200">
+            {tabs.map(tab => (
+              <button
+                key={tab.view}
+                onClick={() => setActiveView(tab.view)}
+                className={`px-4 py-2 text-sm font-body font-medium transition-colors border-b-2 -mb-px ${
+                  activeView === tab.view
+                    ? 'border-[#514163] text-[#514163]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div>
+            {activeView === 'dashboard' && engine && (
+              <DashboardView
+                engine={engine}
+                athlete={athleteData.athlete}
+                sessions={athleteData.sessions}
+                nutritionLogs={[]}
+                userId={athleteData.athlete.user_id ?? ''}
+                hubConnected={false}
+                hubSnapshot={null}
+                hubLoading={false}
+                hubError={null}
+                athleteEmail={null}
+                onRefreshHub={() => {}}
+              />
+            )}
+            {activeView === 'sessions' && (
+              <SessionList
+                sessions={athleteData.sessions}
+                athlete={athleteData.athlete}
+                onAdd={async () => {}}
+                onDelete={async () => {}}
+              />
+            )}
+            {activeView === 'analytics' && engine && (
+              <AnalyticsView
+                sessions={athleteData.sessions}
+                athlete={athleteData.athlete}
+                labTests={athleteData.labTests}
+                engine={engine}
+              />
+            )}
+            {activeView === 'hrv' && (
+              <HrvView
+                hrvLogs={athleteData.hrvLogs}
+                athlete={athleteData.athlete}
+                onAdd={async () => {}}
+                onDelete={async () => {}}
+              />
+            )}
+            {activeView === 'dashboard' && !engine && (
+              <div className="py-20 text-center text-gray-400 font-body text-sm">
+                {t('noEngineData')}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -140,8 +168,8 @@ interface AthleteCardProps {
 
 function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
   const { t } = useLanguage();
-  const { athlete, sessions, latestSession } = athleteData;
-  const engine = useEngine(athlete, sessions);
+  const { athlete, sessions, latestSession, hasLocalProfile } = athleteData;
+  const engine = useEngine(hasLocalProfile ? athlete : null, sessions);
 
   const fitness = engine ? Math.round(engine.fitness) : null;
   const fatigue = engine ? Math.round(engine.fatigue) : null;
@@ -171,7 +199,14 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
             <h3 className="font-body font-semibold text-gray-900 text-sm truncate">{athlete.name}</h3>
             <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#514163] transition-colors shrink-0 ml-2" />
           </div>
-          <p className="font-body text-xs text-gray-400 capitalize mt-0.5">{athlete.sport}</p>
+          <p className="font-body text-xs text-gray-400 capitalize mt-0.5">
+            {athlete.sport}
+            {!hasLocalProfile && (
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                Hub
+              </span>
+            )}
+          </p>
 
           {/* Metrics row */}
           <div className="mt-3 flex gap-4">

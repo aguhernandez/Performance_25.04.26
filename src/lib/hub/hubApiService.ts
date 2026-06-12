@@ -313,3 +313,23 @@ export async function fetchFoodDiary(
     date_to: dateTo,
   });
 }
+
+export interface HubCoachAthlete {
+  id: string;
+  email: string;
+  full_name: string;
+  sport: string;
+  date_of_birth: string | null;
+  gender: string | null;
+  membership_slug: string | null;
+  membership_name: string | null;
+}
+
+export interface HubCoachAthletesResponse {
+  athletes: HubCoachAthlete[];
+  count: number;
+}
+
+export async function fetchCoachAthletes(token: string, coachEmail: string): Promise<HubCoachAthletesResponse> {
+  return hubFetch<HubCoachAthletesResponse>('/coach-athletes', token, { coach_email: coachEmail });
+}
