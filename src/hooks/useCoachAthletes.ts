@@ -69,35 +69,36 @@ export function useCoachAthletes(coachId: string | null) {
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
-    // Step 1: Get planner token and coach email from profiles
-    const { data: coachProfile } = await supabase
-      .from('profiles')
-      .select('hub_planner_token, email')
-      .eq('hub_user_id', coachId)
-      .maybeSingle();
+    // Step 1: Get coach email and admin planner token (admin manages the Hub connection)
+    const [coachRes, adminRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('email')
+        .eq('hub_user_id', coachId)
+        .maybeSingle(),
+      supabase
+        .from('profiles')
+        .select('hub_planner_token')
+        .eq('role', 'admin')
+        .eq('hub_connection_active', true)
+        .maybeSingle(),
+    ]);
 
-    const plannerToken = coachProfile?.hub_planner_token;
-    const coachEmail = coachProfile?.email;
+    const coachEmail = coachRes.data?.email;
+    const plannerToken = adminRes.data?.hub_planner_token;
 
-    // Try planner token first, then fall back to session JWT
-    const sessionToken = localStorage.getItem('hub_session_token');
-    const tokensToTry = [plannerToken, sessionToken].filter(Boolean) as string[];
-
-    // Step 2: Fetch athletes from Hub (source of truth)
+    // Step 2: Fetch athletes from Hub (source of truth — admin token, coach email as filter)
     let hubAthletes: HubCoachAthlete[] = [];
     let hubStatus: 'connected' | 'failed' | 'no_token' = 'no_token';
 
-    if (tokensToTry.length > 0 && coachEmail) {
-      for (const token of tokensToTry) {
-        try {
-          const hubResponse = await fetchCoachAthletes(token, coachEmail);
-          hubAthletes = hubResponse.athletes ?? [];
-          hubStatus = 'connected';
-          break;
-        } catch (err) {
-          hubStatus = 'failed';
-          console.warn('[CoachAthletes] Hub fetch failed with token:', err);
-        }
+    if (plannerToken && coachEmail) {
+      try {
+        const hubResponse = await fetchCoachAthletes(plannerToken, coachEmail);
+        hubAthletes = hubResponse.athletes ?? [];
+        hubStatus = 'connected';
+      } catch (err) {
+        hubStatus = 'failed';
+        console.warn('[CoachAthletes] Hub fetch failed:', err);
       }
     }
 

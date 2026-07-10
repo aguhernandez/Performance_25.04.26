@@ -108,7 +108,7 @@ function AppContent() {
             {activeView === 'settings' ? (
               <SettingsView />
             ) : (
-              <CoachView coachId={user?.id ?? ''} onNavigateSettings={() => setActiveView('settings')} />
+              <CoachView coachId={user?.id ?? ''} />
             )}
           </div>
         </main>

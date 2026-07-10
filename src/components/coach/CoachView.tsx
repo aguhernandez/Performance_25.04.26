@@ -249,10 +249,9 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
 
 interface CoachViewProps {
   coachId: string;
-  onNavigateSettings?: () => void;
 }
 
-export function CoachView({ coachId, onNavigateSettings }: CoachViewProps) {
+export function CoachView({ coachId }: CoachViewProps) {
   const { t, lang } = useLanguage();
   const { athletes, loading, error, hubStatus, refetch } = useCoachAthletes(coachId);
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteWithData | null>(null);
@@ -314,23 +313,10 @@ export function CoachView({ coachId, onNavigateSettings }: CoachViewProps) {
           <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
           <p className="font-body text-xs text-amber-700">
             {lang === 'es'
-              ? 'No se pudo conectar al Hub. Verifica tu token en Configuracion.'
-              : 'Could not connect to Hub. Check your token in Settings.'}
+              ? 'No se pudo conectar al Hub. Mostrando atletas locales.'
+              : 'Could not connect to Hub. Showing local athletes only.'}
           </p>
         </div>
-      )}
-      {hubStatus === 'no_token' && (
-        <button
-          onClick={onNavigateSettings}
-          className="w-full text-left bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-3 hover:bg-blue-100 transition-colors"
-        >
-          <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
-          <p className="font-body text-xs text-blue-700">
-            {lang === 'es'
-              ? 'Configura tu token del Hub en Configuracion para ver todos tus atletas del ecosistema Asciende.'
-              : 'Configure your Hub token in Settings to see all your Asciende athletes.'}
-          </p>
-        </button>
       )}
 
       {/* Athletes list */}
