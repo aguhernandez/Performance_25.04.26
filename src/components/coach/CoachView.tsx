@@ -171,9 +171,9 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
   const { athlete, sessions, latestSession, hasLocalProfile } = athleteData;
   const engine = useEngine(hasLocalProfile ? athlete : null, sessions);
 
-  const fitness = engine ? Math.round(engine.fitness) : null;
-  const fatigue = engine ? Math.round(engine.fatigue) : null;
-  const form = engine ? Math.round(engine.form) : null;
+  const fitness = engine && isFinite(engine.fitness) ? Math.round(engine.fitness) : null;
+  const fatigue = engine && isFinite(engine.fatigue) ? Math.round(engine.fatigue) : null;
+  const form = engine && isFinite(engine.form) ? Math.round(engine.form) : null;
 
   const formColor = form === null ? '#6b7280'
     : form > 5 ? '#10b981'
@@ -249,11 +249,12 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
 
 interface CoachViewProps {
   coachId: string;
+  onNavigateSettings?: () => void;
 }
 
-export function CoachView({ coachId }: CoachViewProps) {
-  const { t } = useLanguage();
-  const { athletes, loading, error, refetch } = useCoachAthletes(coachId);
+export function CoachView({ coachId, onNavigateSettings }: CoachViewProps) {
+  const { t, lang } = useLanguage();
+  const { athletes, loading, error, hubStatus, refetch } = useCoachAthletes(coachId);
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteWithData | null>(null);
 
   if (selectedAthlete) {
@@ -306,6 +307,31 @@ export function CoachView({ coachId }: CoachViewProps) {
           <p className="font-body text-2xl font-bold text-gray-900">{athletes.reduce((s, a) => s + a.hrvLogs.length, 0)}</p>
         </div>
       </div>
+
+      {/* Hub connection status */}
+      {hubStatus === 'failed' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+          <p className="font-body text-xs text-amber-700">
+            {lang === 'es'
+              ? 'No se pudo conectar al Hub. Verifica tu token en Configuracion.'
+              : 'Could not connect to Hub. Check your token in Settings.'}
+          </p>
+        </div>
+      )}
+      {hubStatus === 'no_token' && (
+        <button
+          onClick={onNavigateSettings}
+          className="w-full text-left bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-3 hover:bg-blue-100 transition-colors"
+        >
+          <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
+          <p className="font-body text-xs text-blue-700">
+            {lang === 'es'
+              ? 'Configura tu token del Hub en Configuracion para ver todos tus atletas del ecosistema Asciende.'
+              : 'Configure your Hub token in Settings to see all your Asciende athletes.'}
+          </p>
+        </button>
+      )}
 
       {/* Athletes list */}
       {loading ? (

@@ -17,6 +17,7 @@ export interface CoachAthletesState {
   athletes: AthleteWithData[];
   loading: boolean;
   error: string | null;
+  hubStatus: 'connected' | 'failed' | 'no_token' | null;
 }
 
 function buildPlaceholderAthlete(hubAthlete: HubCoachAthlete): Athlete {
@@ -57,11 +58,12 @@ export function useCoachAthletes(coachId: string | null) {
     athletes: [],
     loading: true,
     error: null,
+    hubStatus: null,
   });
 
   const loadAthletes = useCallback(async () => {
     if (!coachId) {
-      setState({ athletes: [], loading: false, error: null });
+      setState({ athletes: [], loading: false, error: null, hubStatus: null });
       return;
     }
 
@@ -70,26 +72,32 @@ export function useCoachAthletes(coachId: string | null) {
     // Step 1: Get planner token and coach email from profiles
     const { data: coachProfile } = await supabase
       .from('profiles')
-      .select('hub_planner_token, hub_connection_active, email')
+      .select('hub_planner_token, email')
       .eq('hub_user_id', coachId)
       .maybeSingle();
 
     const plannerToken = coachProfile?.hub_planner_token;
-    const hubActive = coachProfile?.hub_connection_active;
     const coachEmail = coachProfile?.email;
 
-    // Use planner token if configured, otherwise fall back to session token (JWT from Hub login)
+    // Try planner token first, then fall back to session JWT
     const sessionToken = localStorage.getItem('hub_session_token');
-    const effectiveToken = (plannerToken && hubActive) ? plannerToken : sessionToken;
+    const tokensToTry = [plannerToken, sessionToken].filter(Boolean) as string[];
 
     // Step 2: Fetch athletes from Hub (source of truth)
     let hubAthletes: HubCoachAthlete[] = [];
-    if (effectiveToken && coachEmail) {
-      try {
-        const hubResponse = await fetchCoachAthletes(effectiveToken, coachEmail);
-        hubAthletes = hubResponse.athletes ?? [];
-      } catch (err) {
-        console.warn('[CoachAthletes] Hub fetch failed, falling back to local only:', err);
+    let hubStatus: 'connected' | 'failed' | 'no_token' = 'no_token';
+
+    if (tokensToTry.length > 0 && coachEmail) {
+      for (const token of tokensToTry) {
+        try {
+          const hubResponse = await fetchCoachAthletes(token, coachEmail);
+          hubAthletes = hubResponse.athletes ?? [];
+          hubStatus = 'connected';
+          break;
+        } catch (err) {
+          hubStatus = 'failed';
+          console.warn('[CoachAthletes] Hub fetch failed with token:', err);
+        }
       }
     }
 
@@ -101,7 +109,7 @@ export function useCoachAthletes(coachId: string | null) {
       .order('name', { ascending: true });
 
     if (localError) {
-      setState({ athletes: [], loading: false, error: localError.message });
+      setState({ athletes: [], loading: false, error: localError.message, hubStatus });
       return;
     }
 
@@ -238,7 +246,7 @@ export function useCoachAthletes(coachId: string | null) {
       }
     }
 
-    setState({ athletes: mergedAthletes, loading: false, error: null });
+    setState({ athletes: mergedAthletes, loading: false, error: null, hubStatus });
   }, [coachId]);
 
   useEffect(() => {

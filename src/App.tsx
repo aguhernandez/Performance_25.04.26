@@ -103,12 +103,12 @@ function AppContent() {
       <div className="min-h-screen bg-white">
         <Header athlete={null} onSignOut={logout} />
         <Sidebar activeView={activeView} onViewChange={setActiveView} role="coach" />
-        <main className="pt-16 lg:pt-0 lg:pl-20 min-h-screen w-full">
+        <main className="pt-16 lg:pl-20 min-h-screen w-full">
           <div className="p-6 w-full max-w-[1400px]">
             {activeView === 'settings' ? (
               <SettingsView />
             ) : (
-              <CoachView coachId={user?.id ?? ''} />
+              <CoachView coachId={user?.id ?? ''} onNavigateSettings={() => setActiveView('settings')} />
             )}
           </div>
         </main>

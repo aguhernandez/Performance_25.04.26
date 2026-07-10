@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('hub_user_id', hubUser.id)
         .maybeSingle();
 
-      if (fetchError) { console.error('❌ Error fetching profile:', fetchError); return; }
+      if (fetchError) { console.error('Error fetching profile:', fetchError); return; }
 
       if (existing) {
         setProfileState(existing);
@@ -172,11 +172,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .select()
           .single();
 
-        if (createError) { console.error('❌ Error creating profile:', createError); return; }
+        if (createError) { console.error('Error creating profile:', createError); return; }
         setProfileState(newProfile);
       }
     } catch (error) {
-      console.error('💥 Profile sync failed:', error);
+      console.error('Profile sync failed:', error);
     }
   };
 
