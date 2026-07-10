@@ -78,11 +78,15 @@ export function useCoachAthletes(coachId: string | null) {
     const hubActive = coachProfile?.hub_connection_active;
     const coachEmail = coachProfile?.email;
 
+    // Use planner token if configured, otherwise fall back to session token (JWT from Hub login)
+    const sessionToken = localStorage.getItem('hub_session_token');
+    const effectiveToken = (plannerToken && hubActive) ? plannerToken : sessionToken;
+
     // Step 2: Fetch athletes from Hub (source of truth)
     let hubAthletes: HubCoachAthlete[] = [];
-    if (plannerToken && hubActive && coachEmail) {
+    if (effectiveToken && coachEmail) {
       try {
-        const hubResponse = await fetchCoachAthletes(plannerToken, coachEmail);
+        const hubResponse = await fetchCoachAthletes(effectiveToken, coachEmail);
         hubAthletes = hubResponse.athletes ?? [];
       } catch (err) {
         console.warn('[CoachAthletes] Hub fetch failed, falling back to local only:', err);

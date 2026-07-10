@@ -207,6 +207,9 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
               </span>
             )}
           </p>
+          {athleteData.hubAthlete?.email && (
+            <p className="font-body text-[11px] text-gray-400 mt-0.5 truncate">{athleteData.hubAthlete.email}</p>
+          )}
 
           {/* Metrics row */}
           <div className="mt-3 flex gap-4">
