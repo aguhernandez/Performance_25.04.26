@@ -229,16 +229,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    if (isDevMode) {
-      setUserState(null);
-      setProfileState(null);
-      return;
-    }
     localStorage.removeItem(SESSION_TOKEN_KEY);
     setUserState(null);
     setProfileState(null);
     setHasToken(false);
-    window.location.href = HUB_URL;
+    window.history.replaceState({}, '', window.location.origin + '/');
+    window.location.replace('/');
   };
 
   const setDevProfile = (devProfile: Profile) => {
