@@ -16,6 +16,7 @@ import { ExportPanel } from '../export/ExportPanel';
 import { SharePanel } from '../share/SharePanel';
 import { HubDataPanel } from '../hub/HubDataPanel';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { analyzeNutritionCompliance } from '../../lib/engine/nutritionAnalyzer';
 import type { HubSnapshot } from '../../hooks/useHubData';
 
 interface DashboardViewProps {
@@ -220,7 +221,6 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
 
       {activeTab === 'compartments' && (
         <CompartmentsPanel
-          current={multiCompartment}
           history={compartmentHistory}
         />
       )}
@@ -233,8 +233,8 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         <div className="grid grid-cols-2 gap-4">
           <NutritionCompliancePanel
             logs={nutritionLogs}
-            athlete={athlete}
-            sessions={sessions}
+            compliance={analyzeNutritionCompliance(nutritionLogs, athlete.weight_kg ?? 75, athlete.lean_mass_kg ?? (athlete.weight_kg ?? 75) * 0.85)}
+            weightKg={athlete.weight_kg ?? 75}
           />
           <SportTrendsPanel
             sessions={sessions}

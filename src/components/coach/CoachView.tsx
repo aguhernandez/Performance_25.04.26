@@ -7,8 +7,21 @@ import { DashboardView } from '../dashboard/DashboardView';
 import { SessionList } from '../sessions/SessionList';
 import { AnalyticsView } from '../analytics/AnalyticsView';
 import { HrvView } from '../hrv/HrvView';
+import type { HubSnapshot } from '../../hooks/useHubData';
 
 type AthleteView = 'dashboard' | 'sessions' | 'analytics' | 'hrv';
+
+const EMPTY_HUB_SNAPSHOT: HubSnapshot = {
+  athleteProfile: null,
+  biologicalPassport: null,
+  trainingSchedule: null,
+  nutritionData: null,
+  wellness: null,
+  anthropometry: null,
+  habits: null,
+  enduranceData: null,
+  foodDiary: null,
+};
 
 interface AthleteDetailProps {
   athleteData: AthleteWithData;
@@ -118,7 +131,7 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
                 nutritionLogs={[]}
                 userId={athleteData.athlete.user_id ?? ''}
                 hubConnected={false}
-                hubSnapshot={null}
+                hubSnapshot={EMPTY_HUB_SNAPSHOT}
                 hubLoading={false}
                 hubError={null}
                 athleteEmail={null}
@@ -171,9 +184,9 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
   const { athlete, sessions, latestSession, hasLocalProfile } = athleteData;
   const engine = useEngine(hasLocalProfile ? athlete : null, sessions);
 
-  const fitness = engine && isFinite(engine.fitness) ? Math.round(engine.fitness) : null;
-  const fatigue = engine && isFinite(engine.fatigue) ? Math.round(engine.fatigue) : null;
-  const form = engine && isFinite(engine.form) ? Math.round(engine.form) : null;
+  const fitness = engine && isFinite(engine.current.fitness) ? Math.round(engine.current.fitness) : null;
+  const fatigue = engine && isFinite(engine.current.fatigue) ? Math.round(engine.current.fatigue) : null;
+  const form = engine && isFinite(engine.current.form) ? Math.round(engine.current.form) : null;
 
   const formColor = form === null ? '#6b7280'
     : form > 5 ? '#10b981'

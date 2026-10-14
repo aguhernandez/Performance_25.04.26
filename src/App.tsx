@@ -108,7 +108,7 @@ function AppContent() {
             {activeView === 'settings' ? (
               <SettingsView />
             ) : (
-              <CoachView coachId={user?.id ?? ''} />
+              <CoachView key={activeView} coachId={user?.id ?? ''} />
             )}
           </div>
         </main>
