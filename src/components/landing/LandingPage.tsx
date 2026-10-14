@@ -229,9 +229,9 @@ const MODULES = [
 
 const CARDS = [
   { titleKey: 'landingCard1Title' as const, descKey: 'landingCard1Desc' as const, chart: 'ctl' as const, badge: 'Bannister Model', color: '#fdda36' },
-  { titleKey: 'landingCard2Title' as const, descKey: 'landingCard2Desc' as const, chart: 'atl' as const, badge: 'ATL Dynamics', color: '#ef4444' },
-  { titleKey: 'landingCard3Title' as const, descKey: 'landingCard3Desc' as const, chart: 'tsb' as const, badge: 'CTL Curves', color: '#34d399' },
-  { titleKey: 'landingCard4Title' as const, descKey: 'landingCard4Desc' as const, chart: 'hrv' as const, badge: 'TSB Form', color: '#60a5fa' },
+  { titleKey: 'landingCard2Title' as const, descKey: 'landingCard2Desc' as const, chart: 'atl' as const, badge: 'Fatigue Dynamics', color: '#ef4444' },
+  { titleKey: 'landingCard3Title' as const, descKey: 'landingCard3Desc' as const, chart: 'tsb' as const, badge: 'Fitness Curves', color: '#34d399' },
+  { titleKey: 'landingCard4Title' as const, descKey: 'landingCard4Desc' as const, chart: 'hrv' as const, badge: 'Form Score', color: '#60a5fa' },
   { titleKey: 'landingCard5Title' as const, descKey: 'landingCard5Desc' as const, chart: 'pdc' as const, badge: 'Forecast', color: '#f97316' },
   { titleKey: 'landingCard6Title' as const, descKey: 'landingCard6Desc' as const, chart: 'acwr' as const, badge: 'ACWR Risk', color: '#a78bfa' },
 ];

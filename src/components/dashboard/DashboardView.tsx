@@ -194,11 +194,10 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
               </div>
               <FlaskConical className="w-4 h-4 text-slate-600" />
             </div>
-            <div className="grid grid-cols-6 gap-3">
+            <div className="grid grid-cols-5 gap-3">
               {[
                 { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: '#0ea5e9' },
                 { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: '#f97316' },
-                { label: t('kMultiplier'), value: current.tau.kMultiplier.toString(), desc: t('fatigueAmplification'), color: '#f59e0b' },
                 { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? '#ef4444' : current.recoveryRatio < 0.6 ? '#64748b' : '#22c55e' },
                 { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: '#0ea5e9' },
                 { label: t('sessions90d'), value: sessions.filter(s => {

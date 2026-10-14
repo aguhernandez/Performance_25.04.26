@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
-import type { Session, Athlete, LabTest } from '../../lib/database.types';
+import type { Athlete, LabTest } from '../../lib/database.types';
 import type { DailyBannisterResult } from '../../lib/engine/types';
-import { extractMMP, fitPDCModel } from '../../lib/engine/powerDurationCurve';
 import { computePopulationBenchmarks, computeGoalProgress } from '../../lib/engine/benchmarks';
+import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 
 interface Props {
-  sessions: Session[];
   athlete: Athlete;
   labTests: LabTest[];
   fitnessHistory: DailyBannisterResult[];
+  cpData: AthleteCpData;
 }
 
 interface GoalInput {
@@ -27,7 +27,7 @@ const TIER_COLORS: Record<string, string> = {
   beginner: '#94a3b8',
 };
 
-export function BenchmarksGoalsView({ sessions, athlete, labTests, fitnessHistory }: Props) {
+export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData }: Props) {
   const [activeTab, setActiveTab] = useState<'benchmarks' | 'goals'>('benchmarks');
   const [goalInputs, setGoalInputs] = useState<GoalInput[]>([
     { label: 'Critical Power', metric: 'cp', targetValue: 300, currentValue: athlete.cp_watts || 0, unit: 'W' },
@@ -36,9 +36,12 @@ export function BenchmarksGoalsView({ sessions, athlete, labTests, fitnessHistor
   ]);
 
   const pdcModel = useMemo(() => {
-    const mmpProfile = extractMMP(sessions);
-    return fitPDCModel(mmpProfile.points.map(p => ({ duration: p.duration, power: p.power })), athlete.cp_watts);
-  }, [sessions, athlete.cp_watts]);
+    const model = cpData.cpModel;
+    if (model && model.status === 'ok' && model.cp > 0) {
+      return { cp: model.cp, wPrime: model.wPrimeJ };
+    }
+    return { cp: athlete.cp_watts || 0, wPrime: 0 };
+  }, [cpData.cpModel, athlete.cp_watts]);
 
   const benchmarks = useMemo(() =>
     computePopulationBenchmarks(athlete, pdcModel),

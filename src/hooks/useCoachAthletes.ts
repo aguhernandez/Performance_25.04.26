@@ -37,7 +37,6 @@ function buildPlaceholderAthlete(hubAthlete: HubCoachAthlete): Athlete {
     sport_weights: null,
     tau_fitness: 42,
     tau_fatigue: 7,
-    k_multiplier: 2.0,
     hrv_baseline: null,
     running_vdot: null,
     run_threshold_pace: null,
@@ -50,7 +49,7 @@ function buildPlaceholderAthlete(hubAthlete: HubCoachAthlete): Athlete {
     coach_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  } as Athlete;
+  } as unknown as Athlete;
 }
 
 export function useCoachAthletes(coachId: string | null) {

@@ -302,7 +302,7 @@ export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEm
                     <div className="bg-red-400 h-full" style={{ width: `${w.intensity_distribution?.red ?? 0}%` }} />
                   </div>
                 </div>
-                <span className="font-body text-[11px] text-gray-600 w-16 text-right flex-shrink-0">{w.total_tss} TSS</span>
+                <span className="font-body text-[11px] text-gray-600 w-16 text-right flex-shrink-0">{w.total_tss} AU</span>
                 {w.adherence_pct !== null && (
                   <span className="font-body text-[11px] flex-shrink-0" style={{ color: w.adherence_pct >= 80 ? '#22c55e' : '#f97316' }}>
                     {Math.round(w.adherence_pct)}%

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import type { SessionInsert, StrengthExercise, SessionType, TrainingIntention, ZoneDistribution } from '../../lib/database.types';
-import { sessionToImpulseInput } from '../../lib/engine/impulseCalculator';
+import { computeSessionImpulseFor } from '../../lib/engine/impulse';
 import { calculateBeachVolleyballImpulse } from '../../lib/engine/beachVolleyCalculator';
 import type { Athlete } from '../../lib/database.types';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -169,10 +169,7 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
         );
         impulse = result.total;
       } else {
-        impulse = sessionToImpulseInput(
-          { ...draftSession, id: '', impulse: 0, raw_data: null, max_hr: null, sub_sport: null, sport_specific_data: null, created_at: '' } as never,
-          athlete
-        );
+        impulse = computeSessionImpulseFor(draftSession, athlete).impulse;
       }
 
       await onSubmit({ ...draftSession, impulse });

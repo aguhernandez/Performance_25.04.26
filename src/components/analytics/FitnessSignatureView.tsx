@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
-import type { Session, Athlete, LabTest } from '../../lib/database.types';
-import { extractMMP, fitPDCModel } from '../../lib/engine/powerDurationCurve';
+import type { Athlete, LabTest } from '../../lib/database.types';
 import { getFTPHistory } from '../../lib/engine/benchmarks';
 import { useLanguage } from '../../contexts/LanguageContext';
+import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 
 interface Props {
-  sessions: Session[];
   athlete: Athlete;
   labTests: LabTest[];
+  cpData: AthleteCpData;
 }
 
 interface SignaturePoint {
@@ -20,7 +20,7 @@ interface SignaturePoint {
   source: 'lab' | 'derived';
 }
 
-export function FitnessSignatureView({ sessions, athlete, labTests }: Props) {
+export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
   const { t } = useLanguage();
   const [selectedMetric, setSelectedMetric] = useState<'cp' | 'wPrime' | 'pMax' | 'cpPerKg'>('cp');
 
@@ -35,51 +35,28 @@ export function FitnessSignatureView({ sessions, athlete, labTests }: Props) {
         date: labEntry.date,
         cp: labEntry.cp,
         wPrime: labEntry.cp * 60 * 0.15,
-        pMax: labEntry.cp * 3,
+        pMax: 0,
         ftpWatts: labEntry.ftp,
         cpPerKg: weightKg > 0 ? labEntry.cp / weightKg : 0,
         source: 'lab',
       });
     }
 
-    if (points.length === 0) {
-      const mmpProfile = extractMMP(sessions);
-      const model = fitPDCModel(mmpProfile.points.map(p => ({ duration: p.duration, power: p.power })), athlete.cp_watts);
-      if (model.cp > 0) {
-        points.push({
-          date: new Date().toISOString().split('T')[0],
-          cp: model.cp,
-          wPrime: model.wPrime,
-          pMax: model.pMax,
-          ftpWatts: Math.round(model.cp * 0.95),
-          cpPerKg: weightKg > 0 ? model.cp / weightKg : 0,
-          source: 'derived',
-        });
-      }
-    }
-
-    if (athlete.cp_watts) {
-      const hasCurrentLab = points.some(p => {
-        const today = new Date().toISOString().split('T')[0];
-        return p.date === today && p.source === 'lab';
+    const model = cpData.cpModel;
+    if (model && model.status === 'ok' && model.cp > 0) {
+      points.push({
+        date: new Date().toISOString().split('T')[0],
+        cp: model.cp,
+        wPrime: model.wPrimeJ,
+        pMax: model.pMax,
+        ftpWatts: Math.round(model.cp * 0.95),
+        cpPerKg: weightKg > 0 ? model.cp / weightKg : 0,
+        source: 'derived',
       });
-      if (!hasCurrentLab) {
-        const mmpProfile = extractMMP(sessions);
-        const model = fitPDCModel(mmpProfile.points.map(p => ({ duration: p.duration, power: p.power })), athlete.cp_watts);
-        points.push({
-          date: new Date().toISOString().split('T')[0],
-          cp: model.cp > 0 ? model.cp : athlete.cp_watts,
-          wPrime: model.wPrime > 0 ? model.wPrime : athlete.cp_watts * 60 * 0.15,
-          pMax: model.pMax > 0 ? model.pMax : athlete.cp_watts * 3,
-          ftpWatts: athlete.ftp_watts || Math.round(athlete.cp_watts * 0.95),
-          cpPerKg: (athlete.weight_kg || 70) > 0 ? (model.cp > 0 ? model.cp : athlete.cp_watts) / (athlete.weight_kg || 70) : 0,
-          source: 'derived',
-        });
-      }
     }
 
     return points.sort((a, b) => a.date.localeCompare(b.date));
-  }, [sessions, athlete, ftpHistory]);
+  }, [athlete, ftpHistory, cpData.cpModel]);
 
   const metrics = {
     cp: { label: t('criticalPower'), unit: 'W', color: '#2563eb' },

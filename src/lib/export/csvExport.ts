@@ -20,8 +20,8 @@ function downloadCsv(content: string, filename: string) {
 }
 
 export function exportBannisterHistory(history: DailyBannisterResult[], athleteName: string) {
-  const headers = ['Date', 'Fitness', 'Fatigue', 'Form', 'RecoveryRatio', 'Impulse', 'TauFitness', 'TauFatigue', 'kMultiplier'];
-  const rows = history.map(d => [d.date, d.fitness, d.fatigue, d.form, d.recoveryRatio, d.impulse, d.tauFitness, d.tauFatigue, d.kMultiplier]);
+  const headers = ['Date', 'Fitness', 'Fatigue', 'Form', 'RecoveryRatio', 'Impulse', 'TauFitness', 'TauFatigue', 'RampRate'];
+  const rows = history.map(d => [d.date, d.fitness, d.fatigue, d.form, d.recoveryRatio, d.impulse, d.tauFitness, d.tauFatigue, (d as { rampRate?: number }).rampRate ?? '']);
   downloadCsv(toCsv(headers, rows), `${athleteName}_bannister_history_${today()}.csv`);
 }
 

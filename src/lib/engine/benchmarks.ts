@@ -1,5 +1,4 @@
 import type { Athlete } from '../database.types';
-import type { PDCModel } from './powerDurationCurve';
 
 export interface BenchmarkPercentile {
   metric: string;
@@ -73,7 +72,7 @@ function getTier(overallPct: number): PopulationBenchmarks['tier'] {
 
 export function computePopulationBenchmarks(
   athlete: Athlete,
-  pdcModel?: PDCModel
+  pdcModel?: { cp: number; wPrime: number }
 ): PopulationBenchmarks {
   const sport = athlete.sport?.toLowerCase() ?? 'cycling';
   const weightKg = athlete.weight_kg || 70;

@@ -10,7 +10,7 @@ export interface ZoneEntry {
   maxHR?: number;
   timeSeconds: number;
   timePct: number;
-  tss: number;
+  impulse: number;
 }
 
 export interface ZoneDistribution {
@@ -59,12 +59,12 @@ export function computeZoneDistribution(
   const zones: ZoneEntry[] = zoneDefs.map(def => {
     const timeSeconds = zoneTimeMap.get(def.zone) ?? 0;
     const timePct = totalTimeSeconds > 0 ? (timeSeconds / totalTimeSeconds) * 100 : 0;
-    const tss = estimateZoneTSS(def.zone, timeSeconds / 3600);
+    const impulse = estimateZoneImpulse(def.zone, timeSeconds / 3600);
     return {
       ...def,
       timeSeconds,
       timePct: Math.round(timePct * 10) / 10,
-      tss: Math.round(tss * 10) / 10,
+      impulse: Math.round(impulse * 10) / 10,
     };
   });
 
@@ -147,7 +147,7 @@ function getZoneByRPE(rpe: number): number {
   return 7;
 }
 
-function estimateZoneTSS(zone: number, hours: number): number {
+function estimateZoneImpulse(zone: number, hours: number): number {
   const intensityFactors = [0.55, 0.68, 0.83, 0.97, 1.10, 1.30, 1.50];
   const if_ = intensityFactors[zone - 1] ?? 0.68;
   return hours * Math.pow(if_, 2) * 100;

@@ -149,9 +149,9 @@ function buildHtml(engine: EngineOutput, athlete: Athlete, sessions: Session[], 
         <div class="metric-sub">${adaptationTrend.direction}</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">k Multiplier</div>
-        <div class="metric-value" style="color:#0f172a">${current.tau.kMultiplier.toFixed(2)}</div>
-        <div class="metric-sub">Fatigue amplification</div>
+        <div class="metric-label">Ramp Rate</div>
+        <div class="metric-value" style="color:#0f172a">${(history.length >= 7 ? (history[history.length - 1].fitness - history[history.length - 7].fitness) : 0).toFixed(2)}</div>
+        <div class="metric-sub">Fitness / 7 days</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Weekly Trend</div>
@@ -239,7 +239,7 @@ function buildHtml(engine: EngineOutput, athlete: Athlete, sessions: Session[], 
         ['Body Weight', `${athlete.weight_kg} kg`],
         ['Max HR', `${athlete.max_hr} bpm`],
         ['Resting HR', `${athlete.resting_hr} bpm`],
-        ['τ₁ Fitness', `${current.tau.tauFitness}d`],
+        ['τ₂ Fatigue', `${current.tau.tauFatigue}d`],
       ].map(([lbl, val]) => `
         <div class="profile-item">
           <span class="lbl">${lbl}</span>

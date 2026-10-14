@@ -4,16 +4,18 @@ import type { EngineOutput } from '../../lib/engine/types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { PowerDurationView } from './PowerDurationView';
 import { FitnessSignatureView } from './FitnessSignatureView';
-import { TSSLoadView } from './TSSLoadView';
+import { ImpulseLoadView } from './ImpulseLoadView';
 import { PeriodizationView } from './PeriodizationView';
 import { BenchmarksGoalsView } from './BenchmarksGoalsView';
 import { ZonesDecouplingView } from './ZonesDecouplingView';
+import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 
 interface Props {
   sessions: Session[];
   athlete: Athlete;
   labTests: LabTest[];
   engine: EngineOutput | null;
+  cpData: AthleteCpData;
 }
 
 type AnalyticsTab =
@@ -24,14 +26,14 @@ type AnalyticsTab =
   | 'benchmarks'
   | 'zones';
 
-export function AnalyticsView({ sessions, athlete, labTests, engine }: Props) {
+export function AnalyticsView({ sessions, athlete, labTests, engine, cpData }: Props) {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('pdc');
   const { t } = useLanguage();
 
   const TABS: { id: AnalyticsTab; label: string; description: string }[] = [
     { id: 'pdc', label: t('pdcTitle'), description: "PDC · MMP · W' · CP Model" },
     { id: 'signature', label: t('fsTitle').split(' ')[0] + ' Signature', description: "CP · FTP · W' Evolution" },
-    { id: 'load', label: 'TSS & Load', description: 'CTL · ATL · TSB · ACWR' },
+    { id: 'load', label: t('impulseLoadTab'), description: t('impulseLoadTabDesc') },
     { id: 'periodization', label: t('periodizationTitle').split(' ')[0], description: 'Blocks · Taper · Seasons' },
     { id: 'benchmarks', label: t('benchmarksTitle').split(' ')[0] + ' & Goals', description: 'Population Percentiles' },
     { id: 'zones', label: t('zonesTitle').split(',')[0], description: 'Distribution · EF · Stamina' },
@@ -71,19 +73,19 @@ export function AnalyticsView({ sessions, athlete, labTests, engine }: Props) {
 
       <div>
         {activeTab === 'pdc' && (
-          <PowerDurationView sessions={sessions} athlete={athlete} />
+          <PowerDurationView athlete={athlete} cpData={cpData} />
         )}
         {activeTab === 'signature' && (
-          <FitnessSignatureView sessions={sessions} athlete={athlete} labTests={labTests} />
+          <FitnessSignatureView athlete={athlete} labTests={labTests} cpData={cpData} />
         )}
         {activeTab === 'load' && (
-          <TSSLoadView sessions={sessions} athlete={athlete} />
+          <ImpulseLoadView sessions={sessions} athlete={athlete} />
         )}
         {activeTab === 'periodization' && (
           <PeriodizationView sessions={sessions} athlete={athlete} fitnessHistory={fitnessHistory} />
         )}
         {activeTab === 'benchmarks' && (
-          <BenchmarksGoalsView sessions={sessions} athlete={athlete} labTests={labTests} fitnessHistory={fitnessHistory} />
+          <BenchmarksGoalsView athlete={athlete} labTests={labTests} fitnessHistory={fitnessHistory} cpData={cpData} />
         )}
         {activeTab === 'zones' && (
           <ZonesDecouplingView sessions={sessions} athlete={athlete} />

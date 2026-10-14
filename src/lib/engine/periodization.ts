@@ -9,8 +9,8 @@ export interface TrainingBlock {
   type: BlockType;
   startDate: string;
   endDate: string;
-  targetTSSPerWeek: number;
-  actualTSSPerWeek?: number;
+  targetLoadPerWeek: number;
+  actualLoadPerWeek?: number;
   notes: string;
   weeks: number;
 }
@@ -38,7 +38,7 @@ export interface BlockComparison {
   blockA: BlockAnalysis;
   blockB: BlockAnalysis;
   delta: {
-    avgWeeklyTSS: number;
+    avgWeeklyImpulse: number;
     avgSessionLoad: number;
     sessionCount: number;
     fitnessGain: number;
@@ -51,12 +51,12 @@ export interface BlockAnalysis {
   startDate: string;
   endDate: string;
   totalSessions: number;
-  totalTSS: number;
-  avgWeeklyTSS: number;
+  totalImpulse: number;
+  avgWeeklyImpulse: number;
   avgSessionLoad: number;
-  byType: Record<string, { sessions: number; tss: number }>;
-  weeklyTSS: { weekStart: string; tss: number }[];
-  peakWeekTSS: number;
+  byType: Record<string, { sessions: number; impulse: number }>;
+  weeklyImpulse: { weekStart: string; impulse: number }[];
+  peakWeekImpulse: number;
   fitnessStart: number;
   fitnessEnd: number;
   fitnessGain: number;
@@ -74,19 +74,19 @@ export function analyzeBlock(
   );
 
   const totalSessions = blockSessions.length;
-  const totalTSS = blockSessions.reduce((sum, s) => sum + s.impulse, 0);
+  const totalImpulse = blockSessions.reduce((sum, s) => sum + s.impulse, 0);
 
   const start = new Date(startDate);
   const end = new Date(endDate);
   const weeks = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)));
-  const avgWeeklyTSS = totalTSS / weeks;
-  const avgSessionLoad = totalSessions > 0 ? totalTSS / totalSessions : 0;
+  const avgWeeklyImpulse = totalImpulse / weeks;
+  const avgSessionLoad = totalSessions > 0 ? totalImpulse / totalSessions : 0;
 
-  const byType: Record<string, { sessions: number; tss: number }> = {};
+  const byType: Record<string, { sessions: number; impulse: number }> = {};
   for (const s of blockSessions) {
-    if (!byType[s.session_type]) byType[s.session_type] = { sessions: 0, tss: 0 };
+    if (!byType[s.session_type]) byType[s.session_type] = { sessions: 0, impulse: 0 };
     byType[s.session_type].sessions++;
-    byType[s.session_type].tss += s.impulse;
+    byType[s.session_type].impulse += s.impulse;
   }
 
   const weeklyMap = new Map<string, number>();
@@ -99,11 +99,11 @@ export function analyzeBlock(
     weeklyMap.set(weekStart, (weeklyMap.get(weekStart) ?? 0) + s.impulse);
   }
 
-  const weeklyTSS = Array.from(weeklyMap.entries())
+  const weeklyImpulse = Array.from(weeklyMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([weekStart, tss]) => ({ weekStart, tss: Math.round(tss * 10) / 10 }));
+    .map(([weekStart, impulse]) => ({ weekStart, impulse: Math.round(impulse * 10) / 10 }));
 
-  const peakWeekTSS = weeklyTSS.length > 0 ? Math.max(...weeklyTSS.map(w => w.tss)) : 0;
+  const peakWeekImpulse = weeklyImpulse.length > 0 ? Math.max(...weeklyImpulse.map(w => w.impulse)) : 0;
 
   let fitnessStart = 0;
   let fitnessEnd = 0;
@@ -119,12 +119,12 @@ export function analyzeBlock(
     startDate,
     endDate,
     totalSessions,
-    totalTSS: Math.round(totalTSS * 10) / 10,
-    avgWeeklyTSS: Math.round(avgWeeklyTSS * 10) / 10,
+    totalImpulse: Math.round(totalImpulse * 10) / 10,
+    avgWeeklyImpulse: Math.round(avgWeeklyImpulse * 10) / 10,
     avgSessionLoad: Math.round(avgSessionLoad * 10) / 10,
     byType,
-    weeklyTSS,
-    peakWeekTSS: Math.round(peakWeekTSS * 10) / 10,
+    weeklyImpulse,
+    peakWeekImpulse: Math.round(peakWeekImpulse * 10) / 10,
     fitnessStart: Math.round(fitnessStart * 100) / 100,
     fitnessEnd: Math.round(fitnessEnd * 100) / 100,
     fitnessGain: Math.round((fitnessEnd - fitnessStart) * 100) / 100,
@@ -145,8 +145,8 @@ export function compareBlocks(
   const allTypes = new Set([...Object.keys(blockA.byType), ...Object.keys(blockB.byType)]);
   const byTypeDelta: Record<string, number> = {};
   for (const type of allTypes) {
-    const a = blockA.byType[type]?.tss ?? 0;
-    const b = blockB.byType[type]?.tss ?? 0;
+    const a = blockA.byType[type]?.impulse ?? 0;
+    const b = blockB.byType[type]?.impulse ?? 0;
     byTypeDelta[type] = Math.round((b - a) * 10) / 10;
   }
 
@@ -154,7 +154,7 @@ export function compareBlocks(
     blockA,
     blockB,
     delta: {
-      avgWeeklyTSS: Math.round((blockB.avgWeeklyTSS - blockA.avgWeeklyTSS) * 10) / 10,
+      avgWeeklyImpulse: Math.round((blockB.avgWeeklyImpulse - blockA.avgWeeklyImpulse) * 10) / 10,
       avgSessionLoad: Math.round((blockB.avgSessionLoad - blockA.avgSessionLoad) * 10) / 10,
       sessionCount: blockB.totalSessions - blockA.totalSessions,
       fitnessGain: Math.round((blockB.fitnessGain - blockA.fitnessGain) * 100) / 100,
@@ -187,7 +187,6 @@ export function simulateTaper(
   currentFatigue: number,
   tauFitness: number,
   tauFatigue: number,
-  kMultiplier: number,
   avgWeeklyLoad: number,
   eventDate: string,
   taperWeeks = 3
@@ -214,8 +213,8 @@ export function simulateTaper(
     weekStart.setDate(weekStart.getDate() + w * 7);
 
     for (let d = 0; d < 7; d++) {
-      fitness = fitness * Math.exp(-1 / tauFitness) + dailyTargetLoad;
-      fatigue = fatigue * Math.exp(-1 / tauFatigue) + dailyTargetLoad * kMultiplier;
+      fitness = fitness + (dailyTargetLoad - fitness) * (1 - Math.exp(-1 / tauFitness));
+      fatigue = fatigue + (dailyTargetLoad - fatigue) * (1 - Math.exp(-1 / tauFatigue));
     }
 
     weeks.push({
@@ -233,8 +232,8 @@ export function simulateTaper(
   if (remainingDays > 0) {
     const reducedLoad = dailyLoad * 0.2;
     for (let d = 0; d < Math.min(remainingDays, 7); d++) {
-      fitness = fitness * Math.exp(-1 / tauFitness) + reducedLoad;
-      fatigue = fatigue * Math.exp(-1 / tauFatigue) + reducedLoad * kMultiplier;
+      fitness = fitness + (reducedLoad - fitness) * (1 - Math.exp(-1 / tauFitness));
+      fatigue = fatigue + (reducedLoad - fatigue) * (1 - Math.exp(-1 / tauFatigue));
     }
   }
 
@@ -260,12 +259,12 @@ export interface SeasonData {
   startDate: string;
   endDate: string;
   totalSessions: number;
-  totalTSS: number;
-  avgWeeklyTSS: number;
+  totalImpulse: number;
+  avgWeeklyImpulse: number;
   peakFitness: number;
-  peakWeekTSS: number;
+  peakWeekImpulse: number;
   byType: Record<string, number>;
-  monthly: { month: string; tss: number }[];
+  monthly: { month: string; impulse: number }[];
 }
 
 export function compareSeasons(
@@ -287,9 +286,9 @@ export function compareSeasons(
     const endDate = `${year}-12-31`;
 
     const totalSessions = yearlySessions.length;
-    const totalTSS = yearlySessions.reduce((sum, s) => sum + s.impulse, 0);
+    const totalImpulse = yearlySessions.reduce((sum, s) => sum + s.impulse, 0);
     const weeksInYear = 52;
-    const avgWeeklyTSS = totalTSS / weeksInYear;
+    const avgWeeklyImpulse = totalImpulse / weeksInYear;
 
     const yearFitness = fitnessHistory.filter(h => h.date.startsWith(String(year)));
     const peakFitness = yearFitness.length > 0 ? Math.max(...yearFitness.map(h => h.fitness)) : 0;
@@ -303,7 +302,7 @@ export function compareSeasons(
       const weekStart = d.toISOString().split('T')[0];
       weeklyMap.set(weekStart, (weeklyMap.get(weekStart) ?? 0) + s.impulse);
     }
-    const peakWeekTSS = weeklyMap.size > 0 ? Math.max(...weeklyMap.values()) : 0;
+    const peakWeekImpulse = weeklyMap.size > 0 ? Math.max(...weeklyMap.values()) : 0;
 
     const byType: Record<string, number> = {};
     for (const s of yearlySessions) {
@@ -317,17 +316,17 @@ export function compareSeasons(
     }
     const monthly = Array.from(monthlyMap.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([month, tss]) => ({ month, tss: Math.round(tss * 10) / 10 }));
+      .map(([month, impulse]) => ({ month, impulse: Math.round(impulse * 10) / 10 }));
 
     seasons.push({
       year,
       startDate,
       endDate,
       totalSessions,
-      totalTSS: Math.round(totalTSS * 10) / 10,
-      avgWeeklyTSS: Math.round(avgWeeklyTSS * 10) / 10,
+      totalImpulse: Math.round(totalImpulse * 10) / 10,
+      avgWeeklyImpulse: Math.round(avgWeeklyImpulse * 10) / 10,
       peakFitness: Math.round(peakFitness * 100) / 100,
-      peakWeekTSS: Math.round(peakWeekTSS * 10) / 10,
+      peakWeekImpulse: Math.round(peakWeekImpulse * 10) / 10,
       byType,
       monthly,
     });

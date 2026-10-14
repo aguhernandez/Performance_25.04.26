@@ -1,47 +1,73 @@
 import { useMemo, useState } from 'react';
-import type { Session, Athlete } from '../../lib/database.types';
+import type { Athlete } from '../../lib/database.types';
 import {
-  extractMMP,
-  fitPDCModel,
   generatePDCCurve,
   formatDuration,
   getPowerZones,
 } from '../../lib/engine/powerDurationCurve';
 import { useLanguage } from '../../contexts/LanguageContext';
+import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 
 interface Props {
-  sessions: Session[];
   athlete: Athlete;
+  cpData: AthleteCpData;
 }
 
 const PERIOD_COLORS = ['#2563eb', '#16a34a', '#d97706', '#94a3b8'];
 
-export function PowerDurationView({ sessions, athlete }: Props) {
+export function PowerDurationView({ athlete, cpData }: Props) {
   const { t } = useLanguage();
-  const [selectedPeriod, setSelectedPeriod] = useState<number>(3);
   const [hoveredDuration, setHoveredDuration] = useState<number | null>(null);
 
-  const mmpProfile = useMemo(() => extractMMP(sessions), [sessions]);
-  const pdcModel = useMemo(() => {
-    const pts = mmpProfile.points.map(p => ({ duration: p.duration, power: p.power }));
-    return fitPDCModel(pts, athlete.cp_watts);
-  }, [mmpProfile.points, athlete.cp_watts]);
+  const cpModel = cpData.cpModel;
+  const hasModel = !!cpModel && cpModel.status === 'ok' && cpModel.cp > 0;
 
-  const pdcCurve = useMemo(() => generatePDCCurve(pdcModel), [pdcModel]);
-  const powerZones = useMemo(() => getPowerZones(pdcModel.cp), [pdcModel.cp]);
+  const pdcCurve = useMemo(() =>
+    hasModel && cpModel
+      ? generatePDCCurve({ cp: cpModel.cp, wPrime: cpModel.wPrimeJ })
+      : [],
+    [hasModel, cpModel]
+  );
+  const zonesCp = hasModel && cpModel ? cpModel.cp : athlete.cp_watts || 200;
+  const powerZones = useMemo(() => getPowerZones(zonesCp), [zonesCp]);
 
-  const selectedPeriodData = mmpProfile.periods[selectedPeriod] ?? mmpProfile.periods[3];
-  const allTimeData = mmpProfile.periods[3];
+  const mmpPeriods = useMemo(() => {
+    const now = new Date();
+    const defs = [
+      { label: '30 days', days: 30 },
+      { label: '90 days', days: 90 },
+      { label: '180 days', days: 180 },
+      { label: 'All time', days: 9999 },
+    ];
+    return defs.map(p => {
+      const cutoff = new Date(now);
+      cutoff.setDate(cutoff.getDate() - p.days);
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      const best = new Map<number, { duration: number; power: number }>();
+      for (const r of cpData.mmpRows) {
+        if (r.date < cutoffStr) continue;
+        const existing = best.get(r.duration_s);
+        if (!existing || r.watts > existing.power) {
+          best.set(r.duration_s, { duration: r.duration_s, power: Math.round(r.watts) });
+        }
+      }
+      return {
+        label: p.label,
+        points: Array.from(best.values()).sort((a, b) => a.duration - b.duration),
+      };
+    });
+  }, [cpData.mmpRows]);
 
-  const chartDurations = [5, 10, 20, 30, 60, 120, 180, 300, 600, 1200, 1800, 3600];
+  const selectedPeriod = mmpPeriods[mmpPeriods.length - 1];
+  const allTimeData = selectedPeriod;
 
   const maxPower = useMemo(() => {
     const allPowers = [
       ...pdcCurve.map(p => p.power),
-      ...mmpProfile.points.map(p => p.power),
+      ...allTimeData.points.map(p => p.power),
     ];
     return allPowers.length > 0 ? Math.max(...allPowers) * 1.1 : 600;
-  }, [pdcCurve, mmpProfile.points]);
+  }, [pdcCurve, allTimeData.points]);
 
   const chartWidth = 700;
   const chartHeight = 280;
@@ -66,8 +92,8 @@ export function PowerDurationView({ sessions, athlete }: Props) {
     `${i === 0 ? 'M' : 'L'} ${xScale(p.duration)} ${yScale(p.power)}`
   ).join(' ');
 
-  const periodPath = selectedPeriodData !== allTimeData
-    ? selectedPeriodData.points.map((p, i) =>
+  const periodPath = mmpPeriods[0].points.length > 0
+    ? mmpPeriods[0].points.map((p, i) =>
         `${i === 0 ? 'M' : 'L'} ${xScale(p.duration)} ${yScale(p.power)}`
       ).join(' ')
     : null;
@@ -87,29 +113,27 @@ export function PowerDurationView({ sessions, athlete }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {mmpProfile.periods.map((p, i) => (
-            <button
-              key={p.label}
-              onClick={() => setSelectedPeriod(i)}
-              className={`px-3 py-1.5 rounded-lg font-body text-[12px] font-medium transition-all ${
-                selectedPeriod === i
-                  ? 'text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              style={selectedPeriod === i ? { backgroundColor: PERIOD_COLORS[i] } : {}}
-            >
-              {p.label}
-            </button>
-          ))}
+          {cpData.loading && <span className="font-body text-[11px] text-gray-400">{t('loadingAthlete')}</span>}
         </div>
       </div>
 
+      {!hasModel ? (
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+          <p className="font-body text-[14px] text-gray-500">{t('noPowerDataAvailable')}</p>
+          <p className="font-body text-[12px] text-gray-400 mt-1">
+            {cpModel?.reason === 'insufficient_data' || cpModel?.status === 'insufficient_data'
+              ? t('noPowerDataDesc')
+              : t('noPowerDataDesc')}
+          </p>
+        </div>
+      ) : (
+      <>
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: t('criticalPower'), value: `${pdcModel.cp}W`, sub: `${(pdcModel.cp / bodyWeightKg).toFixed(2)} W/kg`, color: '#2563eb' },
-          { label: t('wPrime'), value: `${Math.round(pdcModel.wPrime / 1000 * 10) / 10} kJ`, sub: `${pdcModel.wPrime}J`, color: '#d97706' },
-          { label: t('peakPower'), value: `${pdcModel.pMax}W`, sub: `${(pdcModel.pMax / bodyWeightKg).toFixed(2)} W/kg`, color: '#16a34a' },
-          { label: t('modelFit'), value: `${Math.round(pdcModel.r2 * 100)}%`, sub: pdcModel.points.length > 0 ? `${pdcModel.points.length} data points` : t('noPowerData'), color: '#6b7280' },
+          { label: t('criticalPower'), value: `${cpModel?.cp ?? 0}W`, sub: `${((cpModel?.cp ?? 0) / bodyWeightKg).toFixed(2)} W/kg`, color: '#2563eb' },
+          { label: t('wPrime'), value: `${Math.round((cpModel?.wPrimeJ ?? 0) / 1000 * 10) / 10} kJ`, sub: `${cpModel?.wPrimeJ ?? 0}J`, color: '#d97706' },
+          { label: t('peakPower'), value: cpModel && cpModel.pMax > 0 ? `${cpModel.pMax}W` : '—', sub: cpModel && cpModel.pMax > 0 ? `${(cpModel.pMax / bodyWeightKg).toFixed(2)} W/kg` : 'no 1 s stream data', color: '#16a34a' },
+          { label: t('modelFit'), value: cpModel ? `${Math.round(cpModel.r2 * 100)}%` : '—', sub: `${cpModel?.nPoints ?? 0} points · ${cpModel?.confidence ?? 'low'}`, color: '#6b7280' },
         ].map(card => (
           <div key={card.label} className="bg-white border border-gray-200 rounded-xl p-4">
             <p className="font-body text-[11px] text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
@@ -131,8 +155,8 @@ export function PowerDurationView({ sessions, athlete }: Props) {
           </div>
           {periodPath && (
             <div className="flex items-center gap-1.5">
-              <div className="w-8 h-0.5" style={{ backgroundColor: PERIOD_COLORS[selectedPeriod] }} />
-              <span className="font-body text-[11px] text-gray-500">{selectedPeriodData.label}</span>
+              <div className="w-8 h-0.5" style={{ backgroundColor: PERIOD_COLORS[0] }} />
+              <span className="font-body text-[11px] text-gray-500">Last 30 days</span>
             </div>
           )}
         </div>
@@ -192,7 +216,7 @@ export function PowerDurationView({ sessions, athlete }: Props) {
             <path
               d={periodPath}
               fill="none"
-              stroke={PERIOD_COLORS[selectedPeriod]}
+              stroke={PERIOD_COLORS[0]}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -248,8 +272,8 @@ export function PowerDurationView({ sessions, athlete }: Props) {
           <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">{t('powerZones')}</h3>
           <div className="space-y-2">
             {powerZones.map(zone => {
-              const maxW = zone.max === 9999 ? pdcModel.pMax : zone.max;
-              const widthPct = Math.min(100, ((maxW - zone.min) / pdcModel.pMax) * 100);
+              const maxW = zone.max === 9999 ? (cpModel?.pMax || zonesCp * 1.5) : zone.max;
+              const widthPct = Math.min(100, ((maxW - zone.min) / (cpModel?.pMax || zonesCp * 1.5)) * 100);
               return (
                 <div key={zone.zone} className="flex items-center gap-3">
                   <span className="font-body text-[11px] text-gray-400 w-4">{zone.zone}</span>
@@ -257,7 +281,7 @@ export function PowerDurationView({ sessions, athlete }: Props) {
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="font-body text-[11px] text-gray-700">{zone.name}</span>
                       <span className="font-body text-[11px] text-gray-400">
-                        {zone.min}–{zone.max === 9999 ? `${pdcModel.pMax}+` : zone.max}W
+                        {zone.min}–{zone.max === 9999 ? `${cpModel?.pMax || zonesCp * 1.5}+` : zone.max}W
                       </span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -283,7 +307,7 @@ export function PowerDurationView({ sessions, athlete }: Props) {
           ) : (
             <div className="space-y-2 overflow-y-auto max-h-52">
               {allTimeData.points.map(pt => {
-                const periodPt = selectedPeriodData.points.find(p => p.duration === pt.duration);
+                const periodPt = mmpPeriods[0].points.find(p => p.duration === pt.duration);
                 const isRecent = periodPt && periodPt.power >= pt.power * 0.98;
                 return (
                   <div key={pt.duration} className="flex items-center justify-between py-1.5 border-b border-gray-50">
@@ -304,6 +328,8 @@ export function PowerDurationView({ sessions, athlete }: Props) {
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

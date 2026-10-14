@@ -3,6 +3,7 @@ import { ArrowLeft, Users, Activity, TrendingUp, Heart, Zap, Calendar, ChevronRi
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useCoachAthletes, type AthleteWithData } from '../../hooks/useCoachAthletes';
 import { useEngine } from '../../hooks/useEngine';
+import { useAthleteCpModel } from '../../hooks/useAthleteCpModel';
 import { DashboardView } from '../dashboard/DashboardView';
 import { SessionList } from '../sessions/SessionList';
 import { AnalyticsView } from '../analytics/AnalyticsView';
@@ -35,6 +36,7 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
     athleteData.hasLocalProfile ? athleteData.athlete : null,
     athleteData.sessions
   );
+  const cpData = useAthleteCpModel(athleteData.hasLocalProfile ? athleteData.athlete : null);
 
   const tabs: { view: AthleteView; label: string }[] = [
     { view: 'dashboard', label: t('dashboard') },
@@ -152,6 +154,7 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
                 athlete={athleteData.athlete}
                 labTests={athleteData.labTests}
                 engine={engine}
+                cpData={cpData}
               />
             )}
             {activeView === 'hrv' && (

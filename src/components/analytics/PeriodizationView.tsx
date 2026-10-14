@@ -7,7 +7,6 @@ import {
   simulateTaper,
   compareSeasons,
 } from '../../lib/engine/periodization';
-import { buildTSSSummary } from '../../lib/engine/tssMetrics';
 
 interface Props {
   sessions: Session[];
@@ -44,7 +43,6 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
   });
   const [taperWeeks, setTaperWeeks] = useState(3);
 
-  const tssSummary = useMemo(() => buildTSSSummary(sessions, athlete), [sessions, athlete]);
   const fitnessMap = useMemo(() => fitnessHistory.map(h => ({ date: h.date, fitness: h.fitness })), [fitnessHistory]);
 
   const blockComparison = useMemo(() =>
@@ -52,20 +50,28 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
     [sessions, blockAStart, blockAEnd, blockBStart, blockBEnd, fitnessMap]
   );
 
+  const avgWeeklyImpulse = useMemo(() => {
+    if (sessions.length === 0) return 200;
+    const now = new Date();
+    const cutoff = new Date(now);
+    cutoff.setDate(cutoff.getDate() - 28);
+    const recent = sessions.filter(s => new Date(s.session_date) >= cutoff);
+    const total = recent.reduce((sum, s) => sum + s.impulse, 0);
+    return total / 4 || 200;
+  }, [sessions]);
+
   const taperSim = useMemo(() => {
     const current = fitnessHistory[fitnessHistory.length - 1];
-    const avgWeekly = tssSummary.avgWeeklyTSS || 200;
     return simulateTaper(
       current?.fitness ?? 30,
       current?.fatigue ?? 20,
       athlete.tau_fitness || 42,
       athlete.tau_fatigue || 7,
-      athlete.k_multiplier || 1.5,
-      avgWeekly,
+      avgWeeklyImpulse,
       eventDate,
       taperWeeks
     );
-  }, [fitnessHistory, tssSummary.avgWeeklyTSS, athlete, eventDate, taperWeeks]);
+  }, [fitnessHistory, avgWeeklyImpulse, athlete, eventDate, taperWeeks]);
 
   const seasonComparison = useMemo(() =>
     compareSeasons(sessions, fitnessMap),
@@ -142,9 +148,9 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
 
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: 'Avg Weekly TSS', a: blockComparison.blockA.avgWeeklyTSS, b: blockComparison.blockB.avgWeeklyTSS, unit: 'TSS' },
+              { label: 'Avg Weekly Impulse', a: blockComparison.blockA.avgWeeklyImpulse, b: blockComparison.blockB.avgWeeklyImpulse, unit: 'IF' },
               { label: 'Total Sessions', a: blockComparison.blockA.totalSessions, b: blockComparison.blockB.totalSessions, unit: '' },
-              { label: 'Peak Week', a: blockComparison.blockA.peakWeekTSS, b: blockComparison.blockB.peakWeekTSS, unit: 'TSS' },
+              { label: 'Peak Week', a: blockComparison.blockA.peakWeekImpulse, b: blockComparison.blockB.peakWeekImpulse, unit: 'IF' },
               { label: 'Fitness Gain', a: blockComparison.blockA.fitnessGain, b: blockComparison.blockB.fitnessGain, unit: '' },
             ].map(metric => {
               const diff = Number(metric.b) - Number(metric.a);
@@ -182,12 +188,12 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
                 </h4>
                 <div className="space-y-2">
                   {Object.entries(block.byType).map(([type, data]) => {
-                    const pct = block.totalTSS > 0 ? (data.tss / block.totalTSS) * 100 : 0;
+                    const pct = block.totalImpulse > 0 ? (data.impulse / block.totalImpulse) * 100 : 0;
                     return (
                       <div key={type}>
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="font-body text-[11px] text-gray-600 capitalize">{type.replace('_', ' ')}</span>
-                          <span className="font-body text-[11px] text-gray-400">{data.sessions} sessions · {data.tss.toFixed(0)} TSS</span>
+                          <span className="font-body text-[11px] text-gray-400">{data.sessions} sessions · {data.impulse.toFixed(0)} impulse</span>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: blockTypeColors[type] ?? '#94a3b8' }} />
@@ -269,7 +275,7 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="font-body text-[9px] text-gray-400">Target TSS</p>
+                      <p className="font-body text-[9px] text-gray-400">Target Impulse</p>
                       <p className="font-heading text-[13px] font-bold text-gray-700">{week.targetLoad.toFixed(0)}</p>
                     </div>
                     <div>
@@ -306,9 +312,9 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
                     <div className="space-y-2">
                       {[
                         { label: 'Total Sessions', value: season.totalSessions },
-                        { label: 'Total TSS', value: season.totalTSS.toFixed(0) },
-                        { label: 'Avg Weekly TSS', value: season.avgWeeklyTSS.toFixed(1) },
-                        { label: 'Peak Week', value: season.peakWeekTSS.toFixed(0) },
+                        { label: 'Total Impulse', value: season.totalImpulse.toFixed(0) },
+                        { label: 'Avg Weekly Impulse', value: season.avgWeeklyImpulse.toFixed(1) },
+                        { label: 'Peak Week', value: season.peakWeekImpulse.toFixed(0) },
                         { label: 'Peak Fitness', value: season.peakFitness.toFixed(2) },
                       ].map(row => (
                         <div key={row.label} className="flex justify-between items-center">
@@ -321,11 +327,11 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
                       <p className="font-body text-[10px] text-gray-400 mb-2">Monthly load distribution</p>
                       <div className="flex items-end gap-0.5 h-12">
                         {season.monthly.map(m => {
-                          const maxMonthTSS = Math.max(...season.monthly.map(x => x.tss));
-                          const h = maxMonthTSS > 0 ? (m.tss / maxMonthTSS) * 100 : 0;
+                          const maxMonthImpulse = Math.max(...season.monthly.map(x => x.impulse));
+                          const h = maxMonthImpulse > 0 ? (m.impulse / maxMonthImpulse) * 100 : 0;
                           return (
                             <div key={m.month} className="flex-1 bg-blue-400 rounded-sm transition-all hover:bg-blue-600"
-                              style={{ height: `${h}%` }} title={`${m.month}: ${m.tss.toFixed(0)} TSS`} />
+                              style={{ height: `${h}%` }} title={`${m.month}: ${m.impulse.toFixed(0)} impulse`} />
                           );
                         })}
                       </div>
@@ -354,10 +360,10 @@ export function PeriodizationView({ sessions, athlete, fitnessHistory }: Props) 
                       </thead>
                       <tbody>
                         {[
-                          { label: 'Avg Weekly TSS', key: 'avgWeeklyTSS' as const },
+                          { label: 'Avg Weekly Impulse', key: 'avgWeeklyImpulse' as const },
                           { label: 'Total Sessions', key: 'totalSessions' as const },
                           { label: 'Peak Fitness', key: 'peakFitness' as const },
-                          { label: 'Peak Week TSS', key: 'peakWeekTSS' as const },
+                          { label: 'Peak Week Impulse', key: 'peakWeekImpulse' as const },
                         ].map(row => {
                           const first = seasonComparison.seasons[0][row.key] as number;
                           const last = seasonComparison.seasons[seasonComparison.seasons.length - 1][row.key] as number;

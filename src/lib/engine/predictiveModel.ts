@@ -27,8 +27,8 @@ export function generatePredictiveCurve(
     const isTrainingDay = isTypicalTrainingDay(date);
     const impulse = isTrainingDay ? plannedImpulse : 0;
 
-    fitness = fitness * Math.exp(-1 / tau.tauFitness) + impulse;
-    fatigue = fatigue * Math.exp(-1 / tau.tauFatigue) + impulse * tau.kMultiplier;
+    fitness = fitness + (impulse - fitness) * (1 - Math.exp(-1 / tau.tauFitness));
+    fatigue = fatigue + (impulse - fatigue) * (1 - Math.exp(-1 / tau.tauFatigue));
 
     points.push({
       date: date.toISOString().split('T')[0],
@@ -71,8 +71,8 @@ export function generateTaperPrediction(
       impulse = isTypicalTrainingDay(date) ? recentAvgImpulse * taperFraction : 0;
     }
 
-    fitness = fitness * Math.exp(-1 / tau.tauFitness) + impulse;
-    fatigue = fatigue * Math.exp(-1 / tau.tauFatigue) + impulse * tau.kMultiplier;
+    fitness = fitness + (impulse - fitness) * (1 - Math.exp(-1 / tau.tauFitness));
+    fatigue = fatigue + (impulse - fatigue) * (1 - Math.exp(-1 / tau.tauFatigue));
 
     points.push({
       date: date.toISOString().split('T')[0],

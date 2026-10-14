@@ -1,11 +1,9 @@
-import type { TSSEntry } from './tssMetrics';
-
 export interface ACWRPoint {
   date: string;
   acuteLoad: number;
   chronicLoad: number;
   acwr: number;
-  dailyTSS: number;
+  dailyImpulse: number;
   riskZone: 'safe' | 'caution' | 'danger' | 'underload';
 }
 
@@ -20,11 +18,11 @@ export interface ACWRSummary {
 }
 
 export function computeACWR(
-  tssEntries: TSSEntry[],
+  dailyImpulseEntries: { date: string; impulse: number }[],
   acuteDays = 7,
   chronicDays = 28
 ): ACWRSummary {
-  if (tssEntries.length === 0) {
+  if (dailyImpulseEntries.length === 0) {
     return {
       history: [],
       current: null,
@@ -36,14 +34,14 @@ export function computeACWR(
     };
   }
 
-  const sorted = [...tssEntries].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = [...dailyImpulseEntries].sort((a, b) => a.date.localeCompare(b.date));
   const startDate = new Date(sorted[0].date);
   startDate.setDate(startDate.getDate() - chronicDays);
   const endDate = new Date();
 
-  const dailyTSSMap = new Map<string, number>();
+  const dailyMap = new Map<string, number>();
   for (const e of sorted) {
-    dailyTSSMap.set(e.date, (dailyTSSMap.get(e.date) ?? 0) + e.tss);
+    dailyMap.set(e.date, (dailyMap.get(e.date) ?? 0) + e.impulse);
   }
 
   const allDates: string[] = [];
@@ -63,20 +61,20 @@ export function computeACWR(
     const acuteSlice = allDates.slice(acuteStart, i);
     const chronicSlice = allDates.slice(chronicStart, i);
 
-    const acuteSum = acuteSlice.reduce((sum, d) => sum + (dailyTSSMap.get(d) ?? 0), 0);
-    const chronicSum = chronicSlice.reduce((sum, d) => sum + (dailyTSSMap.get(d) ?? 0), 0);
+    const acuteSum = acuteSlice.reduce((sum, d) => sum + (dailyMap.get(d) ?? 0), 0);
+    const chronicSum = chronicSlice.reduce((sum, d) => sum + (dailyMap.get(d) ?? 0), 0);
 
     const acuteLoad = acuteSum / acuteDays;
     const chronicLoad = chronicSum / chronicDays;
     const acwr = chronicLoad > 0 ? acuteLoad / chronicLoad : 0;
-    const dailyTSS = dailyTSSMap.get(date) ?? 0;
+    const dailyImpulse = dailyMap.get(date) ?? 0;
 
     history.push({
       date,
       acuteLoad: Math.round(acuteLoad * 10) / 10,
       chronicLoad: Math.round(chronicLoad * 10) / 10,
       acwr: Math.round(acwr * 100) / 100,
-      dailyTSS: Math.round(dailyTSS * 10) / 10,
+      dailyImpulse: Math.round(dailyImpulse * 10) / 10,
       riskZone: classifyACWR(acwr),
     });
   }

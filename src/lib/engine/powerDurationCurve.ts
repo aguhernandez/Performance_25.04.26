@@ -7,14 +7,6 @@ export interface PDCPoint {
   sessionId?: string;
 }
 
-export interface PDCModel {
-  cp: number;
-  wPrime: number;
-  pMax: number;
-  r2: number;
-  points: PDCPoint[];
-}
-
 export interface MMPEntry {
   duration: number;
   power: number;
@@ -31,41 +23,26 @@ export interface MMPProfile {
   }[];
 }
 
-const STANDARD_DURATIONS = [1, 2, 5, 10, 20, 30, 60, 120, 180, 300, 600, 1200, 1800, 3600, 5400, 7200];
+const PERIOD_DURATIONS = [1, 5, 10, 15, 30, 60, 120, 180, 300, 480, 600, 720, 900, 1200, 1800, 2700, 3600];
 
-export function extractMMP(sessions: Session[]): MMPProfile {
-  const powerSessions = sessions.filter(
-    s => (s.session_type === 'cycling' || s.session_type === 'endurance') &&
-         s.avg_power_watts && s.duration_min > 0
-  );
-
-  const allPoints: MMPEntry[] = [];
-
-  for (const session of powerSessions) {
-    const durationSec = session.duration_min * 60;
-    const power = session.normalized_power_watts ?? session.avg_power_watts ?? 0;
-    if (power <= 0) continue;
-
-    for (const dur of STANDARD_DURATIONS) {
-      if (dur <= durationSec) {
-        const estimatedPower = estimatePowerForDuration(power, durationSec, dur);
-        if (estimatedPower > 0) {
-          allPoints.push({
-            duration: dur,
-            power: Math.round(estimatedPower),
-            date: session.session_date,
-            sessionId: session.id,
-          });
-        }
-      }
-    }
-  }
-
+/**
+ * Build MMP profile ONLY from real stream-derived points (activity_mmp rows).
+ * There is no extrapolation: an activity without a power stream contributes
+ * no points.
+ */
+export function extractMMPFromRows(
+  rows: { duration_s: number; watts: number; date: string; activity_id: string }[]
+): MMPProfile {
   const bestByDuration = new Map<number, MMPEntry>();
-  for (const pt of allPoints) {
-    const existing = bestByDuration.get(pt.duration);
-    if (!existing || pt.power > existing.power) {
-      bestByDuration.set(pt.duration, pt);
+  for (const r of rows) {
+    const existing = bestByDuration.get(r.duration_s);
+    if (!existing || r.watts > existing.power) {
+      bestByDuration.set(r.duration_s, {
+        duration: r.duration_s,
+        power: Math.round(r.watts),
+        date: r.date,
+        sessionId: r.activity_id,
+      });
     }
   }
 
@@ -80,118 +57,61 @@ export function extractMMP(sessions: Session[]): MMPProfile {
   ].map(p => {
     const cutoff = new Date(now);
     cutoff.setDate(cutoff.getDate() - p.days);
-    const periodSessions = powerSessions.filter(s => new Date(s.session_date) >= cutoff);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
 
-    const periodPoints: MMPEntry[] = [];
     const periodBest = new Map<number, MMPEntry>();
-
-    for (const session of periodSessions) {
-      const durationSec = session.duration_min * 60;
-      const power = session.normalized_power_watts ?? session.avg_power_watts ?? 0;
-      if (power <= 0) continue;
-
-      for (const dur of STANDARD_DURATIONS) {
-        if (dur <= durationSec) {
-          const estimatedPower = estimatePowerForDuration(power, durationSec, dur);
-          if (estimatedPower > 0) {
-            const entry: MMPEntry = {
-              duration: dur,
-              power: Math.round(estimatedPower),
-              date: session.session_date,
-              sessionId: session.id,
-            };
-            const existing = periodBest.get(dur);
-            if (!existing || entry.power > existing.power) {
-              periodBest.set(dur, entry);
-            }
-          }
-        }
+    for (const r of rows) {
+      if (r.date < cutoffStr) continue;
+      const existing = periodBest.get(r.duration_s);
+      if (!existing || r.watts > existing.power) {
+        periodBest.set(r.duration_s, {
+          duration: r.duration_s,
+          power: Math.round(r.watts),
+          date: r.date,
+          sessionId: r.activity_id,
+        });
       }
     }
 
-    periodPoints.push(...Array.from(periodBest.values()).sort((a, b) => a.duration - b.duration));
-    return { label: p.label, days: p.days, points: periodPoints };
+    return {
+      label: p.label,
+      days: p.days,
+      points: Array.from(periodBest.values()).sort((a, b) => a.duration - b.duration),
+    };
   });
 
   return { points, periods };
 }
 
-function estimatePowerForDuration(avgPower: number, totalDurationSec: number, targetDurSec: number): number {
-  if (targetDurSec >= totalDurationSec) return avgPower;
-  const ratio = Math.pow(totalDurationSec / targetDurSec, 0.07);
-  return avgPower * ratio;
-}
+/**
+ * Extract MMP profile from sessions that carry pre-computed stream metrics in
+ * raw_data (written by ingestion). Sessions without raw_data.power_mmp are
+ * skipped — no average-power extrapolation.
+ */
+export function extractMMP(sessions: Session[]): MMPProfile {
+  const rows: { duration_s: number; watts: number; date: string; activity_id: string }[] = [];
 
-export function fitPDCModel(points: PDCPoint[], cpFromProfile?: number): PDCModel {
-  if (points.length < 3) {
-    const cp = cpFromProfile ?? 200;
-    return {
-      cp,
-      wPrime: cp * 60 * 0.15,
-      pMax: cp * 3,
-      r2: 0,
-      points,
-    };
-  }
-
-  const validPoints = points.filter(p => p.duration >= 2 && p.duration <= 3600 && p.power > 0);
-  if (validPoints.length < 3) {
-    const cp = cpFromProfile ?? 200;
-    return { cp, wPrime: cp * 60 * 0.15, pMax: cp * 3, r2: 0, points };
-  }
-
-  let bestCp = 0;
-  let bestWPrime = 0;
-  let bestR2 = -Infinity;
-
-  for (let cp = 100; cp <= 600; cp += 2) {
-    const wValues = validPoints.map(p => (p.power - cp) * p.duration);
-    const wPrime = wValues.reduce((a, b) => a + b, 0) / wValues.length;
-    if (wPrime <= 0) continue;
-
-    const predicted = validPoints.map(p => cp + wPrime / p.duration);
-    const actual = validPoints.map(p => p.power);
-    const r2 = computeR2(actual, predicted);
-
-    if (r2 > bestR2) {
-      bestR2 = r2;
-      bestCp = cp;
-      bestWPrime = wPrime;
+  for (const s of sessions) {
+    const raw = s.raw_data as { power_mmp?: { duration_s: number; watts: number }[] } | null;
+    if (!raw?.power_mmp) continue;
+    for (const pt of raw.power_mmp) {
+      rows.push({
+        duration_s: pt.duration_s,
+        watts: pt.watts,
+        date: s.session_date,
+        activity_id: s.id,
+      });
     }
   }
 
-  if (cpFromProfile && Math.abs(bestCp - cpFromProfile) > 50) {
-    bestCp = cpFromProfile;
-    const wValues = validPoints.map(p => (p.power - bestCp) * p.duration);
-    bestWPrime = Math.max(1000, wValues.reduce((a, b) => a + b, 0) / wValues.length);
-  }
-
-  const shortPoints = validPoints.filter(p => p.duration <= 10);
-  const pMax = shortPoints.length > 0
-    ? Math.max(...shortPoints.map(p => p.power))
-    : bestCp * 3;
-
-  return {
-    cp: Math.round(bestCp),
-    wPrime: Math.round(Math.max(0, bestWPrime)),
-    pMax: Math.round(pMax),
-    r2: Math.max(0, Math.min(1, bestR2)),
-    points: validPoints,
-  };
+  return extractMMPFromRows(rows);
 }
 
-export function generatePDCCurve(model: PDCModel, durations = STANDARD_DURATIONS): PDCPoint[] {
+export function generatePDCCurve(model: { cp: number; wPrime: number }, durations: number[] = PERIOD_DURATIONS): PDCPoint[] {
   return durations.map(dur => ({
     duration: dur,
     power: Math.round(model.cp + model.wPrime / dur),
   }));
-}
-
-function computeR2(actual: number[], predicted: number[]): number {
-  const mean = actual.reduce((a, b) => a + b, 0) / actual.length;
-  const ssTot = actual.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0);
-  const ssRes = actual.reduce((sum, v, i) => sum + Math.pow(v - predicted[i], 2), 0);
-  return ssTot === 0 ? 0 : 1 - ssRes / ssTot;
 }
 
 export function formatDuration(seconds: number): string {
@@ -205,9 +125,9 @@ export function getPowerZones(cp: number): { zone: number; name: string; min: nu
     { zone: 1, name: 'Active Recovery', min: 0, max: Math.round(cp * 0.55), color: '#94a3b8' },
     { zone: 2, name: 'Endurance', min: Math.round(cp * 0.55), max: Math.round(cp * 0.75), color: '#22c55e' },
     { zone: 3, name: 'Tempo', min: Math.round(cp * 0.75), max: Math.round(cp * 0.90), color: '#f59e0b' },
-    { zone: 4, name: 'Threshold', min: Math.round(cp * 0.90), max: Math.round(cp * 1.05), color: '#ef4444' },
-    { zone: 5, name: 'VO2max', min: Math.round(cp * 1.05), max: Math.round(cp * 1.20), color: '#dc2626' },
-    { zone: 6, name: 'Anaerobic', min: Math.round(cp * 1.20), max: Math.round(cp * 1.50), color: '#7f1d1d' },
+    { zone: 4, name: 'Threshold', min: Math.round(cp * 0.90), max: Math.round(cp * 1.05), color: '#f59e0b' },
+    { zone: 5, name: 'VO2max', min: Math.round(cp * 1.05), max: Math.round(cp * 1.20), color: '#ef4444' },
+    { zone: 6, name: 'Anaerobic', min: Math.round(cp * 1.20), max: Math.round(cp * 1.50), color: '#dc2626' },
     { zone: 7, name: 'Neuromuscular', min: Math.round(cp * 1.50), max: 9999, color: '#111827' },
   ];
 }

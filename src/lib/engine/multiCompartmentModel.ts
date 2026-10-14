@@ -27,19 +27,16 @@ export function buildCompartmentTau(profile: PhysiologicalProfile): CompartmentT
   const aerobic: import('./types').TauParameters = {
     tauFitness: clamp(42 + aeroFitnessFactor * 10 + aeroCapFactor * 5, 30, 55),
     tauFatigue: clamp(7 + aeroFitnessFactor * 2 - glycoFactor * 1, 5, 12),
-    kMultiplier: clamp(2.0 + glycoFactor * 0.5 - aeroCapFactor * 0.3, 1.6, 3.0),
   };
 
   const glycolytic: import('./types').TauParameters = {
     tauFitness: clamp(28 + glycoFactor * 8 - aeroFitnessFactor * 3, 20, 38),
     tauFatigue: clamp(4 + glycoFactor * 2, 3, 7),
-    kMultiplier: clamp(2.5 + glycoFactor * 0.8, 2.0, 3.8),
   };
 
   const neuromuscular: import('./types').TauParameters = {
     tauFitness: clamp(35 + neuroFactor * 12 - glycoFactor * 3, 25, 48),
     tauFatigue: clamp(5 + neuroFactor * 2, 4, 9),
-    kMultiplier: clamp(1.8 + neuroFactor * 0.6, 1.5, 2.8),
   };
 
   return { aerobic, glycolytic, neuromuscular };
@@ -73,13 +70,13 @@ export function runMultiCompartmentModel(
     const imp = impulseMap.get(date) ?? { aerobic: 0, glycolytic: 0, neuromuscular: 0 };
 
     aeroFitness = aeroFitness * Math.exp(-1 / tau.aerobic.tauFitness) + imp.aerobic;
-    aeroFatigue = aeroFatigue * Math.exp(-1 / tau.aerobic.tauFatigue) + imp.aerobic * tau.aerobic.kMultiplier;
+    aeroFatigue = aeroFatigue * Math.exp(-1 / tau.aerobic.tauFatigue) + imp.aerobic;
 
     glycoFitness = glycoFitness * Math.exp(-1 / tau.glycolytic.tauFitness) + imp.glycolytic;
-    glycoFatigue = glycoFatigue * Math.exp(-1 / tau.glycolytic.tauFatigue) + imp.glycolytic * tau.glycolytic.kMultiplier;
+    glycoFatigue = glycoFatigue * Math.exp(-1 / tau.glycolytic.tauFatigue) + imp.glycolytic;
 
     neuroFitness = neuroFitness * Math.exp(-1 / tau.neuromuscular.tauFitness) + imp.neuromuscular;
-    neuroFatigue = neuroFatigue * Math.exp(-1 / tau.neuromuscular.tauFatigue) + imp.neuromuscular * tau.neuromuscular.kMultiplier;
+    neuroFatigue = neuroFatigue * Math.exp(-1 / tau.neuromuscular.tauFatigue) + imp.neuromuscular;
 
     const aerobic: CompartmentState = {
       fitness: r4(aeroFitness),

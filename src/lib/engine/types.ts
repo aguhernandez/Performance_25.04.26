@@ -17,7 +17,6 @@ export interface PhysiologicalProfile {
 export interface TauParameters {
   tauFitness: number;
   tauFatigue: number;
-  kMultiplier: number;
 }
 
 export interface CompartmentTau {
@@ -152,7 +151,9 @@ export interface DailyBannisterResult {
   impulse: number;
   tauFitness: number;
   tauFatigue: number;
-  kMultiplier: number;
+  rampRate: number;
+  isWarmUp: boolean;
+  formulaVersion: number;
 }
 
 export interface EngineOutput {

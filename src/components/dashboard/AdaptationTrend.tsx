@@ -73,7 +73,7 @@ export function AdaptationTrend({ trend, tau, performanceIndex, baselinePerforma
 
       <div className="border-t border-slate-800/60 pt-3">
         <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mb-2">Personalized Parameters</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="text-center">
             <p className="text-[10px] text-slate-500 font-mono">τ₁</p>
             <p className="text-[13px] font-bold text-cyan-400 font-mono">{tau.tauFitness}d</p>
@@ -83,11 +83,6 @@ export function AdaptationTrend({ trend, tau, performanceIndex, baselinePerforma
             <p className="text-[10px] text-slate-500 font-mono">τ₂</p>
             <p className="text-[13px] font-bold text-orange-400 font-mono">{tau.tauFatigue}d</p>
             <p className="text-[9px] text-slate-600">fatigue</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-slate-500 font-mono">k</p>
-            <p className="text-[13px] font-bold text-amber-400 font-mono">{tau.kMultiplier}</p>
-            <p className="text-[9px] text-slate-600">multiplier</p>
           </div>
         </div>
       </div>

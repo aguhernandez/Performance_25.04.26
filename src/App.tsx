@@ -16,6 +16,7 @@ import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
+import { useAthleteCpModel } from './hooks/useAthleteCpModel';
 import { LandingPage } from './components/landing/LandingPage';
 import { UnderConstructionModal } from './components/UnderConstructionModal';
 import { CoachView } from './components/coach/CoachView';
@@ -71,7 +72,14 @@ function AppContent() {
     refetch,
   } = useAthleteData(user?.id ?? null);
 
-  const engine = useEngine(athlete, sessions, nutritionLogs);
+  const cpData = useAthleteCpModel(athlete);
+
+  const cpModelOverride =
+    cpData.cpModel && cpData.cpModel.status === 'ok'
+      ? { cpWatts: cpData.cpModel.cp, confidence: cpData.cpModel.confidence }
+      : undefined;
+
+  const engine = useEngine(athlete, sessions, { cpModel: cpModelOverride });
 
   const {
     hubConnected,
@@ -183,6 +191,7 @@ function AppContent() {
               athlete={athlete}
               labTests={labTests}
               engine={engine}
+              cpData={cpData}
             />
           )}
 

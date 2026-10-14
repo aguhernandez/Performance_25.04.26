@@ -333,3 +333,38 @@ export interface HubCoachAthletesResponse {
 export async function fetchCoachAthletes(token: string, coachEmail: string): Promise<HubCoachAthletesResponse> {
   return hubFetch<HubCoachAthletesResponse>('/coach-athletes', token, { coach_email: coachEmail });
 }
+
+export interface HubPowerStream {
+  activity_id: string;
+  activity_date: string;
+  sport: string | null;
+  series: {
+    time_s: number[];
+    watts: (number | null)[];
+    hr?: (number | null)[];
+  } | null;
+}
+
+export async function fetchPowerStream(
+  token: string,
+  athleteEmail: string,
+  activityId: string
+): Promise<HubPowerStream> {
+  return hubFetch<HubPowerStream>('/power-stream', token, {
+    athlete_email: athleteEmail,
+    activity_id: activityId,
+  });
+}
+
+export async function fetchActivityPowerStreams(
+  token: string,
+  athleteEmail: string,
+  dateFrom: string,
+  dateTo: string
+): Promise<HubPowerStream[]> {
+  return hubFetch<{ activities: HubPowerStream[] }>('/power-streams', token, {
+    athlete_email: athleteEmail,
+    date_from: dateFrom,
+    date_to: dateTo,
+  }).then(r => r.activities ?? []);
+}

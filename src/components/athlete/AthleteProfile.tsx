@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Save, User, AlertTriangle, CheckCircle, Trophy, Calendar, Shield, Plus, Trash2, Activity, ChevronDown, ChevronUp, Database } from 'lucide-react';
 import type { Athlete, AthleteInsert, Session, TrainingBlock, TrainingBlockInsert, RaceScheduleEntry, RaceScheduleInsert, HealthHistoryEntry, HealthHistoryInsert } from '../../lib/database.types';
-import { individualizedTau } from '../../lib/engine/tauPersonalizer';
+import { athleteTau } from '../../lib/engine/impulse';
 import { generateDemoSessions } from '../../lib/demoData';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -105,15 +105,7 @@ export function AthleteProfile({
 
   const computedTau = (() => {
     try {
-      return individualizedTau({
-        vo2max: parseFloat(form.vo2max) || 50,
-        vlamax: parseFloat(form.vlamax) || 0.4,
-        leanMassKg: parseFloat(form.lean_mass_kg) || 70,
-        weightKg: parseFloat(form.weight_kg) || 75,
-        cpWatts: parseInt(form.cp_watts) || 250,
-        maxHr: parseInt(form.max_hr) || 185,
-        restingHr: parseInt(form.resting_hr) || 50,
-      });
+      return athleteTau({});
     } catch {
       return null;
     }
@@ -359,11 +351,10 @@ export function AthleteProfile({
             <div className="bg-[#0d1420] border border-cyan-500/20 rounded-xl p-4">
               <h3 className="text-[12px] font-mono uppercase tracking-wider text-cyan-500/70 mb-3">{t('tauPreview')}</h3>
               <p className="text-[11px] text-slate-500 mb-3">{t('tauPreviewDesc')}</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: t('tauFitness'), value: `${computedTau.tauFitness}d`, desc: t('longTermAdaptationConst'), color: '#0ea5e9' },
                   { label: t('tauFatigue'), value: `${computedTau.tauFatigue}d`, desc: t('shortTermStressConst'), color: '#f97316' },
-                  { label: t('kMultiplier'), value: computedTau.kMultiplier.toString(), desc: t('fatigueAmplificationFactor'), color: '#f59e0b' },
                 ].map(({ label, value, desc, color }) => (
                   <div key={label} className="text-center p-3 rounded-lg bg-slate-800/30 border border-slate-700/20">
                     <p className="text-[10px] text-slate-500 font-mono uppercase mb-1">{label}</p>
