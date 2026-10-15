@@ -334,6 +334,8 @@ export function usePerformanceData(athlete: Athlete | null): PerformanceData {
         return { weekStart: wk, value: n > 0 ? sum / n : 0 };
       });
 
+    const curWeekStart = weekStartISO(today);
+
     return {
       pmcDays,
       pmcStart,

@@ -5,9 +5,14 @@ import { PdcChart } from './PdcChart';
 import { WeeklyImpulseChart } from './WeeklyImpulseChart';
 import { DurabilityChart } from './DurabilityChart';
 import { EfficiencyChart } from './EfficiencyChart';
+import { AthleteHomeSection } from '../../performance/AthleteHomeSection';
 import { EmptyState } from './shared';
 
-export function PerformanceView({ athlete }: { athlete: Athlete }) {
+export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
+  athlete: Athlete;
+  coachAssigned: boolean;
+  onUpdateAthlete: (updates: Record<string, number | null>) => Promise<void>;
+}) {
   const data = usePerformanceData(athlete);
 
   if (data.loading) {
@@ -36,6 +41,8 @@ export function PerformanceView({ athlete }: { athlete: Athlete }) {
           Persistent model history — impulse, fitness, power and efficiency from stored daily and stream data
         </p>
       </div>
+
+      <AthleteHomeSection athlete={athlete} coachAssigned={coachAssigned} onUpdateAthlete={onUpdateAthlete} />
 
       <PmcChart days={data.pmcDays} pmcStart={data.pmcStart} historyIncomplete={data.historyIncomplete} />
 

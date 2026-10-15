@@ -17,6 +17,8 @@ interface Props {
   labTests: LabTest[];
   engine: EngineOutput | null;
   cpData: AthleteCpData;
+  coachAssigned?: boolean;
+  onUpdateAthlete?: (updates: Record<string, number | null>) => Promise<void>;
 }
 
 type AnalyticsTab =
@@ -28,7 +30,7 @@ type AnalyticsTab =
   | 'benchmarks'
   | 'zones';
 
-export function AnalyticsView({ sessions, athlete, labTests, engine, cpData }: Props) {
+export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coachAssigned = false, onUpdateAthlete }: Props) {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('pdc');
   const { t } = useLanguage();
 
@@ -76,7 +78,11 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData }: P
 
       <div>
         {activeTab === 'performance' && (
-          <PerformanceView athlete={athlete} />
+          <PerformanceView
+            athlete={athlete}
+            coachAssigned={coachAssigned}
+            onUpdateAthlete={onUpdateAthlete ?? (async () => {})}
+          />
         )}
         {activeTab === 'pdc' && (
           <PowerDurationView athlete={athlete} cpData={cpData} />

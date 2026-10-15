@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { useLanguage } from './contexts/LanguageContext';
 import LocalDevMode from './components/dev/LocalDevMode';
@@ -17,10 +17,14 @@ import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
 import { useAthleteCpModel } from './hooks/useAthleteCpModel';
+import { useCoachAssignment } from './hooks/useCoachAssignment';
 import type { ThresholdOverrides } from './lib/engine/impulse';
 import { LandingPage } from './components/landing/LandingPage';
 import { UnderConstructionModal } from './components/UnderConstructionModal';
 import { CoachView } from './components/coach/CoachView';
+import { CoachRosterView } from './components/coach/CoachRosterView';
+import { CoachAthletePerformanceView } from './components/coach/CoachAthletePerformanceView';
+import type { RosterRow } from './lib/rosterAlerts';
 import { Activity } from 'lucide-react';
 
 type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
@@ -115,6 +119,9 @@ function AppContent() {
 
   const engine = useEngine(athlete, sessions, { cpModel: cpModelOverride });
 
+  // Athlete home: thresholds/tau are read-only when a coach is assigned.
+  const coachAssigned = useCoachAssignment(user?.id ?? null);
+
   const {
     hubConnected,
     snapshot: hubSnapshot,
@@ -154,8 +161,15 @@ function AppContent() {
     return <LoadingScreen message={t('initializing')} />;
   }
 
-  // Coach role — bypass athlete data flow and show coach dashboard
-  if (profile?.role === 'coach') {
+  // Coach / head coach role — bypass athlete data flow and show coach dashboard.
+  // The roster is the coach home; clicking a row opens that athlete's
+  // Performance view in read-with-edit mode. Head coach sees the same roster
+  // with an extra coach column + filter and totals row, read-only editing.
+  const isCoachRole = profile?.role === 'coach' || profile?.role === 'head_coach' || profile?.role === 'admin';
+  const [rosterAthlete, setRosterAthlete] = useState<RosterRow | null>(null);
+
+  if (isCoachRole) {
+    const role = profile?.role ?? 'coach';
     return (
       <div className="min-h-screen bg-white">
         <Header athlete={null} onSignOut={logout} />
@@ -164,8 +178,17 @@ function AppContent() {
           <div className="p-6 w-full max-w-[1400px]">
             {activeView === 'settings' ? (
               <SettingsView />
+            ) : rosterAthlete ? (
+              <CoachAthletePerformanceView
+                row={rosterAthlete}
+                onBack={() => setRosterAthlete(null)}
+              />
             ) : (
-              <CoachView key={activeView} coachId={user?.id ?? ''} />
+              <CoachRosterView
+                role={role}
+                onOpenAthlete={setRosterAthlete}
+                athleteNames={{}}
+              />
             )}
           </div>
         </main>
@@ -241,6 +264,8 @@ function AppContent() {
               labTests={labTests}
               engine={engine}
               cpData={cpData}
+              coachAssigned={coachAssigned}
+              onUpdateAthlete={updateAthlete}
             />
           )}
 
