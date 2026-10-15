@@ -4,6 +4,7 @@ import type { Session, Athlete, SessionType } from '../../lib/database.types';
 import type { SessionInsert } from '../../lib/database.types';
 import { SessionForm } from './SessionForm';
 import { SessionFilters, applySessionFilters } from './SessionFilters';
+import { ActivityDetail } from './ActivityDetail';
 import type { SessionFilterState } from './SessionFilters';
 
 interface SessionListProps {
@@ -183,6 +184,9 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
                   {session.notes && (
                     <p className="text-[12px] text-slate-400 mt-2 border-t border-slate-800/40 pt-2">{session.notes}</p>
                   )}
+                  <div className="mt-2 border-t border-slate-800/40 pt-2">
+                    <ActivityDetail session={session} athlete={athlete} />
+                  </div>
                   {session.strength_exercises && Array.isArray(session.strength_exercises) && session.strength_exercises.length > 0 && (
                     <div className="mt-2 border-t border-slate-800/40 pt-2">
                       <p className="text-[10px] text-slate-500 font-mono uppercase mb-1.5">Exercises</p>

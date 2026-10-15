@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Settings, Link2, Link2Off, Key, Trash2, Save, Eye, EyeOff, CheckCircle, AlertCircle, Loader, User, Shield, Bell, Globe } from 'lucide-react';
+import { Settings, Link2, Link2Off, Key, Trash2, Save, Eye, EyeOff, CheckCircle, AlertCircle, Loader, User, Shield, Bell, Globe, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { testHubToken } from '../../lib/hub/hubApiService';
 import type { HubConnectionStatus } from '../../lib/hub/hubApiService';
+import { recalculateHistory } from '../../lib/engine/loadPersistence';
+import type { Athlete, Session } from '../../lib/database.types';
 
 interface ProfileSettings {
   hub_planner_token: string | null;
@@ -32,6 +34,8 @@ export function SettingsView() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'connection' | 'account' | 'notifications'>('connection');
+  const [recalcState, setRecalcState] = useState<'idle' | 'running' | 'done' | 'error'>('idle');
+  const [recalcMessage, setRecalcMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadSettings();
@@ -136,6 +140,36 @@ export function SettingsView() {
 
   const maskToken = (token: string) => {
     return token.substring(0, 12) + '••••••••••••••••••••' + token.substring(token.length - 4);
+  };
+
+  // One-time full-history backfill (admin/coach). Idempotent: upserts on
+  // unique keys, so re-running overwrites the same rows with the same values.
+  const handleRecalculateHistory = async () => {
+    setRecalcState('running');
+    setRecalcMessage(null);
+    try {
+      const { data: athletes, error: athletesError } = await supabase
+        .from('athletes')
+        .select('*');
+      if (athletesError) throw athletesError;
+
+      let totalDays = 0;
+      for (const athlete of (athletes ?? []) as Athlete[]) {
+        const { data: sessions, error: sessionsError } = await supabase
+          .from('sessions')
+          .select('*')
+          .eq('athlete_id', athlete.id)
+          .order('session_date', { ascending: true });
+        if (sessionsError) throw sessionsError;
+        const result = await recalculateHistory(athlete, (sessions ?? []) as Session[]);
+        totalDays += result.dailyStateCount;
+      }
+      setRecalcState('done');
+      setRecalcMessage(`Historial recalculado: ${totalDays} dias materializados.`);
+    } catch (err) {
+      setRecalcState('error');
+      setRecalcMessage(err instanceof Error ? err.message : 'Error al recalcular el historial.');
+    }
   };
 
   const formatDate = (iso: string) => {
@@ -477,6 +511,43 @@ export function SettingsView() {
           </div>
           <div className="p-6">
             <p className="font-body text-[13px] text-gray-500">Las preferencias de notificaciones estaran disponibles proximamente.</p>
+          </div>
+        </div>
+      )}
+
+      {(isAdmin || user?.role === 'trainer') && (
+        <div className="mt-6 bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="w-4 h-4 text-gray-400" />
+              <div>
+                <h2 className="font-body text-[14px] font-semibold text-gray-800">Recalcular historial</h2>
+                <p className="font-body text-[12px] text-gray-500">Backfill completo de daily_load / daily_state desde la primera sesion a hoy. Idempotente.</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleRecalculateHistory}
+                disabled={recalcState === 'running'}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-body font-semibold text-[#514163] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#fdda36' }}
+              >
+                {recalcState === 'running' ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {recalcState === 'running' ? 'Recalculando...' : 'Recalcular historial'}
+              </button>
+            </div>
+            {recalcMessage && (
+              <div className={`mt-4 flex items-center gap-2 p-3 rounded-xl text-[12px] font-body ${
+                recalcState === 'done'
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
+                {recalcState === 'done' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+                {recalcMessage}
+              </div>
+            )}
           </div>
         </div>
       )}

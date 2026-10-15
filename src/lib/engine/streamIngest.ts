@@ -6,13 +6,22 @@ import {
   computePerRideMetrics,
   type PowerStream,
 } from './powerAnalysis';
-import { saveActivityMmp, saveActivityMetrics, loadExistingFingerprints, type ActivityMmpRow, type ActivityMetricsRow } from './cpPersistence';
+import { saveActivityMmp, saveActivityMetrics, saveActivityDurability, loadExistingFingerprints, type ActivityMmpRow, type ActivityMetricsRow, type ActivityDurabilityRow } from './cpPersistence';
+import { computeWbalSummary, computeDurabilityRows } from './wbal';
 import type { HubPowerStream } from '../hub/hubApiService';
 
 export interface IngestResult {
   processed: number;
   skipped: number;
   discarded: number;
+  wbalComputed: number;
+  durabilityRows: number;
+}
+
+/** CP + W′ in effect for a ride date; W′ must come from a high-confidence model. */
+export interface IngestThresholds {
+  cpWatts: number;
+  wPrimeJ: number | null;
 }
 
 function fingerprint(stream: PowerStream): string {
@@ -42,15 +51,17 @@ function toPowerStream(hub: HubPowerStream): PowerStream | null {
 export async function ingestPowerStreams(
   athlete: Athlete,
   sessions: Session[],
-  streams: HubPowerStream[]
+  streams: HubPowerStream[],
+  thresholdsForDate?: (date: string) => IngestThresholds | null
 ): Promise<IngestResult> {
-  const result: IngestResult = { processed: 0, skipped: 0, discarded: 0 };
+  const result: IngestResult = { processed: 0, skipped: 0, discarded: 0, wbalComputed: 0, durabilityRows: 0 };
   if (streams.length === 0) return result;
 
   const fingerprints = await loadExistingFingerprints(athlete.id);
   const sessionById = new Map(sessions.map(s => [s.id, s]));
   const mmpRows: ActivityMmpRow[] = [];
   const metricsRows: ActivityMetricsRow[] = [];
+  const durabilityAllRows: ActivityDurabilityRow[] = [];
 
   for (const hub of streams) {
     const session = sessionById.get(hub.activity_id);
@@ -103,6 +114,25 @@ export async function ingestPowerStreams(
       ? computePerRideMetrics(clean, hrSeries, stats)
       : { ef: null, decouplingPct: null };
 
+    // W′bal + durability: only with a stream and the CP in effect for the
+    // ride date; W′bal additionally requires a high-confidence W′.
+    let minWbalKj: number | null = null;
+    let minWbalPct: number | null = null;
+    let secondsBelow25: number | null = null;
+    let durabilityRows: ActivityDurabilityRow[] = [];
+    const thresholds = thresholdsForDate?.(session.session_date) ?? null;
+    if (thresholds && thresholds.cpWatts > 0) {
+      durabilityRows = computeDurabilityRows(clean, hub.activity_id, athlete.id, session.session_date);
+      result.durabilityRows += durabilityRows.length;
+      if (thresholds.wPrimeJ && thresholds.wPrimeJ > 0) {
+        const wbal = computeWbalSummary(clean, thresholds.cpWatts, thresholds.wPrimeJ);
+        minWbalKj = wbal.minWbalKj;
+        minWbalPct = wbal.minWbalPct;
+        secondsBelow25 = wbal.secondsBelow25;
+        result.wbalComputed++;
+      }
+    }
+
     metricsRows.push({
       activity_id: hub.activity_id,
       athlete_id: athlete.id,
@@ -114,7 +144,11 @@ export async function ingestPowerStreams(
       ef: perRide.ef,
       decoupling_pct: perRide.decouplingPct,
       stream_fingerprint: fp,
+      min_wbal_kj: minWbalKj,
+      min_wbal_pct: minWbalPct,
+      seconds_below_25pct: secondsBelow25,
     });
+    durabilityAllRows.push(...durabilityRows);
 
     result.processed++;
   }
@@ -123,6 +157,7 @@ export async function ingestPowerStreams(
   for (const row of metricsRows) {
     await saveActivityMetrics(row);
   }
+  await saveActivityDurability(durabilityAllRows);
 
   return result;
 }

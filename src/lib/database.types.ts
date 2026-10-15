@@ -48,6 +48,8 @@ export interface Athlete {
   ftp_watts: number;
   max_hr: number;
   resting_hr: number;
+  hr_lt2_bpm: number | null;
+  threshold_speed_kmh: number | null;
   sport_weights: SportWeights;
   tau_fitness: number;
   tau_fatigue: number;
@@ -72,6 +74,8 @@ export interface AthleteInsert {
   ftp_watts?: number;
   max_hr?: number;
   resting_hr?: number;
+  hr_lt2_bpm?: number | null;
+  threshold_speed_kmh?: number | null;
   sport_weights?: SportWeights;
   tau_fitness?: number;
   tau_fatigue?: number;

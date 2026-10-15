@@ -12,7 +12,29 @@ export * from './decoupling';
 export * from './periodization';
 export * from './benchmarks';
 export * from './trainingZones';
-export * from './loadPersistence';
+export {
+  rowsToDailyLoad,
+  historyToDailyState,
+  loadDailyLoad,
+  loadDailyState,
+  saveDailyImpulse,
+  saveDailyState,
+  persistDailyImpulse,
+  rollForwardDailyState,
+  recalculateHistory,
+  computeCalendarHistory,
+  requestRecompute,
+  requestFullRecompute,
+  seedThresholdsFromProfile,
+  insertThresholdRow,
+  loadThresholdsForDate,
+} from './loadPersistence';
+export type {
+  DailyLoadRow,
+  DailyStateRow,
+  DailyLoadMeta,
+  PersistenceResult,
+} from './loadPersistence';
 export * from './powerAnalysis';
 export * from './cpModel';
 export * from './cpPersistence';

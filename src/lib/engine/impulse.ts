@@ -83,28 +83,82 @@ export interface CpModelOverride {
   confidence: 'high' | 'medium' | 'low';
 }
 
-export function resolveThresholds(athlete: Athlete, cpModel?: CpModelOverride): ImpulseThresholds {
-  const modelUsable =
-    cpModel &&
-    cpModel.cpWatts > 0 &&
-    (cpModel.confidence === 'high' || cpModel.confidence === 'medium');
+export type ThresholdSource = 'passport' | 'profile' | 'fallback';
+
+export interface ThresholdResolution {
+  cpWatts: number;
+  cpSource: ThresholdSource;
+  lt2Hr: number;
+  lt2HrSource: ThresholdSource;
+  thresholdSpeedKmh: number | null;
+  thresholdSpeedSource: ThresholdSource;
+}
+
+export interface ThresholdOverrides {
+  /** Active passport values, when the Hub passport is connected */
+  passport?: { lt2Hr: number | null; thresholdSpeedKmh: number | null } | null;
+  cpModel?: CpModelOverride;
+}
+
+export function resolveThresholds(
+  athlete: Athlete,
+  overrides?: ThresholdOverrides
+): ImpulseThresholds & { resolution: ThresholdResolution } {
+  const passport = overrides?.passport ?? null;
+  const cpModel = overrides?.cpModel;
+
+  // CP: modelled (high/medium confidence) > profile
   const profileCp = athlete.cp_watts || athlete.ftp_watts || 0;
+  const modelUsable =
+    cpModel && cpModel.cpWatts > 0 && (cpModel.confidence === 'high' || cpModel.confidence === 'medium');
+  const cpWatts = modelUsable ? cpModel!.cpWatts : profileCp;
+  const cpSource: ThresholdSource = modelUsable ? 'passport' : 'profile';
+
+  // LT2 HR: passport > profile column > 0.9 x max HR
+  const passportLt2 = passport?.lt2Hr ?? null;
+  const profileLt2 = athlete.hr_lt2_bpm ?? null;
+  let lt2Hr: number;
+  let lt2HrSource: ThresholdSource;
+  if (passportLt2 && passportLt2 > 0) {
+    lt2Hr = passportLt2;
+    lt2HrSource = 'passport';
+  } else if (profileLt2 && profileLt2 > 0) {
+    lt2Hr = profileLt2;
+    lt2HrSource = 'profile';
+  } else {
+    lt2Hr = athlete.max_hr ? Math.round(0.9 * athlete.max_hr) : 170;
+    lt2HrSource = 'fallback';
+  }
+
+  // Threshold speed: passport > profile column > null (HR fallback)
+  const passportSpeed = passport?.thresholdSpeedKmh ?? null;
+  const profileSpeed = athlete.threshold_speed_kmh ?? null;
+  let thresholdSpeedKmh: number | null = null;
+  let thresholdSpeedSource: ThresholdSource = 'fallback';
+  if (passportSpeed && passportSpeed > 0) {
+    thresholdSpeedKmh = passportSpeed;
+    thresholdSpeedSource = 'passport';
+  } else if (profileSpeed && profileSpeed > 0) {
+    thresholdSpeedKmh = profileSpeed;
+    thresholdSpeedSource = 'profile';
+  }
+
   return {
-    cpWatts: modelUsable ? cpModel!.cpWatts : profileCp,
-    lt2Hr: athlete.max_hr ? Math.round(0.9 * athlete.max_hr) : 170,
+    cpWatts,
+    lt2Hr,
     maxHr: athlete.max_hr || 185,
     restingHr: athlete.resting_hr ?? 60,
-    thresholdSpeedKmh: null,
-    hasActiveCpModel: modelUsable ? true : false,
-    hasActiveLt2Hr: false,
+    thresholdSpeedKmh,
+    hasActiveCpModel: !!modelUsable,
+    hasActiveLt2Hr: lt2HrSource !== 'fallback',
+    resolution: { cpWatts, cpSource, lt2Hr, lt2HrSource, thresholdSpeedKmh, thresholdSpeedSource },
   };
 }
 
 export function computeSessionImpulse(
   session: Session,
   thresholds: ImpulseThresholds
-): ImpulseRow {
-  const base: ImpulseRow = {
+): ImpulseRow {  const base: ImpulseRow = {
     date: session.session_date,
     sport: session.session_type,
     impulse: 0,
@@ -214,6 +268,69 @@ export function computeDailyImpulseRows(
 ): ImpulseRow[] {
   const thresholds = resolveThresholds(athlete);
   return sessions.map(s => computeSessionImpulse(s, thresholds));
+}
+
+/**
+ * Date-aware thresholds: for each session date pick the threshold-history
+ * row with the latest effective_from <= date; fall back to the current
+ * profile (quality 'estimated') when no row covers that date.
+ * historyRows: rows sorted by effective_from ascending, loaded once per
+ * recompute to avoid per-session queries.
+ */
+export interface ThresholdHistoryEntry {
+  effective_from: string;
+  cp_watts: number | null;
+  hr_lt2_bpm: number | null;
+  threshold_speed_kmh: number | null;
+  source: string;
+  rowId: string;
+}
+
+export function thresholdsForDate(
+  athlete: Athlete,
+  date: string,
+  historyRows: ThresholdHistoryEntry[]
+): { thresholds: ImpulseThresholds; quality: ImpulseQuality; rowId: string | null } {
+  let matched: ThresholdHistoryEntry | null = null;
+  for (const row of historyRows) {
+    if (row.effective_from <= date) matched = row;
+    else break;
+  }
+
+  const fallback = resolveThresholds(athlete);
+  if (!matched) {
+    return { thresholds: fallback, quality: 'estimated', rowId: null };
+  }
+
+  const fromRow: ImpulseThresholds = {
+    cpWatts: matched.cp_watts ?? fallback.cpWatts,
+    lt2Hr: matched.hr_lt2_bpm ?? fallback.lt2Hr,
+    maxHr: athlete.max_hr || 185,
+    restingHr: athlete.resting_hr ?? 60,
+    thresholdSpeedKmh: matched.threshold_speed_kmh ?? fallback.thresholdSpeedKmh,
+    hasActiveCpModel: fallback.hasActiveCpModel,
+    hasActiveLt2Hr: matched.hr_lt2_bpm !== null || fallback.hasActiveLt2Hr,
+  };
+  return { thresholds: fromRow, quality: 'measured', rowId: matched.rowId };
+}
+
+/**
+ * Compute impulse rows per session using date-aware thresholds from the
+ * history table (rows sorted ascending by effective_from).
+ */
+export function computeSessionImpulseRowsWithHistory(
+  athlete: Athlete,
+  sessions: Session[],
+  historyRows: ThresholdHistoryEntry[]
+): ImpulseRow[] {
+  const sorted = [...historyRows].sort((a, b) => a.effective_from.localeCompare(b.effective_from));
+  return sessions.map(session => {
+    const { thresholds, quality } = thresholdsForDate(athlete, session.session_date, sorted);
+    const row = computeSessionImpulse(session, thresholds);
+    // Session-level quality reflects threshold provenance; source-level
+    // quality (measured power/HR vs estimated sRPE) is kept from the row.
+    return row;
+  });
 }
 
 export interface DailyTotal {

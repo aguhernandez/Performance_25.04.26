@@ -26,6 +26,18 @@ export interface ActivityMetricsRow {
   ef: number | null;
   decoupling_pct: number | null;
   stream_fingerprint: string | null;
+  min_wbal_kj?: number | null;
+  min_wbal_pct?: number | null;
+  seconds_below_25pct?: number | null;
+}
+
+export interface ActivityDurabilityRow {
+  activity_id: string;
+  athlete_id: string;
+  date: string;
+  kj_threshold: number;
+  duration_s: number;
+  watts: number;
 }
 
 export interface StoredCpModel {
@@ -56,6 +68,71 @@ export async function saveActivityMetrics(row: ActivityMetricsRow): Promise<void
     .from('activity_metrics')
     .upsert(row, { onConflict: 'activity_id' });
   if (error) throw error;
+}
+
+export async function saveActivityDurability(rows: ActivityDurabilityRow[]): Promise<void> {
+  if (rows.length === 0) return;
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const chunk = rows.slice(i, i + BATCH_SIZE);
+    const { error } = await supabase
+      .from('activity_durability')
+      .upsert(chunk, { onConflict: 'activity_id,kj_threshold,duration_s' });
+    if (error) throw error;
+  }
+}
+
+export async function loadActivityDurability(
+  athleteId: string,
+  windowDays = 9999
+): Promise<ActivityDurabilityRow[]> {
+  let query = supabase
+    .from('activity_durability')
+    .select('activity_id,athlete_id,date,kj_threshold,duration_s,watts')
+    .eq('athlete_id', athleteId)
+    .order('date', { ascending: true });
+  if (windowDays < 9999) {
+    const since = new Date();
+    since.setDate(since.getDate() - windowDays);
+    query = query.gte('date', since.toISOString().split('T')[0]);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as ActivityDurabilityRow[];
+}
+
+export interface WeeklyLoadRow {
+  athlete_id: string;
+  week_start: string;
+  total_impulse: number;
+  monotony: number | null;
+  strain: number | null;
+}
+
+export async function saveWeeklyLoad(rows: WeeklyLoadRow[]): Promise<void> {
+  if (rows.length === 0) return;
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const chunk = rows.slice(i, i + BATCH_SIZE);
+    const { error } = await supabase
+      .from('weekly_load')
+      .upsert(chunk, { onConflict: 'athlete_id,week_start' });
+    if (error) throw error;
+  }
+}
+
+export async function loadWeeklyLoad(
+  athleteId: string,
+  windowDays = 365
+): Promise<WeeklyLoadRow[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - windowDays);
+  const { data, error } = await supabase
+    .from('weekly_load')
+    .select('athlete_id,week_start,total_impulse,monotony,strain')
+    .eq('athlete_id', athleteId)
+    .gte('week_start', since.toISOString().split('T')[0])
+    .order('week_start', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as WeeklyLoadRow[];
 }
 
 export async function loadActivityMmp(

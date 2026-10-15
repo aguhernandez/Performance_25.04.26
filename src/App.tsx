@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { useLanguage } from './contexts/LanguageContext';
 import LocalDevMode from './components/dev/LocalDevMode';
@@ -17,6 +17,7 @@ import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
 import { useHubData } from './hooks/useHubData';
 import { useAthleteCpModel } from './hooks/useAthleteCpModel';
+import type { ThresholdOverrides } from './lib/engine/impulse';
 import { LandingPage } from './components/landing/LandingPage';
 import { UnderConstructionModal } from './components/UnderConstructionModal';
 import { CoachView } from './components/coach/CoachView';
@@ -44,6 +45,33 @@ function AppContent() {
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<View>('dashboard');
 
+  // Hash deep-links (e.g. #/sessions?activity=…) open the target view on load.
+  useEffect(() => {
+    const applyHash = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      const view = hash.split('?')[0] as View;
+      if (['dashboard', 'sessions', 'lab', 'nutrition', 'profile', 'analytics', 'hrv', 'settings'].includes(view)) {
+        setActiveView(view);
+      }
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
+
+  // Hub passport + CP-model thresholds live in a ref so the data hook reads
+  // the latest values at mutation time regardless of render order.
+  const [passportLt2Hr, setPassportLt2Hr] = useState<number | null>(null);
+  const [passportThresholdSpeed, setPassportThresholdSpeed] = useState<number | null>(null);
+  const thresholdOverridesRef = useRef<ThresholdOverrides>({});
+
+  const passportOverrides = useMemo<ThresholdOverrides>(
+    () => ({
+      passport: { lt2Hr: passportLt2Hr, thresholdSpeedKmh: passportThresholdSpeed },
+    }),
+    [passportLt2Hr, passportThresholdSpeed]
+  );
+
   const {
     athlete,
     sessions,
@@ -70,7 +98,7 @@ function AppContent() {
     addHealthEvent,
     deleteHealthEvent,
     refetch,
-  } = useAthleteData(user?.id ?? null);
+  } = useAthleteData(user?.id ?? null, thresholdOverridesRef);
 
   const cpData = useAthleteCpModel(athlete);
 
@@ -78,6 +106,12 @@ function AppContent() {
     cpData.cpModel && cpData.cpModel.status === 'ok'
       ? { cpWatts: cpData.cpModel.cp, confidence: cpData.cpModel.confidence }
       : undefined;
+
+  const thresholdOverridesWithCp = useMemo<ThresholdOverrides>(
+    () => ({ ...passportOverrides, cpModel: cpModelOverride }),
+    [passportOverrides, cpModelOverride?.cpWatts, cpModelOverride?.confidence]
+  );
+  thresholdOverridesRef.current = thresholdOverridesWithCp;
 
   const engine = useEngine(athlete, sessions, { cpModel: cpModelOverride });
 
@@ -88,6 +122,21 @@ function AppContent() {
     error: hubError,
     refresh: refreshHub,
   } = useHubData(profile?.id);
+
+  // Pull threshold values from the active Hub passport when it loads
+  const passport = hubSnapshot.biologicalPassport?.active_passport ?? null;
+  const passportEmail = hubSnapshot.athleteProfile?.athlete?.email ?? null;
+  useEffect(() => {
+    if (!passport) {
+      setPassportLt2Hr(null);
+      setPassportThresholdSpeed(null);
+      return;
+    }
+    setPassportLt2Hr(passport.lt2_hr ?? null);
+    // The Hub passport does not expose threshold speed; VT2 speed is not
+    // available from this endpoint, so it stays on the profile/fallback chain.
+    setPassportThresholdSpeed(null);
+  }, [passport, passportEmail]);
 
   if (loading) {
     return <LoadingScreen message={t('verifyingAccess')} />;

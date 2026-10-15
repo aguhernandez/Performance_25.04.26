@@ -9,7 +9,7 @@ interface AthleteProfileProps {
   athlete: Athlete | null;
   userId: string;
   onSave: (data: Omit<AthleteInsert, 'user_id'>) => Promise<void>;
-  onUpdate: (data: Partial<Athlete>) => Promise<void>;
+  onUpdate: (data: Partial<Athlete> & { effective_from_override?: string }) => Promise<void>;
   sessions?: Session[];
   raceSchedule?: RaceScheduleEntry[];
   trainingBlocks?: TrainingBlock[];
@@ -87,6 +87,9 @@ export function AthleteProfile({
     ftp_watts: athlete?.ftp_watts?.toString() ?? '235',
     max_hr: athlete?.max_hr?.toString() ?? '185',
     resting_hr: athlete?.resting_hr?.toString() ?? '50',
+    hr_lt2_bpm: athlete?.hr_lt2_bpm?.toString() ?? '',
+    threshold_speed_kmh: athlete?.threshold_speed_kmh?.toString() ?? '',
+    effective_from: new Date().toISOString().split('T')[0],
     sport_weights_endurance: (athlete?.sport_weights as { endurance: number } | undefined)?.endurance?.toString() ?? '0.7',
     sport_weights_strength: (athlete?.sport_weights as { strength: number } | undefined)?.strength?.toString() ?? '0.2',
     sport_weights_other: (athlete?.sport_weights as { other: number } | undefined)?.other?.toString() ?? '0.1',
@@ -100,6 +103,15 @@ export function AthleteProfile({
   const [showHealthForm, setShowHealthForm] = useState(false);
 
   const setF = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
+
+  const thresholdFieldsChanged = (
+    data: Pick<AthleteInsert, 'cp_watts' | 'ftp_watts' | 'hr_lt2_bpm' | 'threshold_speed_kmh'>,
+    a: Athlete
+  ) =>
+    (data.cp_watts ?? null) !== (a.cp_watts ?? null) ||
+    (data.ftp_watts ?? null) !== (a.ftp_watts ?? null) ||
+    (data.hr_lt2_bpm ?? null) !== (a.hr_lt2_bpm ?? null) ||
+    (data.threshold_speed_kmh ?? null) !== (a.threshold_speed_kmh ?? null);
 
   const validationIssues = validateProfile(form);
 
@@ -127,6 +139,8 @@ export function AthleteProfile({
         ftp_watts: parseInt(form.ftp_watts) || 235,
         max_hr: parseInt(form.max_hr) || 185,
         resting_hr: parseInt(form.resting_hr) || 50,
+        hr_lt2_bpm: form.hr_lt2_bpm ? parseInt(form.hr_lt2_bpm) : null,
+        threshold_speed_kmh: form.threshold_speed_kmh ? parseFloat(form.threshold_speed_kmh) : null,
         sport_weights: {
           endurance: parseFloat(form.sport_weights_endurance) || 0.7,
           strength: parseFloat(form.sport_weights_strength) || 0.2,
@@ -134,7 +148,11 @@ export function AthleteProfile({
         },
       };
       if (athlete) {
-        await onUpdate(data);
+        await onUpdate(
+          thresholdFieldsChanged(data, athlete)
+            ? { ...data, effective_from_override: form.effective_from }
+            : data
+        );
       } else {
         await onSave(data);
       }
@@ -308,6 +326,8 @@ export function AthleteProfile({
                 { field: 'ftp_watts', label: t('ftp'), unit: 'W', step: '1', hint: t('approx95cp') },
                 { field: 'max_hr', label: t('maxHr'), unit: 'bpm', step: '1', hint: t('maximumHr') },
                 { field: 'resting_hr', label: t('restingHr'), unit: 'bpm', step: '1', hint: t('morningRestingHr') },
+                { field: 'hr_lt2_bpm', label: 'LT2 HR', unit: 'bpm', step: '1', hint: 'HR at LT2/VT2 (from lab test or passport)' },
+                { field: 'threshold_speed_kmh', label: 'Thresh Speed', unit: 'km/h', step: '0.1', hint: 'Running speed at LT2/VT2' },
                 { field: 'weight_kg', label: t('weight'), unit: 'kg', step: '0.1', hint: t('totalBodyWeight') },
                 { field: 'lean_mass_kg', label: t('leanMass'), unit: 'kg', step: '0.1', hint: t('fatFreeMass') },
               ].map(({ field, label, unit, step, hint }) => (
@@ -323,6 +343,15 @@ export function AthleteProfile({
                 </div>
               ))}
             </div>
+
+            {athlete && (
+              <div className="pt-3 border-t border-slate-800/40">
+                <label className="block text-[10px] font-mono uppercase text-slate-500 mb-1">Effective from</label>
+                <input type="date" value={form.effective_from} onChange={e => setF('effective_from', e.target.value)}
+                  className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
+                <p className="text-[9px] text-slate-600 mt-0.5">New CP / LT2 HR / threshold speed values apply from this date onward — earlier days keep their original values.</p>
+              </div>
+            )}
 
             {showAdvanced && (
               <div className="pt-3 border-t border-slate-800/40 space-y-3">

@@ -3,6 +3,7 @@ import type { Session, Athlete, LabTest } from '../../lib/database.types';
 import type { EngineOutput } from '../../lib/engine/types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { PowerDurationView } from './PowerDurationView';
+import { PerformanceView } from './performance/PerformanceView';
 import { FitnessSignatureView } from './FitnessSignatureView';
 import { ImpulseLoadView } from './ImpulseLoadView';
 import { PeriodizationView } from './PeriodizationView';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 type AnalyticsTab =
+  | 'performance'
   | 'pdc'
   | 'signature'
   | 'load'
@@ -31,6 +33,7 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData }: P
   const { t } = useLanguage();
 
   const TABS: { id: AnalyticsTab; label: string; description: string }[] = [
+    { id: 'performance', label: 'Performance', description: 'PMC · PDC · Weekly Load · Efficiency' },
     { id: 'pdc', label: t('pdcTitle'), description: "PDC · MMP · W' · CP Model" },
     { id: 'signature', label: t('fsTitle').split(' ')[0] + ' Signature', description: "CP · FTP · W' Evolution" },
     { id: 'load', label: t('impulseLoadTab'), description: t('impulseLoadTabDesc') },
@@ -72,6 +75,9 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData }: P
       </div>
 
       <div>
+        {activeTab === 'performance' && (
+          <PerformanceView athlete={athlete} />
+        )}
         {activeTab === 'pdc' && (
           <PowerDurationView athlete={athlete} cpData={cpData} />
         )}
