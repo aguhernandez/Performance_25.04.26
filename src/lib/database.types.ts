@@ -409,3 +409,23 @@ export interface HealthHistoryInsert {
   is_current?: boolean;
   notes?: string;
 }
+
+export type RaceScenarioKind = 'race' | 'inverse' | 'altitude' | 'altitude_block';
+
+export interface RaceScenarioRecord {
+  id: string;
+  athlete_id: string;
+  kind: RaceScenarioKind;
+  name: string;
+  params: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface RaceScenarioInsert {
+  athlete_id: string;
+  kind: RaceScenarioKind;
+  name: string;
+  params: Record<string, unknown>;
+  result?: Record<string, unknown> | null;
+}

@@ -25,9 +25,10 @@ import { CoachView } from './components/coach/CoachView';
 import { CoachRosterView } from './components/coach/CoachRosterView';
 import { CoachAthletePerformanceView } from './components/coach/CoachAthletePerformanceView';
 import type { RosterRow } from './lib/rosterAlerts';
+import { SimulatorView } from './components/simulator/SimulatorView';
 import { Activity } from 'lucide-react';
 
-type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
+type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings' | 'simulator';
 
 function LoadingScreen({ message }: { message: string }) {
   return (
@@ -54,7 +55,7 @@ function AppContent() {
     const applyHash = () => {
       const hash = window.location.hash.replace(/^#\/?/, '');
       const view = hash.split('?')[0] as View;
-      if (['dashboard', 'sessions', 'lab', 'nutrition', 'profile', 'analytics', 'hrv', 'settings'].includes(view)) {
+      if (['dashboard', 'sessions', 'lab', 'nutrition', 'profile', 'analytics', 'hrv', 'settings', 'simulator'].includes(view)) {
         setActiveView(view);
       }
     };
@@ -276,6 +277,10 @@ function AppContent() {
               onAdd={addHrvLog}
               onDelete={deleteHrvLog}
             />
+          )}
+
+          {activeView === 'simulator' && athlete && (
+            <SimulatorView athlete={athlete} />
           )}
 
           {activeView === 'settings' && (

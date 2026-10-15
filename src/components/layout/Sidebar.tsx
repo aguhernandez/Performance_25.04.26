@@ -1,8 +1,8 @@
-import { BarChart2, FlaskConical, Utensils, User, LayoutDashboard, TrendingUp, Heart, Menu, X, Settings, Users } from 'lucide-react';
+import { BarChart2, FlaskConical, Utensils, User, LayoutDashboard, TrendingUp, Heart, Menu, X, Settings, Users, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings';
+type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analytics' | 'hrv' | 'settings' | 'simulator';
 
 interface SidebarProps {
   activeView: View;
@@ -18,6 +18,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
     { view: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { view: 'sessions', label: t('sessions'), icon: BarChart2 },
     { view: 'analytics', label: t('analytics'), icon: TrendingUp },
+    { view: 'simulator', label: 'Simulador', icon: Timer },
     { view: 'hrv', label: t('hrv'), icon: Heart },
     { view: 'lab', label: t('labTests'), icon: FlaskConical },
     { view: 'nutrition', label: t('nutrition'), icon: Utensils },
