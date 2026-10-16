@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Save, Trash2, Play, AlertTriangle, Info, XCircle, CheckCircle2, Timer,
 } from 'lucide-react';
-import type { Athlete } from '../../lib/database.types';
+import type { Athlete, Session } from '../../lib/database.types';
 import {
   simulateRace, simulateInverse, simulateAltitude, simulateAltitudeBlock,
   formatPace, formatTime, formatEngineMessage,
@@ -12,8 +12,9 @@ import {
 } from '../../lib/engine/simulationEngine';
 import { useSimulationProfile, useRaceScenarios } from '../../hooks/useSimulation';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { CyclingTtSimulator } from './CyclingTtSimulator';
 
-type Tool = 'race' | 'inverse' | 'altitude' | 'block';
+type Tool = 'race' | 'inverse' | 'altitude' | 'block' | 'cycling';
 
 const SEV_ICON: Record<string, typeof Info> = { danger: XCircle, warning: AlertTriangle, info: Info };
 const SEV_COLOR: Record<string, string> = { danger: '#dc2626', warning: '#f59e0b', info: '#3b82f6' };
@@ -50,7 +51,7 @@ const FEAS_COLOR: Record<string, string> = {
   optimal: '#22c55e', challenging: '#f59e0b', limit: '#f97316', impossible: '#dc2626',
 };
 
-type SaveFn = (kind: 'race' | 'inverse' | 'altitude' | 'altitude_block', name: string, params: Record<string, unknown>, result: Record<string, unknown> | null) => Promise<void>;
+type SaveFn = (kind: 'race' | 'inverse' | 'altitude' | 'altitude_block' | 'cycling_tt', name: string, params: Record<string, unknown>, result: Record<string, unknown> | null) => Promise<void>;
 
 function SaveButton({ saved, onClick, lang }: { saved: boolean; onClick: () => void; lang: Lang }) {
   return (
@@ -594,7 +595,7 @@ function BlockSimulator({ profile, lang, onSave }: {
 
 // ───────────────────────── Main view ─────────────────────────
 
-export function SimulatorView({ athlete }: { athlete: Athlete }) {
+export function SimulatorView({ athlete, sessions, athleteEmail }: { athlete: Athlete; sessions: Session[]; athleteEmail: string }) {
   const { lang } = useLanguage();
   const { profile, labTest, loading: profileLoading } = useSimulationProfile(athlete);
   const { scenarios, loading: scenLoading, save, remove } = useRaceScenarios(athlete.id);
@@ -605,6 +606,7 @@ export function SimulatorView({ athlete }: { athlete: Athlete }) {
     { id: 'inverse', label: lang === 'es' ? 'Objetivo inverso' : 'Inverse goal', desc: 'VO2max ' + (lang === 'es' ? 'necesario' : 'required') },
     { id: 'altitude', label: lang === 'es' ? 'Altitud' : 'Altitude', desc: lang === 'es' ? 'Aclimatación y pérdida' : 'Acclimatization & loss' },
     { id: 'block', label: lang === 'es' ? 'Bloque altitud' : 'Altitude block', desc: lang === 'es' ? 'Antes vs después' : 'Before vs after' },
+    { id: 'cycling', label: lang === 'es' ? 'Contrarreloj bici' : 'Cycling TT', desc: lang === 'es' ? 'Potencia, recorrido, viento' : 'Power, course, wind' },
   ];
 
   return (
@@ -643,6 +645,7 @@ export function SimulatorView({ athlete }: { athlete: Athlete }) {
           {tool === 'inverse' && <InverseSimulator profile={profile} lang={lang} onSave={save} />}
           {tool === 'altitude' && <AltitudeSimulator profile={profile} lang={lang} onSave={save} />}
           {tool === 'block' && <BlockSimulator profile={profile} lang={lang} onSave={save} />}
+          {tool === 'cycling' && <CyclingTtSimulator athlete={athlete} sessions={sessions} athleteEmail={athleteEmail} onSave={save} />}
 
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
@@ -675,6 +678,8 @@ export function SimulatorView({ athlete }: { athlete: Athlete }) {
                             {typeof r.requiredVO2max === 'number' && `VO2max ${r.requiredVO2max} · `}
                             {typeof r.timeSaving_min === 'number' && `${fmtMinLocal(r.timeSaving_min)} · `}
                             {typeof r.hbMassGain_pct === 'number' && `Hb +${r.hbMassGain_pct} %`}
+                            {typeof r.time_s === 'number' && `${formatHMSLocal(r.time_s)} · `}
+                            {typeof r.avgPower_w === 'number' && `${Math.round(r.avgPower_w)} W`}
                           </p>
                         )}
                       </div>
@@ -698,4 +703,12 @@ export function SimulatorView({ athlete }: { athlete: Athlete }) {
 
 function fmtMinLocal(m: number): string {
   return m >= 0 ? `−${m.toFixed(1)} min` : `+${Math.abs(m).toFixed(1)} min`;
+}
+
+function formatHMSLocal(totalSeconds: number): string {
+  const t = Math.max(0, Math.round(totalSeconds));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = t % 60;
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }

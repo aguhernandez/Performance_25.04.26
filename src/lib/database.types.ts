@@ -410,7 +410,7 @@ export interface HealthHistoryInsert {
   notes?: string;
 }
 
-export type RaceScenarioKind = 'race' | 'inverse' | 'altitude' | 'altitude_block';
+export type RaceScenarioKind = 'race' | 'inverse' | 'altitude' | 'altitude_block' | 'cycling_tt';
 
 export interface RaceScenarioRecord {
   id: string;

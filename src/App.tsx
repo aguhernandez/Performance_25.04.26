@@ -280,7 +280,7 @@ function AppContent() {
           )}
 
           {activeView === 'simulator' && athlete && (
-            <SimulatorView athlete={athlete} />
+            <SimulatorView athlete={athlete} sessions={sessions} athleteEmail={user?.email ?? ''} />
           )}
 
           {activeView === 'settings' && (
