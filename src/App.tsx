@@ -49,6 +49,7 @@ function AppContent() {
   const { user, profile, loading, hasToken, isDevMode, login, logout, setDevProfile } = useAuth();
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<View>('dashboard');
+  const [rosterAthlete, setRosterAthlete] = useState<RosterRow | null>(null);
 
   // Hash deep-links (e.g. #/sessions?activity=…) open the target view on load.
   useEffect(() => {
@@ -167,7 +168,6 @@ function AppContent() {
   // Performance view in read-with-edit mode. Head coach sees the same roster
   // with an extra coach column + filter and totals row, read-only editing.
   const isCoachRole = profile?.role === 'coach' || profile?.role === 'head_coach' || profile?.role === 'admin';
-  const [rosterAthlete, setRosterAthlete] = useState<RosterRow | null>(null);
 
   if (isCoachRole) {
     const role = profile?.role ?? 'coach';
