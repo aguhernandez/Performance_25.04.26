@@ -31,11 +31,11 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
   const alertColor = compliance.deficit ? '#ef4444' : compliance.excess ? '#f59e0b' : compliance.overallCompliance > 75 ? '#22c55e' : '#0ea5e9';
 
   return (
-    <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[13px] font-semibold text-white">Nutrition & Recovery</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">14-day compliance – modifying effective impulse</p>
+          <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Nutrition & Recovery</h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">14-day compliance – modifying effective impulse</p>
         </div>
         <div
           className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-mono font-bold"
@@ -48,20 +48,20 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
       <div className="grid grid-cols-2 gap-3">
         <div>
           <div className="flex justify-between mb-1">
-            <span className="text-[10px] text-slate-500 font-mono uppercase">Energy Availability</span>
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Energy Availability</span>
             <span className="text-[10px] font-mono" style={{ color: eaColor }}>{compliance.energyAvailability.toFixed(0)} kcal/kg LM</span>
           </div>
           <ScoreBar value={compliance.energyAvailability} max={60} color={eaColor} />
-          <p className="text-[9px] text-slate-600 mt-0.5">Target: 30–45 kcal/kg lean mass</p>
+          <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">Target: 30–45 kcal/kg lean mass</p>
         </div>
 
         <div>
           <div className="flex justify-between mb-1">
-            <span className="text-[10px] text-slate-500 font-mono uppercase">Recovery Score</span>
-            <span className="text-[10px] font-mono text-cyan-400">{compliance.recoveryScore.toFixed(0)}%</span>
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Recovery Score</span>
+            <span className="text-[10px] font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{compliance.recoveryScore.toFixed(0)}%</span>
           </div>
           <ScoreBar value={compliance.recoveryScore} max={100} color="#0ea5e9" />
-          <p className="text-[9px] text-slate-600 mt-0.5">Sleep duration + quality weighted</p>
+          <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">Sleep duration + quality weighted</p>
         </div>
       </div>
 
@@ -71,12 +71,12 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
           { label: 'Carbs', value: compliance.carbAdherence, unit: '%', color: '#f59e0b', target: `${(weightKg * 5).toFixed(0)}g target` },
           { label: 'Fat', value: compliance.fatAdherence, unit: '%', color: '#a78bfa', target: '≥20% total kcal' },
         ].map(({ label, value, color, target }) => (
-          <div key={label} className="bg-slate-800/30 rounded-lg p-2.5 border border-slate-700/20">
-            <p className="text-[10px] text-slate-500 font-mono uppercase mb-1">{label}</p>
+          <div key={label} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5 border border-gray-200 dark:border-gray-700">
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1">{label}</p>
             <p className="text-[18px] font-bold font-mono" style={{ color: value >= 80 ? color : value >= 60 ? '#f59e0b' : '#ef4444' }}>
               {value.toFixed(0)}%
             </p>
-            <p className="text-[9px] text-slate-600">{target}</p>
+            <p className="text-[9px] text-gray-600 dark:text-gray-500">{target}</p>
           </div>
         ))}
       </div>
@@ -86,12 +86,12 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
         style={{ borderColor: `${alertColor}30`, backgroundColor: `${alertColor}08` }}
       >
         <AlertIcon className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: alertColor }} />
-        <p className="text-[11px] text-slate-300 leading-relaxed">{compliance.recommendation}</p>
+        <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed">{compliance.recommendation}</p>
       </div>
 
       {recentLogs.length > 0 && (
-        <div className="border-t border-slate-800/40 pt-3">
-          <p className="text-[10px] text-slate-500 font-mono uppercase mb-2">7-Day Sleep Trend</p>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-2">7-Day Sleep Trend</p>
           <div className="flex items-end gap-1 h-10">
             {recentLogs.slice(0, 7).reverse().map((log, i) => {
               const h = Math.min((log.sleep_hours / 9) * 40, 40);
@@ -103,15 +103,15 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
                     style={{ height: `${h}px`, backgroundColor: color, opacity: 0.7 }}
                     title={`${log.log_date}: ${log.sleep_hours}h`}
                   />
-                  <span className="text-[8px] text-slate-600 font-mono">{log.sleep_hours.toFixed(0)}</span>
+                  <span className="text-[8px] text-gray-600 dark:text-gray-500 font-mono">{log.sleep_hours.toFixed(0)}</span>
                 </div>
               );
             })}
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[9px] text-slate-600">7d ago</span>
-            <span className="text-[9px] text-slate-400 font-mono">Avg: {avgSleep.toFixed(1)}h</span>
-            <span className="text-[9px] text-slate-600">Today</span>
+            <span className="text-[9px] text-gray-600 dark:text-gray-500">7d ago</span>
+            <span className="text-[9px] text-gray-600 dark:text-gray-400 font-mono">Avg: {avgSleep.toFixed(1)}h</span>
+            <span className="text-[9px] text-gray-600 dark:text-gray-500">Today</span>
           </div>
         </div>
       )}

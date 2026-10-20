@@ -16,27 +16,27 @@ export function MetricCard({
   value,
   unit,
   subtext,
-  accent = '#06b6d4',
+  accent = 'var(--chart-fitness)',
   icon,
   badge,
   trend,
 }: MetricCardProps) {
   return (
-    <div className="relative bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 overflow-hidden group hover:border-slate-700/60 transition-colors duration-200">
+    <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 overflow-hidden group hover:border-gray-300 dark:hover:border-gray-600 transition-colors duration-200">
       <div
         className="absolute inset-x-0 top-0 h-px opacity-60"
         style={{ background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }}
       />
       <div className="flex items-start justify-between mb-3">
-        <span className="text-[11px] font-mono uppercase tracking-widest text-slate-500">{label}</span>
-        {icon && <div className="text-slate-600 group-hover:text-slate-400 transition-colors">{icon}</div>}
+        <span className="text-[11px] font-mono uppercase tracking-widest text-gray-500 dark:text-gray-400">{label}</span>
+        {icon && <div className="text-gray-600 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-300 transition-colors">{icon}</div>}
       </div>
 
       <div className="flex items-end gap-1.5">
         <span className="text-3xl font-bold tabular-nums tracking-tight" style={{ color: accent }}>
           {typeof value === 'number' ? value.toFixed(1) : value}
         </span>
-        {unit && <span className="text-sm text-slate-500 mb-1">{unit}</span>}
+        {unit && <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">{unit}</span>}
       </div>
 
       {(subtext || badge || trend !== undefined) && (
@@ -49,9 +49,9 @@ export function MetricCard({
               {badge.label}
             </span>
           )}
-          {subtext && <span className="text-[11px] text-slate-500">{subtext}</span>}
+          {subtext && <span className="text-[11px] text-gray-500 dark:text-gray-400">{subtext}</span>}
           {trend !== undefined && (
-            <span className={`text-[11px] font-mono ml-auto ${trend > 0 ? 'text-green-400' : trend < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+            <span className={`text-[11px] font-mono ml-auto ${trend > 0 ? 'text-[#2A1F4A] dark:text-[#B8A9E5]' : trend < 0 ? 'text-[#8A6900] dark:text-[#F7C843]' : 'text-gray-500 dark:text-gray-400'}`}>
               {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
             </span>
           )}

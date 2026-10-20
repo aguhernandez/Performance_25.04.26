@@ -5,6 +5,15 @@
 :root {
   --primary-purple: #2A1F4A;
   --primary-yellow: #F7C843;
+  --brand-purple: #2A1F4A;
+  --brand-yellow: #F7C843;
+  --brand-yellow-ink: #8A6900;
+  --chart-fitness: #2A1F4A;
+  --chart-fatigue: #8A6900;
+  --chart-form: #6b7280;
+  --chart-grid: #e5e7eb;
+  --chart-label: #6b7280;
+  --heatmap-empty: #f3f4f6;
   --secondary-purple: #514068;
   --light-purple: #78658C;
   --text-primary: #1f2937;
@@ -21,6 +30,14 @@
 }
 
 .dark {
+  --brand-purple: #B8A9E5;
+  --brand-yellow-ink: #F7C843;
+  --chart-fitness: #B8A9E5;
+  --chart-fatigue: #F7C843;
+  --chart-form: #D1D5DB;
+  --chart-grid: #374151;
+  --chart-label: #9ca3af;
+  --heatmap-empty: #1b1d21;
   --text-primary: #f9fafb;
   --text-secondary: #d1d5db;
   --text-tertiary: #9ca3af;
@@ -38,6 +55,11 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {

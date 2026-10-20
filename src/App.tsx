@@ -50,6 +50,12 @@ function AppContent() {
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [rosterAthlete, setRosterAthlete] = useState<RosterRow | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => localStorage.getItem('performance-theme') === 'dark' ? 'dark' : 'light');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('performance-theme', theme);
+  }, [theme]);
 
   // Hash deep-links (e.g. #/sessions?activity=…) open the target view on load.
   useEffect(() => {
@@ -173,9 +179,16 @@ function AppContent() {
     const role = profile?.role ?? 'coach';
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Header athlete={null} onSignOut={logout} />
-        <Sidebar activeView={activeView} onViewChange={setActiveView} role="coach" />
-        <main className="pt-16 lg:pl-20 min-h-screen w-full">
+        <Header />
+        <Sidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
+          role="coach"
+          theme={theme}
+          onThemeToggle={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+          onSignOut={logout}
+        />
+        <main className="pt-16 lg:pt-16 lg:pl-20 min-h-screen w-full">
           <div className="p-6 w-full max-w-[1400px]">
             {activeView === 'settings' ? (
               <SettingsView />
@@ -189,8 +202,6 @@ function AppContent() {
                 role={role}
                 onOpenAthlete={setRosterAthlete}
                 athleteNames={{}}
-                coachHubId={profile?.hub_user_id}
-                coachEmail={profile?.email}
               />
             )}
           </div>
@@ -214,10 +225,16 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header athlete={athlete} onSignOut={logout} />
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <Header />
+      <Sidebar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        theme={theme}
+        onThemeToggle={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+        onSignOut={logout}
+      />
 
-      <main className="pt-16 lg:pt-0 lg:pl-20 min-h-screen w-full">
+      <main className="pt-16 lg:pt-16 lg:pl-20 min-h-screen w-full">
         <div className="p-6 w-full max-w-[1400px]">
           {activeView === 'dashboard' && athlete && (
             <DashboardView

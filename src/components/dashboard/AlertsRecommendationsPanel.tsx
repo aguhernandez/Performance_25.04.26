@@ -12,13 +12,13 @@ interface AlertsRecommendationsPanelProps {
 
 const WARNING_CONFIG: Record<string, { icon: typeof AlertTriangle; border: string; bg: string; iconColor: string }> = {
   overreaching: { icon: AlertTriangle, border: 'border-red-500/30', bg: 'bg-red-500/5', iconColor: 'text-red-400' },
-  underload: { icon: TrendingDown, border: 'border-slate-600/30', bg: 'bg-slate-800/20', iconColor: 'text-slate-400' },
-  acute_fatigue: { icon: Zap, border: 'border-amber-500/30', bg: 'bg-amber-500/5', iconColor: 'text-amber-400' },
-  stagnation: { icon: MinusCircle, border: 'border-sky-500/30', bg: 'bg-sky-500/5', iconColor: 'text-sky-400' },
+  underload: { icon: TrendingDown, border: 'border-slate-600/30', bg: 'bg-gray-50 dark:bg-gray-800', iconColor: 'text-gray-600 dark:text-gray-400' },
+  acute_fatigue: { icon: Zap, border: 'border-[#F7C843]/40', bg: 'bg-[#F7C843]/10', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
+  stagnation: { icon: MinusCircle, border: 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30', bg: 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10', iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]' },
   nutrition_deficit: { icon: Apple, border: 'border-red-500/30', bg: 'bg-red-500/5', iconColor: 'text-red-400' },
-  nutrition_excess: { icon: Apple, border: 'border-amber-500/30', bg: 'bg-amber-500/5', iconColor: 'text-amber-400' },
-  hrv_suppression: { icon: Zap, border: 'border-orange-500/30', bg: 'bg-orange-500/5', iconColor: 'text-orange-400' },
-  compartment_imbalance: { icon: MinusCircle, border: 'border-cyan-500/30', bg: 'bg-cyan-500/5', iconColor: 'text-cyan-400' },
+  nutrition_excess: { icon: Apple, border: 'border-[#F7C843]/40', bg: 'bg-[#F7C843]/10', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
+  hrv_suppression: { icon: Zap, border: 'border-orange-500/30', bg: 'bg-orange-500/5', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
+  compartment_imbalance: { icon: MinusCircle, border: 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30', bg: 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10', iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]' },
 };
 
 const REC_ICON: Record<string, typeof Target> = {
@@ -43,10 +43,10 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
   const hasRecs = recommendations.length > 0;
 
   return (
-    <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-3">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-[13px] font-semibold text-white">Alerts & Recommendations</h3>
-        <div className="flex items-center gap-1 bg-slate-800/40 rounded-lg p-0.5">
+        <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Alerts & Recommendations</h3>
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
           {(['warnings', 'recommendations'] as const).map(t => {
             const count = t === 'warnings' ? warnings.length : recommendations.length;
             return (
@@ -54,7 +54,7 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
                 key={t}
                 onClick={() => setTab(t)}
                 className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-mono capitalize transition-all ${
-                  tab === t ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'
+                  tab === t ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                 }`}
               >
                 {t}
@@ -62,8 +62,8 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
                   <span
                     className="text-[9px] px-1 rounded-full font-bold"
                     style={{
-                      backgroundColor: t === 'warnings' && count > 0 ? '#ef444430' : '#0ea5e930',
-                      color: t === 'warnings' && count > 0 ? '#ef4444' : '#0ea5e9',
+                      backgroundColor: t === 'warnings' && count > 0 ? '#ef444430' : '#2A1F4A20',
+                      color: t === 'warnings' && count > 0 ? '#ef4444' : '#2A1F4A',
                     }}
                   >
                     {count}
@@ -98,14 +98,14 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
                     >
                       {w.severity.toUpperCase()}
                     </span>
-                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">
+                    <span className="text-[9px] font-mono text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       {w.type.replace(/_/g, ' ')}
                     </span>
-                    <span className="text-[9px] font-mono text-slate-600 ml-auto">
+                    <span className="text-[9px] font-mono text-gray-600 dark:text-gray-500 ml-auto">
                       {w.value.toFixed(3)} / {w.threshold}
                     </span>
                   </div>
-                  <p className="text-[12px] text-slate-300 leading-relaxed">{w.message}</p>
+                  <p className="text-[12px] text-gray-700 dark:text-gray-300 leading-relaxed">{w.message}</p>
                 </div>
               </div>
             );
@@ -116,9 +116,9 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
       {tab === 'recommendations' && (
         <div className="space-y-2">
           {recommendations.length === 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-slate-800/20 border border-slate-700/30">
-              <CheckCircle2 className="w-4 h-4 text-slate-500 flex-shrink-0" />
-              <p className="text-[12px] text-slate-500">No specific recommendations at this time. Continue current protocol.</p>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CheckCircle2 className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+              <p className="text-[12px] text-gray-500 dark:text-gray-400">No specific recommendations at this time. Continue current protocol.</p>
             </div>
           )}
           {recommendations.map((rec, i) => {
@@ -127,9 +127,9 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
             const key = `${rec.title}-${i}`;
             const expanded = expandedRec === key;
             return (
-              <div key={i} className="bg-slate-800/30 border border-slate-700/20 rounded-lg overflow-hidden">
+              <div key={i} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                 <button
-                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-slate-800/30 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 dark:bg-gray-800 transition-colors"
                   onClick={() => setExpandedRec(expanded ? null : key)}
                 >
                   <div
@@ -140,28 +140,28 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-[12px] font-medium text-white">{rec.title}</p>
+                      <p className="text-[12px] font-medium text-gray-900 dark:text-white">{rec.title}</p>
                       <span
                         className="text-[9px] font-mono px-1.5 py-0.5 rounded"
                         style={{ color: priColor, backgroundColor: `${priColor}15` }}
                       >
                         {rec.priority.toUpperCase()}
                       </span>
-                      <span className="text-[9px] text-slate-500 capitalize ml-1">{rec.category}</span>
+                      <span className="text-[9px] text-gray-500 dark:text-gray-400 capitalize ml-1">{rec.category}</span>
                     </div>
-                    {!expanded && <p className="text-[11px] text-slate-500 mt-0.5 truncate">{rec.detail}</p>}
+                    {!expanded && <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{rec.detail}</p>}
                   </div>
-                  {expanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />}
+                  {expanded ? <ChevronUp className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 flex-shrink-0" />}
                 </button>
                 {expanded && (
-                  <div className="border-t border-slate-700/20 px-3 pb-3 pt-2 space-y-2">
-                    <p className="text-[12px] text-slate-400 leading-relaxed">{rec.detail}</p>
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-3 pb-3 pt-2 space-y-2">
+                    <p className="text-[12px] text-gray-600 dark:text-gray-400 leading-relaxed">{rec.detail}</p>
                     <div
                       className="rounded-lg p-2.5 text-[11px] leading-relaxed"
                       style={{ backgroundColor: `${priColor}08`, borderLeft: `2px solid ${priColor}` }}
                     >
-                      <span className="font-semibold text-slate-300">Action: </span>
-                      <span className="text-slate-400">{rec.actionable}</span>
+                      <span className="font-semibold text-gray-700 dark:text-gray-300">Action: </span>
+                      <span className="text-gray-600 dark:text-gray-400">{rec.actionable}</span>
                     </div>
                   </div>
                 )}

@@ -17,9 +17,9 @@ const WARNING_CONFIG = {
   underload: {
     icon: TrendingDown,
     borderColor: 'border-slate-600/30',
-    bgColor: 'bg-slate-800/30',
-    iconColor: 'text-slate-400',
-    badgeColor: 'bg-slate-700/40 text-slate-400',
+    bgColor: 'bg-gray-50 dark:bg-gray-800',
+    iconColor: 'text-gray-600 dark:text-gray-400',
+    badgeColor: 'bg-gray-200 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400',
   },
   acute_fatigue: {
     icon: Zap,
@@ -30,10 +30,10 @@ const WARNING_CONFIG = {
   },
   stagnation: {
     icon: MinusCircle,
-    borderColor: 'border-sky-500/30',
-    bgColor: 'bg-sky-500/5',
-    iconColor: 'text-sky-400',
-    badgeColor: 'bg-sky-500/10 text-sky-400',
+    borderColor: 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30',
+    bgColor: 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10',
+    iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]',
+    badgeColor: 'bg-[#2A1F4A]/10 text-[#2A1F4A] dark:bg-[#B8A9E5]/10 dark:text-[#B8A9E5]',
   },
 };
 
@@ -67,15 +67,15 @@ export function WarningBanner({ warnings }: WarningBannerProps) {
                 <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${config.badgeColor}`}>
                   {SEVERITY_LABELS[warning.severity]}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
+                <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {warning.type.replace('_', ' ')}
                 </span>
               </div>
-              <p className="text-[12px] text-slate-300 leading-relaxed">{warning.message}</p>
+              <p className="text-[12px] text-gray-700 dark:text-gray-300 leading-relaxed">{warning.message}</p>
             </div>
             <button
               onClick={() => setDismissed(prev => new Set([...prev, key]))}
-              className="text-slate-600 hover:text-slate-400 transition-colors flex-shrink-0"
+              className="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition-colors flex-shrink-0"
             >
               <X className="w-3.5 h-3.5" />
             </button>

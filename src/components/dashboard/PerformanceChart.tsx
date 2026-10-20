@@ -13,9 +13,9 @@ const CHART_PADDING = { top: 16, bottom: 32, left: 48, right: 16 };
 type SeriesKey = 'fitness' | 'fatigue' | 'form';
 
 const SERIES_CONFIG: Record<SeriesKey, { color: string; label: string; dash?: string }> = {
-  fitness: { color: '#0ea5e9', label: 'Fitness' },
-  fatigue: { color: '#f97316', label: 'Fatigue' },
-  form: { color: '#22c55e', label: 'Form' },
+  fitness: { color: 'var(--chart-fitness)', label: 'Fitness' },
+  fatigue: { color: 'var(--chart-fatigue)', label: 'Fatigue' },
+  form: { color: 'var(--chart-form)', label: 'Form' },
 };
 
 export function PerformanceChart({ history, windowDays = 90, predictedHistory = [] }: PerformanceChartProps) {
@@ -125,11 +125,11 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
   }, [data]);
 
   return (
-    <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-[13px] font-semibold text-white">Impulse–Response Model</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">Bannister physiological response over time</p>
+          <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Impulse–Response Model</h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Bannister physiological response over time</p>
         </div>
         <div className="flex items-center gap-2">
           {(Object.entries(SERIES_CONFIG) as [SeriesKey, typeof SERIES_CONFIG[SeriesKey]][]).map(([key, cfg]) => (
@@ -138,8 +138,8 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
               onClick={() => toggleSeries(key)}
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-mono transition-all ${
                 activeSeries.has(key)
-                  ? 'bg-slate-800/60 text-slate-300'
-                  : 'text-slate-600 opacity-40'
+                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  : 'text-gray-600 dark:text-gray-500 opacity-40'
               }`}
             >
               <span
@@ -175,13 +175,13 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
                 <line
                   x1={0} y1={y - CHART_PADDING.top}
                   x2={chartWidth} y2={y - CHART_PADDING.top}
-                  stroke="#1e293b" strokeWidth="0.5" strokeDasharray="2,2"
+                  stroke="var(--chart-grid)" strokeWidth="0.5" strokeDasharray="2,2"
                 />
                 <text
                   x={-4} y={y - CHART_PADDING.top + 3}
                   textAnchor="end"
                   fontSize="5"
-                  fill="#475569"
+                  fill="var(--chart-label)"
                   fontFamily="monospace"
                 >
                   {value.toFixed(1)}
@@ -235,7 +235,7 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
                 y={chartHeight + 14}
                 textAnchor="middle"
                 fontSize="4.5"
-                fill="#475569"
+                fill="var(--chart-label)"
                 fontFamily="monospace"
               >
                 {label}
@@ -246,25 +246,25 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
 
         {tooltip && (
           <div
-            className="absolute pointer-events-none bg-[#0a0f1c] border border-slate-700/60 rounded-lg p-2.5 shadow-2xl z-10 min-w-[140px]"
+            className="absolute pointer-events-none bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 shadow-2xl z-10 min-w-[140px]"
             style={{
               left: Math.min(tooltip.x + 12, 500),
               top: Math.max(tooltip.y - 80, 4),
             }}
           >
-            <p className="text-[10px] text-slate-500 font-mono mb-1.5">{tooltip.data.date}</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono mb-1.5">{tooltip.data.date}</p>
             {(Object.entries(SERIES_CONFIG) as [SeriesKey, typeof SERIES_CONFIG[SeriesKey]][]).map(([key, cfg]) => (
               <div key={key} className="flex justify-between gap-4 items-center">
                 <span className="text-[10px] font-mono" style={{ color: cfg.color }}>{cfg.label}</span>
-                <span className="text-[11px] font-bold text-white tabular-nums">
+                <span className="text-[11px] font-bold text-gray-900 dark:text-white tabular-nums">
                   {tooltip.data[key].toFixed(2)}
                 </span>
               </div>
             ))}
             <div className="border-t border-slate-800 mt-1.5 pt-1.5">
               <div className="flex justify-between gap-4">
-                <span className="text-[10px] font-mono text-slate-500">Impulse</span>
-                <span className="text-[10px] text-slate-400 tabular-nums">{tooltip.data.impulse.toFixed(3)}</span>
+                <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400">Impulse</span>
+                <span className="text-[10px] text-gray-600 dark:text-gray-400 tabular-nums">{tooltip.data.impulse.toFixed(3)}</span>
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
 
       {data.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-slate-600 text-sm">No session data – add sessions to model performance</p>
+          <p className="text-gray-600 dark:text-gray-500 text-sm">No session data – add sessions to model performance</p>
         </div>
       )}
     </div>

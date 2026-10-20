@@ -1,4 +1,4 @@
-import { BarChart2, FlaskConical, Utensils, User, LayoutDashboard, TrendingUp, Heart, Menu, X, Settings, Users, Timer } from 'lucide-react';
+import { BarChart2, FlaskConical, Utensils, User, Home, TrendingUp, Heart, Menu, X, Settings, Users, Timer, Globe, Moon, Sun, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -8,14 +8,17 @@ interface SidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
   role?: 'athlete' | 'coach' | 'admin';
+  theme: 'light' | 'dark';
+  onThemeToggle: () => void;
+  onSignOut: () => void;
 }
 
-export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, role = 'athlete', theme, onThemeToggle, onSignOut }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, lang, setLang } = useLanguage();
 
   const athleteNavItems: { view: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { view: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { view: 'dashboard', label: t('home'), icon: Home },
     { view: 'sessions', label: t('sessions'), icon: BarChart2 },
     { view: 'analytics', label: t('analytics'), icon: TrendingUp },
     { view: 'simulator', label: 'Simulador', icon: Timer },
@@ -75,13 +78,26 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
                 );
               })}
             </nav>
+            <div className="border-t border-gray-200 dark:border-gray-800 px-3 py-3 space-y-1">
+              <div className="flex items-center gap-2">
+                <button onClick={() => setLang(lang === 'es' ? 'en' : 'es')} className="flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 font-body text-[13px]">
+                  <Globe className="w-5 h-5" /><span>{lang === 'es' ? 'Español' : 'English'}</span>
+                </button>
+                <button onClick={onThemeToggle} aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'} className="flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+              </div>
+              <button onClick={onSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 font-body text-[13px]">
+                <LogOut className="w-5 h-5" /><span>{t('signOut')}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300 ease-in-out group z-40">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-20 hover:w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300 ease-in-out group z-40">
         {/* Logo strip */}
-        <div className="flex items-center justify-center h-12 border-b border-gray-200 dark:border-gray-700 overflow-hidden px-3 shrink-0">
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 overflow-hidden px-3 shrink-0">
           <img src="/Asciendefavicon.png" alt="Asciende" className="h-7 w-7 object-contain group-hover:hidden" />
           <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="hidden group-hover:block h-7 w-auto object-contain" />
         </div>
@@ -128,6 +144,20 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
             </div>
           </div>
         )}
+
+        <div className="border-t border-gray-200 dark:border-gray-700 px-3 py-3 space-y-1 shrink-0">
+          <div className="flex items-center justify-center group-hover:justify-start gap-1">
+            <button onClick={() => setLang(lang === 'es' ? 'en' : 'es')} title={lang === 'es' ? 'Cambiar idioma a English' : 'Change language to Español'} className="flex items-center justify-center gap-2 w-9 h-9 group-hover:w-auto group-hover:flex-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+              <Globe className="w-4 h-4 shrink-0" /><span className="hidden group-hover:inline font-body text-[11px] font-semibold">{lang.toUpperCase()}</span>
+            </button>
+            <button onClick={onThemeToggle} title={theme === 'dark' ? 'Light theme' : 'Dark theme'} aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'} className="flex items-center justify-center gap-2 w-9 h-9 group-hover:flex-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+              {theme === 'dark' ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}<span className="hidden group-hover:inline font-body text-[11px] font-medium">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
+          </div>
+          <button onClick={onSignOut} title={t('signOut')} className="w-full h-9 flex items-center justify-center group-hover:justify-start gap-3 group-hover:px-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <LogOut className="w-4 h-4 shrink-0" /><span className="hidden group-hover:inline font-body text-[11px] font-medium whitespace-nowrap">{t('signOut')}</span>
+          </button>
+        </div>
       </aside>
     </>
   );

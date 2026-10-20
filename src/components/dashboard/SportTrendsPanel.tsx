@@ -8,11 +8,11 @@ interface SportTrendsPanelProps {
 }
 
 const SPORT_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  endurance: { label: 'Endurance', color: '#0ea5e9', icon: 'EN' },
-  cycling: { label: 'Cycling', color: '#a78bfa', icon: 'CY' },
-  running: { label: 'Running', color: '#f59e0b', icon: 'RN' },
-  beach_volleyball: { label: 'Beach Volleyball', color: '#22c55e', icon: 'BV' },
-  strength: { label: 'Strength', color: '#f97316', icon: 'ST' },
+  endurance: { label: 'Endurance', color: '#2A1F4A', icon: 'EN' },
+  cycling: { label: 'Cycling', color: '#8A6900', icon: 'CY' },
+  running: { label: 'Running', color: '#6b7280', icon: 'RN' },
+  beach_volleyball: { label: 'Beach Volleyball', color: '#2A1F4A', icon: 'BV' },
+  strength: { label: 'Strength', color: '#8A6900', icon: 'ST' },
   other: { label: 'Other', color: '#64748b', icon: 'OT' },
 };
 
@@ -65,19 +65,19 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
   const maxWeeklyTotal = Math.max(...weeklyTrend.map(w => w.total), 0.001);
 
   return (
-    <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[13px] font-semibold text-white">Sport Breakdown</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">Impulse distribution across training modalities</p>
+          <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Sport Breakdown</h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Impulse distribution across training modalities</p>
         </div>
-        <div className="flex items-center gap-1 bg-slate-800/40 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
           {(['distribution', 'trend'] as const).map(v => (
             <button
               key={v}
               onClick={() => setView(v)}
               className={`px-2 py-1 rounded-md text-[10px] font-mono capitalize transition-all ${
-                view === v ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'
+                view === v ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               {v}
@@ -110,8 +110,8 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-0.5">
-                    <span className="text-[11px] text-slate-300">{d.label}</span>
-                    <span className="text-[11px] font-mono text-slate-400">{d.sessions} sessions</span>
+                    <span className="text-[11px] text-gray-700 dark:text-gray-300">{d.label}</span>
+                    <span className="text-[11px] font-mono text-gray-600 dark:text-gray-400">{d.sessions} sessions</span>
                   </div>
                   <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
                     <div
@@ -122,24 +122,24 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
                 </div>
                 <div className="text-right flex-shrink-0 w-16">
                   <p className="text-[12px] font-bold font-mono" style={{ color: d.color }}>{d.impulse.toFixed(2)}</p>
-                  <p className="text-[9px] text-slate-500">{d.pct.toFixed(1)}%</p>
+                  <p className="text-[9px] text-gray-500 dark:text-gray-400">{d.pct.toFixed(1)}%</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-5 gap-2 pt-2 border-t border-slate-800/40">
+          <div className="grid grid-cols-5 gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
             {[
-              { label: 'Endurance', data: sportBreakdown.endurance, color: '#0ea5e9' },
-              { label: 'Cycling', data: sportBreakdown.cycling, color: '#a78bfa' },
-              { label: 'Running', data: sportBreakdown.running, color: '#f59e0b' },
-              { label: 'Beach VB', data: sportBreakdown.beachVolley, color: '#22c55e' },
-              { label: 'Strength', data: sportBreakdown.strength, color: '#f97316' },
+              { label: 'Endurance', data: sportBreakdown.endurance, color: '#2A1F4A' },
+              { label: 'Cycling', data: sportBreakdown.cycling, color: '#8A6900' },
+              { label: 'Running', data: sportBreakdown.running, color: '#6b7280' },
+              { label: 'Beach VB', data: sportBreakdown.beachVolley, color: '#2A1F4A' },
+              { label: 'Strength', data: sportBreakdown.strength, color: '#8A6900' },
             ].map(({ label, data, color }) => (
               <div key={label} className="text-center">
-                <p className="text-[9px] text-slate-500 font-mono uppercase mb-0.5">{label}</p>
+                <p className="text-[9px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-0.5">{label}</p>
                 <p className="text-[13px] font-bold font-mono" style={{ color }}>{data.sessions}</p>
-                <p className="text-[9px] text-slate-600">sessions</p>
+                <p className="text-[9px] text-gray-600 dark:text-gray-500">sessions</p>
               </div>
             ))}
           </div>
@@ -148,11 +148,11 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
 
       {view === 'trend' && weeklyTrend.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] text-slate-500 font-mono uppercase">Weekly impulse by sport (8 weeks)</p>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Weekly impulse by sport (8 weeks)</p>
           <div className="space-y-1">
             {weeklyTrend.map((week, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="text-[9px] text-slate-600 font-mono w-14 flex-shrink-0">{week.label}</span>
+                <span className="text-[9px] text-gray-600 dark:text-gray-500 font-mono w-14 flex-shrink-0">{week.label}</span>
                 <div className="flex-1 flex h-5 rounded overflow-hidden gap-px">
                   {Object.entries(week.byType).map(([type, impulse]) => {
                     const cfg = SPORT_CONFIG[type];
@@ -172,7 +172,7 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
                     );
                   })}
                 </div>
-                <span className="text-[10px] font-mono text-slate-400 w-10 text-right">{week.total.toFixed(2)}</span>
+                <span className="text-[10px] font-mono text-gray-600 dark:text-gray-400 w-10 text-right">{week.total.toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -180,7 +180,7 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
             {Object.entries(SPORT_CONFIG).map(([type, cfg]) => (
               <div key={type} className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: cfg.color }} />
-                <span className="text-[9px] text-slate-500">{cfg.label}</span>
+                <span className="text-[9px] text-gray-500 dark:text-gray-400">{cfg.label}</span>
               </div>
             ))}
           </div>
@@ -188,7 +188,7 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
       )}
 
       {weeklyTrend.length === 0 && (
-        <p className="text-slate-600 text-[12px]">Add sessions to see weekly trends</p>
+        <p className="text-gray-600 dark:text-gray-500 text-[12px]">Add sessions to see weekly trends</p>
       )}
     </div>
   );

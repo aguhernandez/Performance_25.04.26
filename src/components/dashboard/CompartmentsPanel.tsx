@@ -7,9 +7,9 @@ interface CompartmentsPanelProps {
 }
 
 const COMPARTMENTS = [
-  { key: 'aerobic' as const, label: 'Aerobic', color: '#0ea5e9', desc: 'Oxidative — endurance base' },
-  { key: 'glycolytic' as const, label: 'Glycolytic', color: '#f97316', desc: 'Anaerobic — speed endurance' },
-  { key: 'neuromuscular' as const, label: 'Neuromuscular', color: '#a78bfa', desc: 'Strength — explosive power' },
+  { key: 'aerobic' as const, label: 'Aerobic', color: '#2A1F4A', desc: 'Oxidative — endurance base' },
+  { key: 'glycolytic' as const, label: 'Glycolytic', color: '#8A6900', desc: 'Anaerobic — speed endurance' },
+  { key: 'neuromuscular' as const, label: 'Neuromuscular', color: '#6b7280', desc: 'Strength — explosive power' },
 ];
 
 const MINI_H = 80;
@@ -22,27 +22,27 @@ export function CompartmentsPanel({ history, windowDays = 90 }: CompartmentsPane
 
   if (data.length === 0) {
     return (
-      <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-        <h3 className="text-[13px] font-semibold text-white mb-2">Multi-Compartment Model</h3>
-        <p className="text-slate-600 text-[12px]">Add sessions to visualize compartment dynamics</p>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+        <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-2">Multi-Compartment Model</h3>
+        <p className="text-gray-600 dark:text-gray-500 text-[12px]">Add sessions to visualize compartment dynamics</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[13px] font-semibold text-white">Multi-Compartment Model</h3>
-          <p className="text-[11px] text-slate-500 mt-0.5">Aerobic · Glycolytic · Neuromuscular — independent decay systems</p>
+          <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Multi-Compartment Model</h3>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Aerobic · Glycolytic · Neuromuscular — independent decay systems</p>
         </div>
-        <div className="flex items-center gap-1 bg-slate-800/40 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
           {(['fitness', 'fatigue', 'form'] as const).map(m => (
             <button
               key={m}
               onClick={() => setActiveMetric(m)}
               className={`px-2 py-1 rounded-md text-[10px] font-mono uppercase transition-all ${
-                activeMetric === m ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'
+                activeMetric === m ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               {m}
@@ -65,25 +65,25 @@ export function CompartmentsPanel({ history, windowDays = 90 }: CompartmentsPane
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/40">
+      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
         {COMPARTMENTS.map(({ key, label, color }) => {
           const last = data[data.length - 1];
           const state = last[key];
           return (
             <div key={key} className="text-center">
-              <p className="text-[10px] text-slate-500 font-mono uppercase mb-1">{label}</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1">{label}</p>
               <div className="flex justify-center gap-3">
                 <div>
-                  <p className="text-[9px] text-slate-600">Fit</p>
+                  <p className="text-[9px] text-gray-600 dark:text-gray-500">Fit</p>
                   <p className="text-[13px] font-bold font-mono" style={{ color }}>{state.fitness.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-slate-600">Fat</p>
-                  <p className="text-[13px] font-bold font-mono text-orange-400">{state.fatigue.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600 dark:text-gray-500">Fat</p>
+                  <p className="text-[13px] font-bold font-mono text-[#8A6900] dark:text-[#F7C843]">{state.fatigue.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-slate-600">Form</p>
-                  <p className={`text-[13px] font-bold font-mono ${state.form >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className="text-[9px] text-gray-600 dark:text-gray-500">Form</p>
+                  <p className={`text-[13px] font-bold font-mono ${state.form >= 0 ? 'text-[#2A1F4A] dark:text-[#B8A9E5]' : 'text-[#8A6900] dark:text-[#F7C843]'}`}>
                     {state.form >= 0 ? '+' : ''}{state.form.toFixed(2)}
                   </p>
                 </div>
@@ -132,7 +132,7 @@ function CompartmentMiniChart({ data, compartmentKey, metric, label, color, desc
         <span className="text-[11px] font-semibold" style={{ color }}>{label}</span>
         <span
           className="text-[11px] font-bold font-mono"
-          style={{ color: metric === 'form' ? (lastVal >= 0 ? '#22c55e' : '#ef4444') : color }}
+          style={{ color: metric === 'form' ? (lastVal >= 0 ? '#2A1F4A' : '#8A6900') : color }}
         >
           {metric === 'form' && lastVal >= 0 ? '+' : ''}{lastVal.toFixed(2)}
         </span>
@@ -167,7 +167,7 @@ function CompartmentMiniChart({ data, compartmentKey, metric, label, color, desc
           )}
         </g>
       </svg>
-      <p className="text-[9px] text-slate-600 mt-1">{desc}</p>
+      <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-1">{desc}</p>
     </div>
   );
 }

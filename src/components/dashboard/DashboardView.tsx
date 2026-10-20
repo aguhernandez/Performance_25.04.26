@@ -51,8 +51,8 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
   if (!engine) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <Activity className="w-10 h-10 text-slate-700 mb-3" />
-        <p className="text-slate-500">{t('noEngineData')}</p>
+        <Activity className="w-10 h-10 text-gray-700 dark:text-gray-300 mb-3" />
+        <p className="text-gray-500 dark:text-gray-400">{t('noEngineData')}</p>
       </div>
     );
   }
@@ -73,48 +73,48 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
           label={t('fitness')}
           value={current.fitness}
           subtext={`τ₁ = ${current.tau.tauFitness}d`}
-          accent="#0ea5e9"
+          accent="var(--chart-fitness)"
           icon={<Activity className="w-4 h-4" />}
         />
         <MetricCard
           label={t('fatigue')}
           value={current.fatigue}
           subtext={`τ₂ = ${current.tau.tauFatigue}d`}
-          accent="#f97316"
+          accent="var(--chart-fatigue)"
           icon={<Dumbbell className="w-4 h-4" />}
         />
         <MetricCard
           label={t('form')}
           value={current.form >= 0 ? `+${current.form.toFixed(2)}` : current.form.toFixed(2)}
           subtext={t('fitnessMinus')}
-          accent={current.form >= 0 ? '#22c55e' : '#ef4444'}
+          accent={current.form >= 0 ? 'var(--chart-fitness)' : 'var(--chart-fatigue)'}
         />
         <MetricCard
           label={t('perfIndex')}
           value={performanceIndex}
           unit="pts"
           subtext={`${t('baseline')}: ${baselinePerformance.toFixed(2)}`}
-          accent="#0ea5e9"
+          accent="var(--chart-fitness)"
           trend={performanceIndex - 100}
         />
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-slate-800/40 border border-slate-700/40 rounded-xl p-1">
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-cyan-500 text-[#070b12]'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#F7C843] text-[#2A1F4A]'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               {tab.icon}
               {tab.label}
               {tab.id === 'alerts' && alertCount > 0 && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'alerts' ? 'bg-[#070b12]/30 text-[#070b12]' : 'bg-red-500/20 text-red-400'}`}>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'alerts' ? 'bg-[#2A1F4A]/10 text-[#2A1F4A] dark:bg-[#F7C843]/15 dark:text-[#F7C843]' : 'bg-red-500/20 text-red-500 dark:text-red-400'}`}>
                   {alertCount}
                 </span>
               )}
@@ -155,62 +155,62 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
                 baselinePerformance={baselinePerformance}
               />
             </div>
-            <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-              <h3 className="text-[13px] font-semibold text-white mb-3">{t('athleteProfileCard')}</h3>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-3">{t('athleteProfileCard')}</h3>
               <div className="space-y-2">
                 {[
-                  { label: 'VO2max', value: `${athlete.vo2max} ml/kg/min`, color: '#0ea5e9' },
-                  { label: 'vLamax', value: `${athlete.vlamax} mmol/l/s`, color: '#f97316' },
-                  { label: 'CP', value: `${athlete.cp_watts} W`, color: '#22c55e' },
-                  { label: t('leanMass'), value: `${athlete.lean_mass_kg} kg`, color: '#f59e0b' },
-                  { label: t('weight'), value: `${athlete.weight_kg} kg`, color: '#94a3b8' },
-                  { label: 'w/kg (CP)', value: `${(athlete.cp_watts / athlete.weight_kg).toFixed(2)} W/kg`, color: '#0ea5e9' },
+                  { label: 'VO2max', value: `${athlete.vo2max} ml/kg/min`, color: 'var(--chart-fitness)' },
+                  { label: 'vLamax', value: `${athlete.vlamax} mmol/l/s`, color: 'var(--chart-fatigue)' },
+                  { label: 'CP', value: `${athlete.cp_watts} W`, color: 'var(--chart-fitness)' },
+                  { label: t('leanMass'), value: `${athlete.lean_mass_kg} kg`, color: 'var(--chart-fatigue)' },
+                  { label: t('weight'), value: `${athlete.weight_kg} kg`, color: 'var(--chart-form)' },
+                  { label: 'w/kg (CP)', value: `${(athlete.cp_watts / athlete.weight_kg).toFixed(2)} W/kg`, color: 'var(--chart-fitness)' },
                 ].map(({ label, value, color }) => (
-                  <div key={label} className="flex justify-between items-center py-1.5 border-b border-slate-800/40 last:border-0">
-                    <span className="text-[11px] text-slate-500 font-mono">{label}</span>
+                  <div key={label} className="flex justify-between items-center py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">{label}</span>
                     <span className="text-[12px] font-medium font-mono" style={{ color }}>{value}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 pt-3 border-t border-slate-800/40">
-                <p className="text-[10px] text-slate-500 uppercase font-mono tracking-widest mb-2">{t('sevenDayImpulse')}</p>
+              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-mono tracking-widest mb-2">{t('sevenDayImpulse')}</p>
                 <div className="flex items-end gap-1">
-                  <span className="text-[22px] font-bold text-cyan-400 tabular-nums font-mono">
+                  <span className="text-[22px] font-bold text-[#2A1F4A] dark:text-[#B8A9E5] tabular-nums font-mono">
                     {avgImpulse.toFixed(3)}
                   </span>
-                  <span className="text-[11px] text-slate-500 mb-1">{t('auSession')}</span>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{t('auSession')}</span>
                 </div>
-                <p className="text-[10px] text-slate-600">{recentSessions.length} {t('sessionsInWindow')}</p>
+                <p className="text-[10px] text-gray-600 dark:text-gray-500">{recentSessions.length} {t('sessionsInWindow')}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-[13px] font-semibold text-white">{t('physiologicalParams')}</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">{t('personalizedTau')}</p>
+                <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">{t('physiologicalParams')}</h3>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{t('personalizedTau')}</p>
               </div>
-              <FlaskConical className="w-4 h-4 text-slate-600" />
+              <FlaskConical className="w-4 h-4 text-gray-600 dark:text-gray-500" />
             </div>
             <div className="grid grid-cols-5 gap-3">
               {[
-                { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: '#0ea5e9' },
-                { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: '#f97316' },
-                { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? '#ef4444' : current.recoveryRatio < 0.6 ? '#64748b' : '#22c55e' },
-                { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: '#0ea5e9' },
+                { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: 'var(--chart-fitness)' },
+                { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: 'var(--chart-fatigue)' },
+                { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? 'var(--chart-fatigue)' : 'var(--chart-form)' },
+                { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: 'var(--chart-fitness)' },
                 { label: t('sessions90d'), value: sessions.filter(s => {
                   const d = new Date(s.session_date);
                   const cutoff = new Date();
                   cutoff.setDate(cutoff.getDate() - 90);
                   return d >= cutoff;
-                }).length.toString(), desc: t('trainingFrequency'), color: '#22c55e' },
+                }).length.toString(), desc: t('trainingFrequency'), color: 'var(--chart-form)' },
               ].map(({ label, value, desc, color }) => (
-                <div key={label} className="text-center p-2 rounded-lg bg-slate-800/20 border border-slate-700/20">
-                  <p className="text-[10px] text-slate-500 font-mono mb-1">{label}</p>
+                <div key={label} className="text-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono mb-1">{label}</p>
                   <p className="text-[16px] font-bold font-mono" style={{ color }}>{value}</p>
-                  <p className="text-[9px] text-slate-600 mt-0.5">{desc}</p>
+                  <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">{desc}</p>
                 </div>
               ))}
             </div>

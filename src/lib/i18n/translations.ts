@@ -18,6 +18,7 @@ export const translations = {
     signOut: 'Sign out',
 
     // Sidebar
+    home: 'Home',
     dashboard: 'Dashboard',
     sessions: 'Sessions',
     analytics: 'Analytics',
@@ -662,6 +663,7 @@ export const translations = {
     signOut: 'Cerrar sesión',
 
     // Sidebar
+    home: 'Inicio',
     dashboard: 'Panel',
     sessions: 'Sesiones',
     analytics: 'Análisis',
