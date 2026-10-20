@@ -91,25 +91,32 @@ export function useCoachHubSync(
         const hubUserId = emailToHubUserId.get(hubA.email.toLowerCase()) ?? hubA.id;
 
         // Check if a local athlete exists for this user_id
-        const { data: existing } = await supabase
+        const { data: existing, error: lookupErr } = await supabase
           .from('athletes')
           .select('id, coach_id')
           .eq('user_id', hubUserId)
           .maybeSingle();
 
+        if (lookupErr) {
+          console.warn(`[CoachHubSync] Could not find athlete for ${hubA.email}:`, lookupErr);
+          continue;
+        }
+
         let athleteId: string;
 
         if (existing) {
           athleteId = existing.id;
-          // Update coach_id if not set
-          if (!existing.coach_id) {
-            await supabase
+          if (existing.coach_id !== coachHubId) {
+            const { error: updateErr } = await supabase
               .from('athletes')
               .update({ coach_id: coachHubId })
               .eq('id', athleteId);
+            if (updateErr) {
+              console.warn(`[CoachHubSync] Could not update coach for ${hubA.email}:`, updateErr);
+              continue;
+            }
           }
         } else {
-          // Create a minimal athlete row from Hub data
           const { data: newAthlete, error: createErr } = await supabase
             .from('athletes')
             .insert({
@@ -122,13 +129,25 @@ export function useCoachHubSync(
               onboarding_completed: false,
             })
             .select('id')
-            .single();
+            .maybeSingle();
 
-          if (createErr || !newAthlete) {
+          if (newAthlete) {
+            athleteId = newAthlete.id;
+          } else if (createErr?.code === '23505') {
+            const { data: racedAthlete, error: raceLookupErr } = await supabase
+              .from('athletes')
+              .select('id')
+              .eq('user_id', hubUserId)
+              .maybeSingle();
+            if (raceLookupErr || !racedAthlete) {
+              console.warn(`[CoachHubSync] Could not resolve concurrent athlete for ${hubA.email}:`, raceLookupErr ?? createErr);
+              continue;
+            }
+            athleteId = racedAthlete.id;
+          } else {
             console.warn(`[CoachHubSync] Could not create athlete for ${hubA.email}:`, createErr);
             continue;
           }
-          athleteId = newAthlete.id;
         }
 
         // Upsert coach_athletes link (coach_id as UUID)
