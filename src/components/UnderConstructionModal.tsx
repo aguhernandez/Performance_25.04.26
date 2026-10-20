@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
+const DISMISSAL_KEY = 'asciende_under_construction_dismissed';
+
 export function UnderConstructionModal() {
   const { lang, setLang, t } = useLanguage();
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    try {
+      return localStorage.getItem(DISMISSAL_KEY) !== 'true';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     document.body.style.overflow = isVisible ? 'hidden' : 'unset';
@@ -11,6 +19,11 @@ export function UnderConstructionModal() {
       document.body.style.overflow = 'unset';
     };
   }, [isVisible]);
+
+  const dismiss = () => {
+    try { localStorage.setItem(DISMISSAL_KEY, 'true'); } catch { /* ignore */ }
+    setIsVisible(false);
+  };
 
   if (!isVisible) return null;
 
@@ -58,7 +71,7 @@ export function UnderConstructionModal() {
 
         {/* Button */}
         <button
-          onClick={() => setIsVisible(false)}
+          onClick={dismiss}
           className="w-full py-3 rounded-lg font-body font-semibold text-sm transition-all"
           style={{
             backgroundColor: '#F7C843',

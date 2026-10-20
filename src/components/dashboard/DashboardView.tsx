@@ -64,6 +64,135 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
   const avgImpulse = recentSessions.length > 0 ? totalLoad / recentSessions.length : 0;
   const alertCount = warnings.length + recommendations.filter(r => r.priority === 'high').length;
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                <PerformanceChart history={history} windowDays={90} predictedHistory={predictedHistory} />
+              </div>
+              <div>
+                <FormGauge state={current} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                <AdaptationTrend
+                  trend={adaptationTrend}
+                  tau={current.tau}
+                  performanceIndex={performanceIndex}
+                  baselinePerformance={baselinePerformance}
+                />
+              </div>
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-3">{t('athleteProfileCard')}</h3>
+                <div className="space-y-2">
+                  {[
+                    { label: 'VO2max', value: `${athlete.vo2max} ml/kg/min`, color: 'var(--chart-fitness)' },
+                    { label: 'vLamax', value: `${athlete.vlamax} mmol/l/s`, color: 'var(--chart-fatigue)' },
+                    { label: 'CP', value: `${athlete.cp_watts} W`, color: 'var(--chart-fitness)' },
+                    { label: t('leanMass'), value: `${athlete.lean_mass_kg} kg`, color: 'var(--chart-fatigue)' },
+                    { label: t('weight'), value: `${athlete.weight_kg} kg`, color: 'var(--chart-form)' },
+                    { label: 'w/kg (CP)', value: `${(athlete.cp_watts / athlete.weight_kg).toFixed(2)} W/kg`, color: 'var(--chart-fitness)' },
+                  ].map(({ label, value, color }) => (
+                    <div key={label} className="flex justify-between items-center py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">{label}</span>
+                      <span className="text-[12px] font-medium font-mono" style={{ color }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-mono tracking-widest mb-2">{t('sevenDayImpulse')}</p>
+                  <div className="flex items-end gap-1">
+                    <span className="text-[22px] font-bold text-[#2A1F4A] dark:text-[#B8A9E5] tabular-nums font-mono">
+                      {avgImpulse.toFixed(3)}
+                    </span>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{t('auSession')}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-600 dark:text-gray-500">{recentSessions.length} {t('sessionsInWindow')}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">{t('physiologicalParams')}</h3>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{t('personalizedTau')}</p>
+                </div>
+                <FlaskConical className="w-4 h-4 text-gray-600 dark:text-gray-500" />
+              </div>
+              <div className="grid grid-cols-5 gap-3">
+                {[
+                  { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: 'var(--chart-fitness)' },
+                  { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: 'var(--chart-fatigue)' },
+                  { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? 'var(--chart-fatigue)' : 'var(--chart-form)' },
+                  { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: 'var(--chart-fitness)' },
+                  { label: t('sessions90d'), value: sessions.filter(s => {
+                    const d = new Date(s.session_date);
+                    const cutoff = new Date();
+                    cutoff.setDate(cutoff.getDate() - 90);
+                    return d >= cutoff;
+                  }).length.toString(), desc: t('trainingFrequency'), color: 'var(--chart-form)' },
+                ].map(({ label, value, desc, color }) => (
+                  <div key={label} className="text-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono mb-1">{label}</p>
+                    <p className="text-[16px] font-bold font-mono" style={{ color }}>{value}</p>
+                    <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'compartments':
+        return <CompartmentsPanel history={compartmentHistory} />;
+
+      case 'load':
+        return <LoadHeatmap sessions={sessions} />;
+
+      case 'analytics':
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <NutritionCompliancePanel
+              logs={nutritionLogs}
+              compliance={analyzeNutritionCompliance(nutritionLogs, athlete.weight_kg ?? 75, athlete.lean_mass_kg ?? (athlete.weight_kg ?? 75) * 0.85)}
+              weightKg={athlete.weight_kg ?? 75}
+            />
+            <SportTrendsPanel
+              sessions={sessions}
+              sportBreakdown={sportBreakdown}
+            />
+          </div>
+        );
+
+      case 'alerts':
+        return (
+          <AlertsRecommendationsPanel
+            warnings={warnings}
+            recommendations={recommendations}
+          />
+        );
+
+      case 'hub':
+        return (
+          <HubDataPanel
+            hubConnected={hubConnected}
+            snapshot={hubSnapshot}
+            loading={hubLoading}
+            error={hubError}
+            athleteEmail={athleteEmail}
+            onRefresh={onRefreshHub}
+          />
+        );
+    }
+  };
+
   return (
     <div className="space-y-4">
       {warnings.length > 0 && <WarningBanner warnings={warnings} />}
@@ -99,19 +228,18 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 overflow-x-auto">
           {TABS.map(tab => (
             <button
               key={tab.id}
               type="button"
               aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 shrink-0 ${
                 activeTab === tab.id
-                  ? 'bg-[#F7C843] text-[#2A1F4A]'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-
+                  ? 'bg-[#F7C843] text-[#2A1F4A] shadow-sm scale-[1.02]'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-gray-700/50'
               }`}
             >
               {tab.icon}
@@ -127,7 +255,7 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative z-30">
           <SharePanel athleteId={athlete.id} userId={userId} />
           <ExportPanel
             engine={engine}
@@ -138,130 +266,12 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         </div>
       </div>
 
-      {activeTab === 'overview' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <PerformanceChart history={history} windowDays={90} predictedHistory={predictedHistory} />
-            </div>
-            <div>
-              <FormGauge state={current} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <AdaptationTrend
-                trend={adaptationTrend}
-                tau={current.tau}
-                performanceIndex={performanceIndex}
-                baselinePerformance={baselinePerformance}
-              />
-            </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-              <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-3">{t('athleteProfileCard')}</h3>
-              <div className="space-y-2">
-                {[
-                  { label: 'VO2max', value: `${athlete.vo2max} ml/kg/min`, color: 'var(--chart-fitness)' },
-                  { label: 'vLamax', value: `${athlete.vlamax} mmol/l/s`, color: 'var(--chart-fatigue)' },
-                  { label: 'CP', value: `${athlete.cp_watts} W`, color: 'var(--chart-fitness)' },
-                  { label: t('leanMass'), value: `${athlete.lean_mass_kg} kg`, color: 'var(--chart-fatigue)' },
-                  { label: t('weight'), value: `${athlete.weight_kg} kg`, color: 'var(--chart-form)' },
-                  { label: 'w/kg (CP)', value: `${(athlete.cp_watts / athlete.weight_kg).toFixed(2)} W/kg`, color: 'var(--chart-fitness)' },
-                ].map(({ label, value, color }) => (
-                  <div key={label} className="flex justify-between items-center py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
-                    <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">{label}</span>
-                    <span className="text-[12px] font-medium font-mono" style={{ color }}>{value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-mono tracking-widest mb-2">{t('sevenDayImpulse')}</p>
-                <div className="flex items-end gap-1">
-                  <span className="text-[22px] font-bold text-[#2A1F4A] dark:text-[#B8A9E5] tabular-nums font-mono">
-                    {avgImpulse.toFixed(3)}
-                  </span>
-                  <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{t('auSession')}</span>
-                </div>
-                <p className="text-[10px] text-gray-600 dark:text-gray-500">{recentSessions.length} {t('sessionsInWindow')}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">{t('physiologicalParams')}</h3>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{t('personalizedTau')}</p>
-              </div>
-              <FlaskConical className="w-4 h-4 text-gray-600 dark:text-gray-500" />
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              {[
-                { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: 'var(--chart-fitness)' },
-                { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: 'var(--chart-fatigue)' },
-                { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? 'var(--chart-fatigue)' : 'var(--chart-form)' },
-                { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: 'var(--chart-fitness)' },
-                { label: t('sessions90d'), value: sessions.filter(s => {
-                  const d = new Date(s.session_date);
-                  const cutoff = new Date();
-                  cutoff.setDate(cutoff.getDate() - 90);
-                  return d >= cutoff;
-                }).length.toString(), desc: t('trainingFrequency'), color: 'var(--chart-form)' },
-              ].map(({ label, value, desc, color }) => (
-                <div key={label} className="text-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono mb-1">{label}</p>
-                  <p className="text-[16px] font-bold font-mono" style={{ color }}>{value}</p>
-                  <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'compartments' && (
-        <CompartmentsPanel
-          history={compartmentHistory}
-        />
-      )}
-
-      {activeTab === 'load' && (
-        <LoadHeatmap sessions={sessions} />
-      )}
-
-      {activeTab === 'analytics' && (
-        <div className="grid grid-cols-2 gap-4">
-          <NutritionCompliancePanel
-            logs={nutritionLogs}
-            compliance={analyzeNutritionCompliance(nutritionLogs, athlete.weight_kg ?? 75, athlete.lean_mass_kg ?? (athlete.weight_kg ?? 75) * 0.85)}
-            weightKg={athlete.weight_kg ?? 75}
-          />
-          <SportTrendsPanel
-            sessions={sessions}
-            sportBreakdown={sportBreakdown}
-          />
-        </div>
-      )}
-
-      {activeTab === 'alerts' && (
-        <AlertsRecommendationsPanel
-          warnings={warnings}
-          recommendations={recommendations}
-        />
-      )}
-
-      {activeTab === 'hub' && (
-        <HubDataPanel
-          hubConnected={hubConnected}
-          snapshot={hubSnapshot}
-          loading={hubLoading}
-          error={hubError}
-          athleteEmail={athleteEmail}
-          onRefresh={onRefreshHub}
-        />
-      )}
+      <div
+        key={activeTab}
+        className="animate-[fadeIn_0.2s_ease-out]"
+      >
+        {renderTabContent()}
+      </div>
     </div>
   );
 }
