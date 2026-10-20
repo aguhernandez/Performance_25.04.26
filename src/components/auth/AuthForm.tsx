@@ -44,14 +44,14 @@ export function AuthForm({ onAuth }: AuthFormProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="relative">
-              <Activity className="w-7 h-7" style={{ color: '#514163' }} />
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
+              <Activity className="w-7 h-7" style={{ color: '#2A1F4A' }} />
+              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#F7C843' }} />
             </div>
-            <span className="font-heading text-2xl font-bold tracking-tight" style={{ color: '#514163' }}>ASC</span>
-            <span className="font-heading text-2xl font-bold tracking-tight" style={{ color: '#fdda36' }}>Impulse</span>
+            <span className="font-heading text-2xl font-bold tracking-tight" style={{ color: '#2A1F4A' }}>ASC</span>
+            <span className="font-heading text-2xl font-bold tracking-tight" style={{ color: '#F7C843' }}>Impulse</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 mb-2">
-            <Zap className="w-3.5 h-3.5" style={{ color: '#fdda36' }} />
+            <Zap className="w-3.5 h-3.5" style={{ color: '#F7C843' }} />
             <span className="font-body text-[11px] text-gray-500 uppercase tracking-widest">Performance Vector Engine</span>
           </div>
           <p className="font-body text-gray-600 text-[13px]">Impulse-response performance modeling</p>
@@ -65,7 +65,7 @@ export function AuthForm({ onAuth }: AuthFormProps) {
                 onClick={() => setMode(m)}
                 className={`flex-1 py-1.5 rounded-md font-body text-[12px] font-medium transition-all ${
                   mode === m
-                    ? 'bg-[#fdda36] text-[#514163]'
+                    ? 'bg-[#F7C843] text-[#2A1F4A]'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >

@@ -23,7 +23,7 @@ export function UnderConstructionModal() {
             onClick={() => setLang('en')}
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
               lang === 'en'
-                ? 'bg-[#fdda36] text-[#514163]'
+                ? 'bg-[#F7C843] text-[#2A1F4A]'
                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
           >
@@ -33,7 +33,7 @@ export function UnderConstructionModal() {
             onClick={() => setLang('es')}
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
               lang === 'es'
-                ? 'bg-[#fdda36] text-[#514163]'
+                ? 'bg-[#F7C843] text-[#2A1F4A]'
                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
           >
@@ -48,7 +48,7 @@ export function UnderConstructionModal() {
 
         {/* Title and Message */}
         <div className="text-center space-y-3">
-          <h1 className="font-heading font-black text-2xl" style={{ color: '#514163' }}>
+          <h1 className="font-heading font-black text-2xl" style={{ color: '#2A1F4A' }}>
             {t('underConstructionTitle')}
           </h1>
           <p className="font-body text-sm text-gray-600 leading-relaxed">
@@ -61,11 +61,11 @@ export function UnderConstructionModal() {
           onClick={() => setIsVisible(false)}
           className="w-full py-3 rounded-lg font-body font-semibold text-sm transition-all"
           style={{
-            backgroundColor: '#fdda36',
-            color: '#514163',
+            backgroundColor: '#F7C843',
+            color: '#2A1F4A',
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0cc2e')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fdda36')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F7C843')}
         >
           {t('underConstructionButton')}
         </button>

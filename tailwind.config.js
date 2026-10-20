@@ -5,8 +5,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#fdda36',
-        secondary: '#514163',
+        primary: '#F7C843',
+        secondary: '#2A1F4A',
+        brand: {
+          purple: '#2A1F4A',
+          yellow: '#F7C843',
+        },
       },
       fontFamily: {
         'heading': ['Krona One', 'sans-serif'],

@@ -186,8 +186,8 @@ export function SettingsView() {
     <div className="w-full max-w-3xl mx-auto">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#fdda36' }}>
-            <Settings className="w-4.5 h-4.5" style={{ color: '#514163' }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F7C843' }}>
+            <Settings className="w-4.5 h-4.5" style={{ color: '#2A1F4A' }} />
           </div>
           <h1 className="font-heading text-2xl font-bold text-gray-900">Configuracion</h1>
         </div>
@@ -362,7 +362,7 @@ export function SettingsView() {
                       value={tokenLabelInput}
                       onChange={e => setTokenLabelInput(e.target.value)}
                       placeholder="Performance Satellite"
-                      className="w-full px-3 py-2.5 rounded-lg border border-[#e5e7eb] font-body text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#fdda36] focus:border-transparent"
+                      className="w-full px-3 py-2.5 rounded-lg border border-[#e5e7eb] font-body text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
                     />
                   </div>
 
@@ -377,7 +377,7 @@ export function SettingsView() {
                         value={tokenInput}
                         onChange={e => { setTokenInput(e.target.value); setError(null); }}
                         placeholder="planner_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                        className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-[#e5e7eb] font-mono text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#fdda36] focus:border-transparent"
+                        className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-[#e5e7eb] font-mono text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -397,8 +397,8 @@ export function SettingsView() {
                   <button
                     onClick={handleSaveToken}
                     disabled={!tokenInput.trim() || saving}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-body font-semibold text-[#514163] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ backgroundColor: '#fdda36' }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-body font-semibold text-[#2A1F4A] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: '#F7C843' }}
                   >
                     {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     {saving ? 'Guardando...' : 'Guardar token'}
@@ -531,8 +531,8 @@ export function SettingsView() {
               <button
                 onClick={handleRecalculateHistory}
                 disabled={recalcState === 'running'}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-body font-semibold text-[#514163] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#fdda36' }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-body font-semibold text-[#2A1F4A] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#F7C843' }}
               >
                 {recalcState === 'running' ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 {recalcState === 'running' ? 'Recalculando...' : 'Recalcular historial'}

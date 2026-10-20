@@ -124,7 +124,7 @@ export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEm
         <Section title="Perfil del Atleta" icon={<Activity className="w-3.5 h-3.5" />}>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center font-heading font-bold text-[14px] text-white flex-shrink-0" style={{ backgroundColor: '#514163' }}>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center font-heading font-bold text-[14px] text-white flex-shrink-0" style={{ backgroundColor: '#2A1F4A' }}>
                 {snapshot.athleteProfile.athlete.full_name.charAt(0)}
               </div>
               <div>

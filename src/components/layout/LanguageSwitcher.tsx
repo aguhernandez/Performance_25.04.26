@@ -9,7 +9,7 @@ export function LanguageSwitcher() {
         onClick={() => setLang('es')}
         className={`px-2.5 py-1 rounded-md text-[11px] font-body font-semibold transition-colors ${
           lang === 'es'
-            ? 'bg-white text-[#514163] shadow-sm'
+            ? 'bg-white text-[#2A1F4A] shadow-sm'
             : 'text-gray-400 hover:text-gray-600'
         }`}
       >
@@ -19,7 +19,7 @@ export function LanguageSwitcher() {
         onClick={() => setLang('en')}
         className={`px-2.5 py-1 rounded-md text-[11px] font-body font-semibold transition-colors ${
           lang === 'en'
-            ? 'bg-white text-[#514163] shadow-sm'
+            ? 'bg-white text-[#2A1F4A] shadow-sm'
             : 'text-gray-400 hover:text-gray-600'
         }`}
       >

@@ -147,7 +147,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
           <div className="absolute right-0 top-full mt-1.5 z-20 w-[380px] bg-white border border-gray-200 rounded-[16px] shadow-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <p className="font-heading text-[13px]" style={{ color: '#514163' }}>Shareable API Links</p>
+                <p className="font-heading text-[13px]" style={{ color: '#2A1F4A' }}>Shareable API Links</p>
                 <p className="font-body text-[10px] text-gray-400 mt-0.5">Read-only JSON access for coaches & tools</p>
               </div>
               <button
@@ -162,7 +162,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
             {showNew && (
               <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-3">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="font-heading text-[11px] uppercase tracking-wider" style={{ color: '#514163' }}>New Share Link</p>
+                  <p className="font-heading text-[11px] uppercase tracking-wider" style={{ color: '#2A1F4A' }}>New Share Link</p>
                   <button onClick={() => setShowNew(false)} className="text-gray-300 hover:text-gray-500 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -203,7 +203,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                         <div
                           onClick={() => toggle(field)}
                           className="w-8 h-4 rounded-full transition-colors relative flex-shrink-0 cursor-pointer"
-                          style={{ backgroundColor: newLink[field] ? '#fdda36' : '#e5e7eb' }}
+                          style={{ backgroundColor: newLink[field] ? '#F7C843' : '#e5e7eb' }}
                         >
                           <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${newLink[field] ? 'translate-x-4' : 'translate-x-0.5'}`} />
                         </div>

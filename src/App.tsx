@@ -32,13 +32,13 @@ type View = 'dashboard' | 'sessions' | 'lab' | 'nutrition' | 'profile' | 'analyt
 
 function LoadingScreen({ message }: { message: string }) {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
-          <Activity className="w-10 h-10" style={{ color: '#514163' }} />
-          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
+          <Activity className="w-10 h-10" style={{ color: '#2A1F4A' }} />
+          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#F7C843' }} />
         </div>
-        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin" style={{ borderTopColor: '#fdda36' }} />
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin" style={{ borderTopColor: '#F7C843' }} />
         <p className="font-body text-[13px] text-gray-500">{message}</p>
       </div>
     </div>
@@ -172,7 +172,7 @@ function AppContent() {
   if (isCoachRole) {
     const role = profile?.role ?? 'coach';
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header athlete={null} onSignOut={logout} />
         <Sidebar activeView={activeView} onViewChange={setActiveView} role="coach" />
         <main className="pt-16 lg:pl-20 min-h-screen w-full">
@@ -211,7 +211,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header athlete={athlete} onSignOut={logout} />
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 

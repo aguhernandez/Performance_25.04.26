@@ -285,7 +285,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                 key={l}
                 onClick={() => setLang(l)}
                 className={`px-2.5 py-1 font-body text-[11px] uppercase tracking-wider transition-colors ${
-                  lang === l ? 'bg-[#fdda36] text-[#0a0a0f] font-semibold' : 'text-gray-400 hover:text-white'
+                  lang === l ? 'bg-[#F7C843] text-[#0a0a0f] font-semibold' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {l}
@@ -301,7 +301,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
           <button
             onClick={openLogin}
             className="flex items-center gap-1.5 font-body text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-all hover:opacity-90 active:scale-95"
-            style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
+            style={{ backgroundColor: '#F7C843', color: '#0a0a0f' }}
           >
             {t('landingLogin')}
             <ArrowRight className="w-3 h-3" />
@@ -313,18 +313,18 @@ export function LandingPage({ onLogin }: LandingPageProps) {
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
         <VectorField />
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle, rgba(253,218,54,0.04) 0%, transparent 70%)' }} />
+          <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle, rgba(247,200,67,0.04) 0%, transparent 70%)' }} />
           <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[100px]" style={{ background: 'radial-gradient(circle, rgba(81,65,99,0.08) 0%, transparent 70%)' }} />
         </div>
         <div className={`relative z-10 max-w-4xl transition-all duration-1000 ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 font-body text-[11px] tracking-widest uppercase"
-            style={{ borderColor: 'rgba(253,218,54,0.2)', color: '#fdda36', background: 'rgba(253,218,54,0.05)' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
+            style={{ borderColor: 'rgba(247,200,67,0.2)', color: '#F7C843', background: 'rgba(247,200,67,0.05)' }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#F7C843' }} />
             Performance Intelligence · Mathematical Modeling
           </div>
           <h1 className="font-heading font-black leading-[1.0] mb-6" style={{ fontSize: 'clamp(3.5rem, 9vw, 8rem)' }}>
             <span className="block text-white">{t('landingHero1')}</span>
-            <span className="block" style={{ color: '#fdda36' }}>{t('landingHero2')}</span>
+            <span className="block" style={{ color: '#F7C843' }}>{t('landingHero2')}</span>
             <span className="block text-white/50" style={{ fontSize: 'clamp(1.4rem, 3.5vw, 3rem)' }}>{t('landingHero3')}</span>
           </h1>
           <p className="font-body text-[15px] text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
@@ -334,7 +334,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
             <button
               onClick={() => scrollToSection('explore')}
               className="flex items-center gap-2 font-body font-semibold text-[13px] px-7 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
+              style={{ backgroundColor: '#F7C843', color: '#0a0a0f' }}
             >
               {t('landingExplore')}
               <ChevronRight className="w-4 h-4" />
@@ -361,7 +361,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border mb-4 font-body text-[10px] tracking-widest uppercase"
-              style={{ borderColor: 'rgba(253,218,54,0.15)', color: 'rgba(253,218,54,0.7)', background: 'rgba(253,218,54,0.04)' }}>
+              style={{ borderColor: 'rgba(247,200,67,0.15)', color: 'rgba(247,200,67,0.7)', background: 'rgba(247,200,67,0.04)' }}>
               Analytical Cards
             </div>
             <h2 className="font-heading font-bold text-white mb-3" style={{ fontSize: 'clamp(1.6rem, 3vw, 2.5rem)' }}>{t('landingPreviewTitle')}</h2>
@@ -432,7 +432,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border mb-6 font-body text-[10px] tracking-widest uppercase"
-                style={{ borderColor: 'rgba(253,218,54,0.15)', color: 'rgba(253,218,54,0.6)', background: 'rgba(253,218,54,0.04)' }}>
+                style={{ borderColor: 'rgba(247,200,67,0.15)', color: 'rgba(247,200,67,0.6)', background: 'rgba(247,200,67,0.04)' }}>
                 Workflow
               </div>
               <h2 className="font-heading font-bold text-white mb-4" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>{t('landingWorkflowTitle')}</h2>
@@ -440,7 +440,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
               <button
                 onClick={openLogin}
                 className="inline-flex items-center gap-2 font-body font-semibold text-[13px] px-6 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
+                style={{ backgroundColor: '#F7C843', color: '#0a0a0f' }}
               >
                 {t('landingLogin')}
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -455,8 +455,8 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                     className="rounded-xl p-5 border"
                     style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
                   >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(253,218,54,0.08)' }}>
-                      <Icon className="w-4 h-4" style={{ color: '#fdda36' }} />
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'rgba(247,200,67,0.08)' }}>
+                      <Icon className="w-4 h-4" style={{ color: '#F7C843' }} />
                     </div>
                     <h3 className="font-heading font-bold text-white text-[13px] mb-1.5">{t(wf.titleKey)}</h3>
                     <p className="font-body text-gray-500 text-[12px] leading-relaxed">{t(wf.descKey)}</p>
@@ -484,9 +484,9 @@ export function LandingPage({ onLogin }: LandingPageProps) {
           <div className="relative flex items-center justify-center" style={{ height: '380px' }}>
             {/* Center node */}
             <div className="absolute z-10 flex flex-col items-center justify-center w-28 h-28 rounded-full border-2 text-center"
-              style={{ background: 'linear-gradient(135deg, rgba(253,218,54,0.15), rgba(253,218,54,0.05))', borderColor: 'rgba(253,218,54,0.4)' }}>
-              <Zap className="w-6 h-6 mb-1" style={{ color: '#fdda36' }} />
-              <span className="font-heading font-black text-[13px]" style={{ color: '#fdda36' }}>{t('landingEcoCentral')}</span>
+              style={{ background: 'linear-gradient(135deg, rgba(247,200,67,0.15), rgba(247,200,67,0.05))', borderColor: 'rgba(247,200,67,0.4)' }}>
+              <Zap className="w-6 h-6 mb-1" style={{ color: '#F7C843' }} />
+              <span className="font-heading font-black text-[13px]" style={{ color: '#F7C843' }}>{t('landingEcoCentral')}</span>
               <span className="font-body text-[9px] text-gray-500 leading-tight mt-0.5">{t('landingEcoCentralDesc')}</span>
             </div>
 
@@ -509,7 +509,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                       y1="50%"
                       x2={`calc(50% + ${x}px)`}
                       y2={`calc(50% + ${y}px)`}
-                      stroke="rgba(253,218,54,0.12)"
+                      stroke="rgba(247,200,67,0.12)"
                       strokeWidth="1"
                       strokeDasharray="4 4"
                     />
@@ -541,12 +541,12 @@ export function LandingPage({ onLogin }: LandingPageProps) {
       <section className="py-28 px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full blur-[120px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(253,218,54,0.04) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(ellipse, rgba(247,200,67,0.04) 0%, transparent 70%)' }} />
         </div>
         <div className="relative z-10 max-w-2xl mx-auto">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-8 border"
-            style={{ background: 'rgba(253,218,54,0.08)', borderColor: 'rgba(253,218,54,0.2)' }}>
-            <Zap className="w-7 h-7" style={{ color: '#fdda36' }} />
+            style={{ background: 'rgba(247,200,67,0.08)', borderColor: 'rgba(247,200,67,0.2)' }}>
+            <Zap className="w-7 h-7" style={{ color: '#F7C843' }} />
           </div>
           <h2 className="font-heading font-black text-white mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)' }}>
             {t('landingHero2')}
@@ -557,7 +557,7 @@ export function LandingPage({ onLogin }: LandingPageProps) {
           <button
             onClick={openLogin}
             className="inline-flex items-center gap-2 font-body font-bold text-[14px] px-10 py-4 rounded-xl transition-all hover:opacity-90 active:scale-95 shadow-lg"
-            style={{ backgroundColor: '#fdda36', color: '#0a0a0f', boxShadow: '0 0 40px rgba(253,218,54,0.2)' }}
+            style={{ backgroundColor: '#F7C843', color: '#0a0a0f', boxShadow: '0 0 40px rgba(247,200,67,0.2)' }}
           >
             {t('landingLogin')}
             <ArrowRight className="w-4 h-4" />

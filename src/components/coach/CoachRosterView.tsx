@@ -134,7 +134,7 @@ export function CoachRosterView({
 
       {loading ? (
         <div className="py-20 text-center">
-          <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin mx-auto mb-3" style={{ borderTopColor: '#fdda36' }} />
+          <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin mx-auto mb-3" style={{ borderTopColor: '#F7C843' }} />
           <p className="font-body text-sm text-gray-500">Loading roster…</p>
         </div>
       ) : error ? (

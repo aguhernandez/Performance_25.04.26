@@ -92,7 +92,7 @@ export function ExportPanel({ engine, athlete, sessions, nutritionLogs }: Export
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1.5 z-20 w-72 bg-white border border-gray-200 rounded-[16px] shadow-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100">
-              <p className="font-heading text-[13px]" style={{ color: '#514163' }}>Export Data</p>
+              <p className="font-heading text-[13px]" style={{ color: '#2A1F4A' }}>Export Data</p>
             </div>
 
             <div className="p-2">

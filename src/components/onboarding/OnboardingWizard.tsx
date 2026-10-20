@@ -165,9 +165,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <Activity className="w-6 h-6" style={{ color: '#514163' }} />
-            <span className="font-heading text-xl font-bold" style={{ color: '#514163' }}>ASC</span>
-            <span className="font-heading text-xl font-bold" style={{ color: '#fdda36' }}>Impulse</span>
+            <Activity className="w-6 h-6" style={{ color: '#2A1F4A' }} />
+            <span className="font-heading text-xl font-bold" style={{ color: '#2A1F4A' }}>ASC</span>
+            <span className="font-heading text-xl font-bold" style={{ color: '#F7C843' }}>Impulse</span>
           </div>
           <h1 className="font-heading text-2xl font-bold text-gray-900 mb-1">Welcome to your performance engine</h1>
           <p className="font-body text-[13px] text-gray-500">Complete your athlete profile in 4 quick steps</p>
@@ -183,13 +183,13 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
                     done ? 'border-green-500 bg-green-50' :
-                    active ? 'border-[#fdda36] bg-[#fdda36]/10' :
+                    active ? 'border-[#F7C843] bg-[#F7C843]/10' :
                     'border-gray-200 bg-white'
                   }`}
                 >
-                  {done ? <Check className="w-4 h-4 text-green-500" /> : <Icon className={`w-4 h-4 ${active ? 'text-[#514163]' : 'text-gray-400'}`} />}
+                  {done ? <Check className="w-4 h-4 text-green-500" /> : <Icon className={`w-4 h-4 ${active ? 'text-[#2A1F4A]' : 'text-gray-400'}`} />}
                 </div>
-                <span className={`font-body text-[10px] ${active ? 'text-[#514163] font-semibold' : 'text-gray-400'}`}>{s.label}</span>
+                <span className={`font-body text-[10px] ${active ? 'text-[#2A1F4A] font-semibold' : 'text-gray-400'}`}>{s.label}</span>
                 {i < STEPS.length - 1 && (
                   <div className={`absolute w-px h-0 hidden`} />
                 )}
@@ -213,7 +213,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Athlete name"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#fdda36] focus:ring-2 focus:ring-[#fdda36]/20"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843] focus:ring-2 focus:ring-[#F7C843]/20"
                 />
               </div>
 
@@ -227,7 +227,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       onClick={() => setSport(s.value)}
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all ${
                         sport === s.value
-                          ? 'border-[#fdda36] bg-[#fdda36]/10 text-[#514163] font-semibold'
+                          ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
@@ -248,7 +248,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     min="30"
                     max="200"
                     step="0.1"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#fdda36]"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843]"
                   />
                 </div>
                 <div>
@@ -256,7 +256,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   <select
                     value={experienceYears}
                     onChange={e => setExperienceYears(parseInt(e.target.value))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#fdda36]"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843]"
                   >
                     {EXPERIENCE_OPTIONS.map(o => (
                       <option key={o.value} value={o.value}>{o.label}</option>
@@ -310,7 +310,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       placeholder={est}
                       step={s}
                       disabled={!hasLabData}
-                      className={`w-full border rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:border-[#fdda36] ${
+                      className={`w-full border rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:border-[#F7C843] ${
                         hasLabData ? 'border-gray-200 text-gray-900' : 'border-gray-100 text-gray-400 bg-gray-50 cursor-not-allowed'
                       }`}
                     />
@@ -338,11 +338,11 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       onClick={() => setPrimaryGoal(g.value)}
                       className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl border text-left transition-all ${
                         primaryGoal === g.value
-                          ? 'border-[#fdda36] bg-[#fdda36]/10 text-[#514163] font-semibold'
+                          ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
-                      {primaryGoal === g.value && <Check className="w-3.5 h-3.5 text-[#514163] flex-shrink-0" />}
+                      {primaryGoal === g.value && <Check className="w-3.5 h-3.5 text-[#2A1F4A] flex-shrink-0" />}
                       <span className="font-body text-[13px]">{g.label}</span>
                     </button>
                   ))}
@@ -359,7 +359,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       onClick={() => setGoalTimelineWeeks(t.value)}
                       className={`px-3 py-2 rounded-xl border text-center transition-all ${
                         goalTimelineWeeks === t.value
-                          ? 'border-[#fdda36] bg-[#fdda36]/10 text-[#514163] font-semibold'
+                          ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'
                       }`}
                     >
@@ -459,7 +459,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               onClick={isLast ? handleComplete : handleNext}
               disabled={!canProceed() || loading}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-body font-semibold text-[13px] transition-all disabled:opacity-50"
-              style={{ backgroundColor: '#fdda36', color: '#514163' }}
+              style={{ backgroundColor: '#F7C843', color: '#2A1F4A' }}
             >
               {loading ? 'Creating profile...' : isLast ? 'Launch my engine' : (
                 <>
@@ -476,7 +476,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             <div
               key={s.id}
               className={`h-1.5 rounded-full transition-all ${
-                i === stepIndex ? 'w-6 bg-[#514163]' : i < stepIndex ? 'w-3 bg-[#fdda36]' : 'w-3 bg-gray-200'
+                i === stepIndex ? 'w-6 bg-[#2A1F4A]' : i < stepIndex ? 'w-3 bg-[#F7C843]' : 'w-3 bg-gray-200'
               }`}
             />
           ))}

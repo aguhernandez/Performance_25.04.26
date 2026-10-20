@@ -58,7 +58,7 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
       </div>
 
       <div className="bg-[#0d1117] rounded-2xl p-6 flex items-center gap-6">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: '#fdda36', color: '#514163' }}>
+        <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: '#F7C843', color: '#2A1F4A' }}>
           {athleteData.athlete.name.charAt(0).toUpperCase()}
         </div>
         <div>
@@ -115,7 +115,7 @@ function AthleteDetail({ athleteData, onBack }: AthleteDetailProps) {
                 onClick={() => setActiveView(tab.view)}
                 className={`px-4 py-2 text-sm font-body font-medium transition-colors border-b-2 -mb-px ${
                   activeView === tab.view
-                    ? 'border-[#514163] text-[#514163]'
+                    ? 'border-[#2A1F4A] text-[#2A1F4A]'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -203,17 +203,17 @@ function AthleteCard({ athleteData, onClick }: AthleteCardProps) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#514163] hover:shadow-md transition-all group"
+      className="w-full text-left bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#2A1F4A] hover:shadow-md transition-all group"
     >
       <div className="flex items-start gap-4">
-        <div className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0" style={{ backgroundColor: '#fdda36', color: '#514163' }}>
+        <div className="w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0" style={{ backgroundColor: '#F7C843', color: '#2A1F4A' }}>
           {athlete.name.charAt(0).toUpperCase()}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h3 className="font-body font-semibold text-gray-900 text-sm truncate">{athlete.name}</h3>
-            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#514163] transition-colors shrink-0 ml-2" />
+            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#2A1F4A] transition-colors shrink-0 ml-2" />
           </div>
           <p className="font-body text-xs text-gray-400 capitalize mt-0.5">
             {athlete.sport}
@@ -338,7 +338,7 @@ export function CoachView({ coachId }: CoachViewProps) {
       {/* Athletes list */}
       {loading ? (
         <div className="py-20 text-center">
-          <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin mx-auto mb-3" style={{ borderTopColor: '#fdda36' }} />
+          <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin mx-auto mb-3" style={{ borderTopColor: '#F7C843' }} />
           <p className="font-body text-sm text-gray-500">{t('loadingAthletes')}</p>
         </div>
       ) : error ? (

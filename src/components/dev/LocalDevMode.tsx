@@ -88,20 +88,20 @@ export default function LocalDevMode({ onProfileSelected }: LocalDevModeProps) {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: '#fdda36' }} />
-        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ backgroundColor: '#fdda36' }} />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ backgroundColor: '#514163' }} />
+        <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: '#F7C843' }} />
+        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ backgroundColor: '#F7C843' }} />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ backgroundColor: '#2A1F4A' }} />
       </div>
 
       <div className="w-full max-w-xl relative">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2.5 mb-5">
             <div className="relative">
-              <Activity className="w-7 h-7" style={{ color: '#514163' }} />
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#fdda36' }} />
+              <Activity className="w-7 h-7" style={{ color: '#2A1F4A' }} />
+              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#F7C843' }} />
             </div>
-            <span className="font-heading text-2xl font-bold" style={{ color: '#514163' }}>ASC</span>
-            <span className="font-heading text-2xl font-bold" style={{ color: '#fdda36' }}>Impulse</span>
+            <span className="font-heading text-2xl font-bold" style={{ color: '#2A1F4A' }}>ASC</span>
+            <span className="font-heading text-2xl font-bold" style={{ color: '#F7C843' }}>Impulse</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold mb-4 border" style={{ backgroundColor: '#fffbeb', color: '#92400e', borderColor: '#fcd34d' }}>
@@ -134,7 +134,7 @@ export default function LocalDevMode({ onProfileSelected }: LocalDevModeProps) {
             >
               <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors ${bg} ${hoverBg}`}>
                 {loading === key ? (
-                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full animate-spin" style={{ borderTopColor: '#514163' }} />
+                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full animate-spin" style={{ borderTopColor: '#2A1F4A' }} />
                 ) : (
                   <Icon className={`w-6 h-6 ${color}`} />
                 )}

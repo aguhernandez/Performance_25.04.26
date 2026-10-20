@@ -70,12 +70,12 @@ export function LoginModal({ onClose }: LoginModalProps) {
           background: 'linear-gradient(145deg, #0f0f18 0%, #0a0a0f 100%)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: '20px',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(253,218,54,0.06)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(247,200,67,0.06)',
         }}
       >
         {/* Glow accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
-          style={{ background: 'linear-gradient(to right, transparent, rgba(253,218,54,0.4), transparent)' }} />
+          style={{ background: 'linear-gradient(to right, transparent, rgba(247,200,67,0.4), transparent)' }} />
 
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-0">
@@ -135,9 +135,9 @@ export function LoginModal({ onClose }: LoginModalProps) {
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 // @ts-ignore
-                '--tw-ring-color': 'rgba(253,218,54,0.3)',
+                '--tw-ring-color': 'rgba(247,200,67,0.3)',
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(253,218,54,0.3)'; }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(247,200,67,0.3)'; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
             />
           </div>
@@ -160,7 +160,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.08)',
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(253,218,54,0.3)'; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(247,200,67,0.3)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
               />
               <button
@@ -187,7 +187,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
             type="submit"
             disabled={submitting || !email.trim() || !password}
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-body font-bold text-[13px] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-            style={{ backgroundColor: '#fdda36', color: '#0a0a0f' }}
+            style={{ backgroundColor: '#F7C843', color: '#0a0a0f' }}
           >
             {submitting ? (
               <>
@@ -210,7 +210,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-0.5 transition-colors hover:opacity-80"
-              style={{ color: '#fdda36' }}
+              style={{ color: '#F7C843' }}
             >
               {t('loginRegister')}
               <ExternalLink className="w-2.5 h-2.5" />

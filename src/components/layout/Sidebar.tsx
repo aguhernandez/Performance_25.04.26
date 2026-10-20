@@ -42,7 +42,8 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
     <>
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-sm"
+        aria-label="Abrir navegación"
+        className="lg:hidden fixed top-3 left-3 z-50 w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
       >
         <Menu className="w-4 h-4 text-gray-600" />
       </button>
@@ -50,8 +51,8 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-64 bg-white flex flex-col h-full shadow-xl">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+          <div className="relative w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex flex-col h-full shadow-xl pt-[env(safe-area-inset-top)]">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 dark:border-gray-800">
               <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-7 w-auto" />
               <button onClick={() => setMobileOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-4 h-4" />
@@ -65,7 +66,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
                     key={view}
                     onClick={() => handleNav(view)}
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150 ${
-                      active ? 'bg-[#fdda36] text-[#514163] font-body font-bold' : 'text-[#4b5563] hover:bg-gray-100 font-body font-medium'
+                      active ? 'bg-[#F7C843] text-[#2A1F4A] font-body font-bold' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-body font-medium'
                     }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
@@ -78,9 +79,9 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
         </div>
       )}
 
-      <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-white border-r border-[#e5e7eb] flex-col transition-all duration-300 ease-in-out group z-40">
+      <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-20 hover:w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 flex-col transition-all duration-300 ease-in-out group z-40">
         {/* Logo strip */}
-        <div className="flex items-center justify-center h-12 border-b border-[#e5e7eb] overflow-hidden px-3 shrink-0">
+        <div className="flex items-center justify-center h-12 border-b border-gray-200 dark:border-gray-700 overflow-hidden px-3 shrink-0">
           <img src="/Asciendefavicon.png" alt="Asciende" className="h-7 w-7 object-contain group-hover:hidden" />
           <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="hidden group-hover:block h-7 w-auto object-contain" />
         </div>
@@ -93,8 +94,8 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
                 onClick={() => onViewChange(view)}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150 ${
                   active
-                    ? 'bg-[#fdda36] text-[#514163] font-body font-bold'
-                    : 'text-[#4b5563] hover:bg-gray-100 font-body font-medium'
+                    ? 'bg-[#F7C843] text-[#2A1F4A] font-body font-bold'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-body font-medium'
                 }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -102,7 +103,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
                   {label}
                 </span>
                 {active && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: '#514163' }} />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: '#2A1F4A' }} />
                 )}
               </button>
             );
@@ -111,7 +112,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete' }: SidebarP
 
         {role !== 'coach' && (
           <div className="px-3 pb-4">
-            <div className="rounded-xl bg-gray-50 border border-[#e5e7eb] p-3">
+            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
               <p className="font-body text-[9px] text-gray-400 uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Model</p>
               <p className="font-body text-[11px] text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{t('impulseResponse')}</p>
               <div className="mt-2 space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
