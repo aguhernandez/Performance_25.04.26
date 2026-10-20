@@ -15,9 +15,11 @@ const SESSION_TOKEN_KEY = 'hub_session_token';
 
 /**
  * Reads coach-athlete assignments from the Hub (source of truth) and syncs
- * them into the local Supabase tables:
- *   - `coach_athletes` (coach_id ↔ athlete_id links)
- *   - `athletes.coach_id` (denormalized coach reference on the athlete row)
+ * them into the local Supabase table:
+ *   - `athletes.coach_id` (Hub coach reference on the athlete row)
+ *
+ * Hub user IDs are not Supabase auth user IDs, so the Hub sync intentionally
+ * does not write `coach_athletes`, whose coach_id foreign key targets auth.users.
  *
  * Token resolution order:
  *   1. The coach's own `hub_planner_token` (if active)
@@ -148,18 +150,6 @@ export function useCoachHubSync(
             console.warn(`[CoachHubSync] Could not create athlete for ${hubA.email}:`, createErr);
             continue;
           }
-        }
-
-        // Upsert coach_athletes link (coach_id as UUID)
-        const { error: linkErr } = await supabase
-          .from('coach_athletes')
-          .upsert(
-            { coach_id: coachHubId, athlete_id: athleteId },
-            { onConflict: 'coach_id,athlete_id' }
-          );
-
-        if (linkErr) {
-          console.warn(`[CoachHubSync] Could not link athlete ${athleteId}:`, linkErr);
         }
 
         count++;

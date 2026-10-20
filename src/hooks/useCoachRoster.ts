@@ -18,8 +18,8 @@ export interface RosterState {
  *
  * On load, also triggers a Hub sync (via useCoachHubSync) that pulls
  * coach-athlete assignments from the Hub using the JWT / X-Planner-Token
- * and upserts them into the local `coach_athletes` table. The roster
- * is refetched after a successful sync so newly-discovered athletes appear.
+ * and stores the Hub coach reference on each local athlete. The roster is
+ * refetched after a successful sync so newly-discovered athletes appear.
  */
 export function useCoachRoster(
   coachHubId?: string | null,

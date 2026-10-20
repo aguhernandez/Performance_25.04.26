@@ -93,6 +93,56 @@ const PDC_WINDOWS = [
   { key: 'all', label: 'All time', days: 9999 },
 ];
 
+const DURABILITY_WINDOWS = [
+  { key: '42d', label: 'Last 42 days', days: 42 },
+  { key: '90d', label: 'Last 90 days', days: 90 },
+  { key: 'all', label: 'All time', days: 9999 },
+];
+
+function buildDurabilityWindows(rows: ActivityDurabilityRow[], today: string): DurabilityWindow[] {
+  return DURABILITY_WINDOWS.map(window => {
+    const cutoff = window.days >= 9999 ? null : addDays(today, -window.days);
+    const groups = new Map<number, DurabilityGroup>();
+
+    for (const row of rows) {
+      if (cutoff && row.date < cutoff) continue;
+      if (![0, 1000, 2000].includes(Number(row.kj_threshold))) continue;
+      if (row.duration_s !== 300 && row.duration_s !== 1200) continue;
+
+      const threshold = Number(row.kj_threshold);
+      const existing = groups.get(threshold) ?? {
+        kjThreshold: threshold,
+        cells: {
+          duration300: { watts: null, date: null, activityId: null },
+          duration1200: { watts: null, date: null, activityId: null },
+        },
+      };
+      const key: 'duration300' | 'duration1200' = row.duration_s === 300 ? 'duration300' : 'duration1200';
+      const current = existing.cells[key];
+      if (current.watts === null || Number(row.watts) > current.watts) {
+        existing.cells[key] = {
+          watts: Number(row.watts),
+          date: row.date,
+          activityId: row.activity_id,
+        };
+      }
+      groups.set(threshold, existing);
+    }
+
+    return {
+      key: window.key,
+      label: window.label,
+      groups: [0, 1000, 2000].map(kjThreshold => groups.get(kjThreshold) ?? {
+        kjThreshold,
+        cells: {
+          duration300: { watts: null, date: null, activityId: null },
+          duration1200: { watts: null, date: null, activityId: null },
+        },
+      }),
+    };
+  });
+}
+
 function aggregateQuality(qualities: string[]): 'measured' | 'modelled' | 'estimated' {
   if (qualities.includes('measured')) return 'measured';
   if (qualities.includes('modelled')) return 'modelled';
@@ -335,6 +385,7 @@ export function usePerformanceData(athlete: Athlete | null): PerformanceData {
       });
 
     const curWeekStart = weekStartISO(today);
+    const durabilityWindows = buildDurabilityWindows(durability, today);
 
     return {
       pmcDays,
@@ -347,7 +398,7 @@ export function usePerformanceData(athlete: Athlete | null): PerformanceData {
       weeklyLoad,
       currentWeekStart: curWeekStart,
       efficiency,
-      durability,
+      durability: durabilityWindows,
       efMovingAvg: movingAvg(efByWeek),
       decouplingMovingAvg: movingAvg(decByWeek),
       loading,
