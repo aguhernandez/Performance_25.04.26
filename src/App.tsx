@@ -189,6 +189,8 @@ function AppContent() {
                 role={role}
                 onOpenAthlete={setRosterAthlete}
                 athleteNames={{}}
+                coachHubId={profile?.hub_user_id}
+                coachEmail={profile?.email}
               />
             )}
           </div>

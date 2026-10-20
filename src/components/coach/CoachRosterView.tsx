@@ -30,12 +30,16 @@ export function CoachRosterView({
   role,
   onOpenAthlete,
   athleteNames,
+  coachHubId,
+  coachEmail,
 }: {
   role: string;
   onOpenAthlete: (row: RosterRow) => void;
   athleteNames: Record<string, string>;
+  coachHubId?: string | null;
+  coachEmail?: string | null;
 }) {
-  const { rows, loading, error, refetch } = useCoachRoster();
+  const { rows, loading, error, refetch, hubSyncStatus, hubSyncedCount, hubSyncError } = useCoachRoster(coachHubId, coachEmail);
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDir, setSortDir] = useState<Dir>('asc');
@@ -99,13 +103,36 @@ export function CoachRosterView({
             {rows.length} athletes · alerts, not medical diagnoses
           </p>
         </div>
-        <button
-          onClick={refetch}
-          className="flex items-center gap-2 px-3 py-2 text-xs font-body text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          {hubSyncStatus === 'syncing' && (
+            <span className="flex items-center gap-1.5 text-[11px] font-body text-gray-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              Syncing from Hub…
+            </span>
+          )}
+          {hubSyncStatus === 'synced' && hubSyncedCount > 0 && (
+            <span className="text-[11px] font-body text-gray-400">
+              Hub: {hubSyncedCount} athletes synced
+            </span>
+          )}
+          {hubSyncStatus === 'failed' && (
+            <span className="text-[11px] font-body text-amber-600" title={hubSyncError ?? undefined}>
+              Hub sync failed
+            </span>
+          )}
+          {hubSyncStatus === 'no_token' && (
+            <span className="text-[11px] font-body text-gray-400">
+              No Hub token
+            </span>
+          )}
+          <button
+            onClick={refetch}
+            className="flex items-center gap-2 px-3 py-2 text-xs font-body text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
