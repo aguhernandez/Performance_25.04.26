@@ -40,12 +40,12 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
   const { t } = useLanguage();
 
   const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'overview', label: t('overview'), icon: <Activity className="w-3.5 h-3.5" /> },
-    { id: 'compartments', label: t('compartments'), icon: <Layers className="w-3.5 h-3.5" /> },
-    { id: 'load', label: t('load'), icon: <BarChart3 className="w-3.5 h-3.5" /> },
-    { id: 'analytics', label: t('nutritionSports'), icon: <Utensils className="w-3.5 h-3.5" /> },
-    { id: 'alerts', label: t('alerts'), icon: <Bell className="w-3.5 h-3.5" /> },
-    { id: 'hub', label: 'Hub', icon: <Link2 className="w-3.5 h-3.5" /> },
+    { id: 'overview', label: t('overview'), icon: <Activity className="w-4 h-4" /> },
+    { id: 'compartments', label: t('compartments'), icon: <Layers className="w-4 h-4" /> },
+    { id: 'load', label: t('load'), icon: <BarChart3 className="w-4 h-4" /> },
+    { id: 'analytics', label: t('nutritionSports'), icon: <Utensils className="w-4 h-4" /> },
+    { id: 'alerts', label: t('alerts'), icon: <Bell className="w-4 h-4" /> },
+    { id: 'hub', label: 'Hub', icon: <Link2 className="w-4 h-4" /> },
   ];
 
   if (!engine) {
@@ -63,6 +63,12 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
   const totalLoad = recentSessions.reduce((sum, s) => sum + s.impulse, 0);
   const avgImpulse = recentSessions.length > 0 ? totalLoad / recentSessions.length : 0;
   const alertCount = warnings.length + recommendations.filter(r => r.priority === 'high').length;
+
+  const handleTabClick = (e: React.MouseEvent, tabId: Tab) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveTab(tabId);
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -158,7 +164,7 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
 
       case 'analytics':
         return (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <NutritionCompliancePanel
               logs={nutritionLogs}
               compliance={analyzeNutritionCompliance(nutritionLogs, athlete.weight_kg ?? 75, athlete.lean_mass_kg ?? (athlete.weight_kg ?? 75) * 0.85)}
@@ -192,6 +198,8 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         );
     }
   };
+
+  const activeTabLabel = TABS.find(tab => tab.id === activeTab)?.label ?? '';
 
   return (
     <div className="space-y-4">
@@ -228,32 +236,36 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-1 overflow-x-auto">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              aria-pressed={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-[#F7C843] text-[#2A1F4A] shadow-sm scale-[1.02]'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-gray-700/50'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              {tab.id === 'alerts' && alertCount > 0 && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'alerts' ? 'bg-[#2A1F4A]/10 text-[#2A1F4A] dark:bg-[#F7C843]/15 dark:text-[#F7C843]' : 'bg-red-500/20 text-red-500 dark:text-red-400'}`}>
-                  {alertCount}
-                </span>
-              )}
-              {tab.id === 'hub' && hubConnected && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[#2A1F4A] dark:bg-[#B8A9E5] flex-shrink-0" />
-              )}
-            </button>
-          ))}
+      {/* Tab bar + Share/Export */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2 relative z-20">
+          {TABS.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                aria-pressed={isActive}
+                onClick={(e) => handleTabClick(e, tab.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold border-2 transition-all duration-150 ${
+                  isActive
+                    ? 'bg-[#F7C843] text-[#2A1F4A] border-[#F7C843] shadow-md'
+                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-[#F7C843]/50 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+                {tab.id === 'alerts' && alertCount > 0 && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-[#2A1F4A]/15 text-[#2A1F4A]' : 'bg-red-500/20 text-red-500 dark:text-red-400'}`}>
+                    {alertCount}
+                  </span>
+                )}
+                {tab.id === 'hub' && hubConnected && (
+                  <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                )}
+              </button>
+            );
+          })}
         </div>
         <div className="flex items-center gap-2 relative z-30">
           <SharePanel athleteId={athlete.id} userId={userId} />
@@ -266,10 +278,14 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         </div>
       </div>
 
-      <div
-        key={activeTab}
-        className="animate-[fadeIn_0.2s_ease-out]"
-      >
+      {/* Active tab indicator */}
+      <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500 font-body uppercase tracking-wider">
+        <span className="w-1 h-1 rounded-full bg-[#F7C843]" />
+        Viewing: {activeTabLabel}
+      </div>
+
+      {/* Tab content */}
+      <div>
         {renderTabContent()}
       </div>
     </div>
