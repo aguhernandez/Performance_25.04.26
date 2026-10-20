@@ -17,7 +17,8 @@ const WARNING_CONFIG: Record<string, { icon: typeof AlertTriangle; border: strin
   stagnation: { icon: MinusCircle, border: 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30', bg: 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10', iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]' },
   nutrition_deficit: { icon: Apple, border: 'border-red-500/30', bg: 'bg-red-500/5', iconColor: 'text-red-400' },
   nutrition_excess: { icon: Apple, border: 'border-[#F7C843]/40', bg: 'bg-[#F7C843]/10', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
-  hrv_suppression: { icon: Zap, border: 'border-orange-500/30', bg: 'bg-orange-500/5', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
+  hrv_suppression: { icon: Zap, border: 'border-[#F7C843]/40 dark:border-[#F7C843]/30', bg: 'bg-[#F7C843]/20 dark:bg-[#F7C843]/10', iconColor: 'text-[#8A6900] dark:text-[#F7C843]' },
+
   compartment_imbalance: { icon: MinusCircle, border: 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30', bg: 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10', iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]' },
 };
 
@@ -31,7 +32,7 @@ const REC_ICON: Record<string, typeof Target> = {
 
 const REC_COLOR: Record<string, string> = {
   high: '#ef4444',
-  medium: '#f59e0b',
+  medium: '#8A6900',
   low: '#64748b',
 };
 
@@ -78,15 +79,15 @@ export function AlertsRecommendationsPanel({ warnings, recommendations }: Alerts
       {tab === 'warnings' && (
         <div className="space-y-2">
           {warnings.length === 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
-              <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
-              <p className="text-[12px] text-green-400">No active warnings. Physiological parameters within normal range.</p>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30">
+              <CheckCircle2 className="w-4 h-4 text-[#2A1F4A] dark:text-[#B8A9E5] flex-shrink-0" />
+              <p className="text-[12px] text-[#2A1F4A] dark:text-[#B8A9E5]">No active warnings. Physiological parameters within normal range.</p>
             </div>
           )}
           {warnings.map((w, i) => {
             const cfg = WARNING_CONFIG[w.type] ?? WARNING_CONFIG.stagnation;
             const Icon = cfg.icon;
-            const sevColor = w.severity === 'high' ? '#ef4444' : w.severity === 'medium' ? '#f59e0b' : '#64748b';
+            const sevColor = w.severity === 'high' ? '#ef4444' : w.severity === 'medium' ? '#8A6900' : '#64748b';
             return (
               <div key={i} className={`flex items-start gap-3 p-3 rounded-lg border ${cfg.border} ${cfg.bg}`}>
                 <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${cfg.iconColor}`} />

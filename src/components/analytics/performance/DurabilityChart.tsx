@@ -28,17 +28,17 @@ function CellBar({ cell, pct, color }: {
         style={{
           height: has ? `${Math.max(4, pct ?? 60)}%` : '4px',
           minHeight: 4,
-          backgroundColor: has ? color : '#f1f5f9',
+          backgroundColor: has ? color : 'var(--chart-grid)',
           opacity: hover ? 0.85 : 1,
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       />
-      <p className="font-mono text-[10px] mt-1" style={{ color: has ? '#334155' : '#94a3b8' }}>
+      <p className="font-mono text-[10px] mt-1" style={{ color: has ? 'var(--chart-label)' : '#94a3b8' }}>
         {has ? `${Math.round(cell.watts!)} W` : 'No data'}
       </p>
       {has && pct !== null && (
-        <p className="text-[9px]" style={{ color: pct >= 0 ? '#16a34a' : '#dc2626' }}>
+        <p className="text-[9px]" style={{ color: pct >= 0 ? '#2A1F4A' : '#8A6900' }}>
           {pct >= 0 ? '+' : ''}{pct.toFixed(0)}%
         </p>
       )}
@@ -77,7 +77,7 @@ export function DurabilityChart({ windows }: { windows: DurabilityWindow[] }) {
       ) : (
         <>
           <div className="flex items-center gap-3 mb-3">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30">
               <FlaskConical className="w-3 h-3" />
               Measured: best recorded effort
             </span>
@@ -87,7 +87,7 @@ export function DurabilityChart({ windows }: { windows: DurabilityWindow[] }) {
               const fresh = durationS === 300 ? fresh300 : fresh1200;
               return (
                 <div key={durationS} className="space-y-2">
-                  <p className="text-[11px] font-semibold text-gray-700">
+                  <p className="text-[11px] font-semibold text-gray-700 dark:text-gray-200">
                     {durationS === 300 ? '5 min' : '20 min'} mean-max
                   </p>
                   {active.groups.map(g => {
@@ -102,7 +102,7 @@ export function DurabilityChart({ windows }: { windows: DurabilityWindow[] }) {
                         <CellBar
                           cell={cell}
                           pct={pct}
-                          color={g.kjThreshold === 0 ? '#0ea5e9' : g.kjThreshold === 1000 ? '#f59e0b' : '#ef4444'}
+                          color={g.kjThreshold === 0 ? '#2A1F4A' : g.kjThreshold === 1000 ? '#8A6900' : '#ef4444'}
                         />
                       </div>
                     );

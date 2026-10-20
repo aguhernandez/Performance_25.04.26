@@ -50,23 +50,23 @@ export function PendingSuggestions({ rows, athleteNames }: {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
       <div className="flex items-center gap-2 mb-3">
-        <Lightbulb className="w-4 h-4 text-amber-500" />
-        <h3 className="font-heading text-[14px] font-bold text-gray-900">Pending threshold suggestions</h3>
+        <Lightbulb className="w-4 h-4 text-[#8A6900] dark:text-[#F7C843]" />
+        <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">Pending threshold suggestions</h3>
         <span className="text-[10px] text-gray-400 italic">alerts, not medical diagnoses</span>
       </div>
       <ul className="space-y-2">
         {pending.map(row => (
           <li
             key={row.athlete_id}
-            className="flex items-center justify-between gap-3 bg-amber-50/60 border border-amber-100 rounded-lg px-3 py-2"
+            className="flex items-center justify-between gap-3 bg-[#F7C843]/20 dark:bg-[#F7C843]/10 border border-[#F7C843]/40 dark:border-[#F7C843]/30 rounded-lg px-3 py-2"
           >
             <div>
-              <p className="font-body text-[13px] font-semibold text-gray-800">
+              <p className="font-body text-[13px] font-semibold text-gray-800 dark:text-gray-100">
                 {athleteNames[row.athlete_id] ?? row.name}
               </p>
-              <p className="font-body text-[11px] text-gray-500">
+              <p className="font-body text-[11px] text-gray-500 dark:text-gray-400">
                 Model CP {Math.round(Number(row.suggested_cp))} W
                 {row.cp_watts || row.ftp_watts
                   ? ` · profile ${Math.round(Number(row.cp_watts ?? row.ftp_watts))} W`
@@ -76,7 +76,7 @@ export function PendingSuggestions({ rows, athleteNames }: {
             <button
               onClick={() => apply(row)}
               disabled={applying === row.athlete_id}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold rounded-lg bg-[#F7C843] text-[#2A1F4A] hover:bg-[#E7B92D] disabled:opacity-50 transition-colors"
             >
               <Check className="w-3.5 h-3.5" />
               {applying === row.athlete_id ? 'Applying…' : 'Apply'}

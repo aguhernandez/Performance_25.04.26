@@ -189,20 +189,20 @@ export function SettingsView() {
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F7C843' }}>
             <Settings className="w-4.5 h-4.5" style={{ color: '#2A1F4A' }} />
           </div>
-          <h1 className="font-heading text-2xl font-bold text-gray-900">Configuracion</h1>
+          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">Configuracion</h1>
         </div>
-        <p className="font-body text-[13px] text-gray-500 ml-12">Ajustes de tu perfil y conexiones externas</p>
+        <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 ml-12">Ajustes de tu perfil y conexiones externas</p>
       </div>
 
-      <div className="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1">
+      <div className="flex gap-1 mb-6 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-body font-medium transition-all ${
               activeTab === id
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -213,13 +213,13 @@ export function SettingsView() {
 
       {activeTab === 'connection' && (
         <div className="space-y-6">
-          <div className="bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <div className="flex items-center gap-3">
                 <Link2 className="w-4 h-4 text-gray-400" />
                 <div>
-                  <h2 className="font-body text-[14px] font-semibold text-gray-800">Conexion con Asciende Hub</h2>
-                  <p className="font-body text-[12px] text-gray-500">Este satelite se conecta al Hub para leer y enviar datos de atletas</p>
+                  <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Conexion con Asciende Hub</h2>
+                  <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Este satelite se conecta al Hub para leer y enviar datos de atletas</p>
                 </div>
               </div>
             </div>
@@ -227,35 +227,35 @@ export function SettingsView() {
             <div className="p-6">
               {settings.hub_connection_active && settings.hub_planner_token ? (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30">
+                    <CheckCircle className="w-5 h-5 text-[#2A1F4A] dark:text-[#B8A9E5] flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-body text-[13px] font-semibold text-green-800">Conexion activa</p>
-                      <p className="font-body text-[12px] text-green-600 truncate">
+                      <p className="font-body text-[13px] font-semibold text-[#2A1F4A] dark:text-[#B8A9E5]">Conexion activa</p>
+                      <p className="font-body text-[12px] text-[#2A1F4A] dark:text-[#B8A9E5] truncate">
                         {settings.hub_token_label || 'Performance Satellite'}
                       </p>
                     </div>
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-[#2A1F4A] dark:bg-[#B8A9E5] animate-pulse flex-shrink-0" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+                    <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                       <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Token</p>
                       <div className="flex items-center gap-2">
-                        <p className="font-mono text-[12px] text-gray-700 flex-1 truncate">
+                        <p className="font-mono text-[12px] text-gray-700 dark:text-gray-200 flex-1 truncate">
                           {showToken ? settings.hub_planner_token : maskToken(settings.hub_planner_token)}
                         </p>
                         <button
                           onClick={() => setShowToken(!showToken)}
-                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                          className="text-gray-400 hover:text-gray-600 dark:text-gray-300 flex-shrink-0"
                         >
                           {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
                       </div>
                     </div>
-                    <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+                    <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                       <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Configurado</p>
-                      <p className="font-body text-[12px] text-gray-700">
+                      <p className="font-body text-[12px] text-gray-700 dark:text-gray-200">
                         {settings.hub_token_set_at ? formatDate(settings.hub_token_set_at) : '—'}
                       </p>
                     </div>
@@ -264,7 +264,7 @@ export function SettingsView() {
                   {connectionStatus && (
                     <div className={`flex items-start gap-3 p-3 rounded-xl text-[12px] font-body ${
                       connectionStatus.tokenValid
-                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30'
                         : 'bg-red-50 text-red-800 border border-red-200'
                     }`}>
                       {connectionStatus.tokenValid
@@ -284,7 +284,7 @@ export function SettingsView() {
                       <button
                         onClick={handleTestConnection}
                         disabled={testing}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#e5e7eb] text-[13px] font-body font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-[13px] font-body font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-gray-800 transition-colors disabled:opacity-50"
                       >
                         {testing ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                         {testing ? 'Verificando...' : 'Verificar conexion'}
@@ -301,10 +301,10 @@ export function SettingsView() {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <Link2Off className="w-5 h-5 text-gray-400 flex-shrink-0" />
                   <div>
-                    <p className="font-body text-[13px] font-semibold text-gray-700">Sin conexion activa</p>
+                    <p className="font-body text-[13px] font-semibold text-gray-700 dark:text-gray-200">Sin conexion activa</p>
                     <p className="font-body text-[12px] text-gray-400">
                       {isAdmin ? 'Pega el token generado en el Hub para activar la conexion.' : 'El administrador debe configurar el token de conexion.'}
                     </p>
@@ -315,21 +315,21 @@ export function SettingsView() {
           </div>
 
           {isAdmin && !settings.hub_connection_active && (
-            <div className="bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                 <div className="flex items-center gap-3">
                   <Shield className="w-4 h-4 text-gray-400" />
                   <div>
-                    <h2 className="font-body text-[14px] font-semibold text-gray-800">Administrar token de conexion</h2>
-                    <p className="font-body text-[12px] text-gray-500">Solo visible para administradores</p>
+                    <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Administrar token de conexion</h2>
+                    <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Solo visible para administradores</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-6 space-y-4">
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-                  <p className="font-body text-[12px] text-amber-800 font-semibold mb-1">Como obtener el token</p>
-                  <ol className="font-body text-[12px] text-amber-700 space-y-1 list-decimal list-inside">
+                <div className="p-4 rounded-xl bg-[#F7C843]/20 dark:bg-[#F7C843]/10 border border-[#F7C843]/40 dark:border-[#F7C843]/30">
+                  <p className="font-body text-[12px] text-[#8A6900] dark:text-[#F7C843] font-semibold mb-1">Como obtener el token</p>
+                  <ol className="font-body text-[12px] text-[#8A6900] dark:text-[#F7C843] space-y-1 list-decimal list-inside">
                     <li>Ir al Hub → Settings → External Planners</li>
                     <li>Click en "New token"</li>
                     <li>Planner type: <strong>performance</strong></li>
@@ -346,7 +346,7 @@ export function SettingsView() {
                 )}
 
                 {saveSuccess && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 border border-green-200 text-[12px] font-body text-green-700">
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 text-[12px] font-body text-[#2A1F4A] dark:text-[#B8A9E5]">
                     <CheckCircle className="w-4 h-4 flex-shrink-0" />
                     Token guardado correctamente. Conexion activada.
                   </div>
@@ -354,7 +354,7 @@ export function SettingsView() {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="font-body text-[12px] font-medium text-gray-700 mb-1.5 block">
+                    <label className="font-body text-[12px] font-medium text-gray-700 dark:text-gray-200 mb-1.5 block">
                       Etiqueta del token
                     </label>
                     <input
@@ -362,12 +362,12 @@ export function SettingsView() {
                       value={tokenLabelInput}
                       onChange={e => setTokenLabelInput(e.target.value)}
                       placeholder="Performance Satellite"
-                      className="w-full px-3 py-2.5 rounded-lg border border-[#e5e7eb] font-body text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
+                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 font-body text-[13px] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="font-body text-[12px] font-medium text-gray-700 mb-1.5 block">
+                    <label className="font-body text-[12px] font-medium text-gray-700 dark:text-gray-200 mb-1.5 block">
                       Token del Hub <span className="text-gray-400 font-normal">(formato: planner_...)</span>
                     </label>
                     <div className="relative">
@@ -377,12 +377,12 @@ export function SettingsView() {
                         value={tokenInput}
                         onChange={e => { setTokenInput(e.target.value); setError(null); }}
                         placeholder="planner_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                        className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-[#e5e7eb] font-mono text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
+                        className="w-full pl-9 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-[13px] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7C843] focus:border-transparent"
                       />
                       <button
                         type="button"
                         onClick={() => setShowToken(!showToken)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-300"
                       >
                         {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -407,7 +407,7 @@ export function SettingsView() {
                     <button
                       onClick={handleTestConnection}
                       disabled={testing}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#e5e7eb] text-[13px] font-body font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-[13px] font-body font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-gray-800 transition-colors disabled:opacity-50"
                     >
                       {testing ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
                       {testing ? 'Verificando...' : 'Probar token'}
@@ -418,13 +418,13 @@ export function SettingsView() {
             </div>
           )}
 
-          <div className="bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <div className="flex items-center gap-3">
                 <Globe className="w-4 h-4 text-gray-400" />
                 <div>
-                  <h2 className="font-body text-[14px] font-semibold text-gray-800">Endpoints disponibles</h2>
-                  <p className="font-body text-[12px] text-gray-500">API del Hub que este satelite puede usar</p>
+                  <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Endpoints disponibles</h2>
+                  <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">API del Hub que este satelite puede usar</p>
                 </div>
               </div>
             </div>
@@ -440,14 +440,14 @@ export function SettingsView() {
                   { method: 'POST', path: '/push-training-log', desc: 'Enviar log de entrenamiento' },
                   { method: 'POST', path: '/push-lab-passport', desc: 'Enviar resultados de test' },
                 ].map(({ method, path, desc }) => (
-                  <div key={path} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-[#e5e7eb]">
+                  <div key={path} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <span className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${
-                      method === 'GET' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                      method === 'GET' ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' : 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]'
                     }`}>
                       {method}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-mono text-[11px] text-gray-700 truncate">{path}</p>
+                      <p className="font-mono text-[11px] text-gray-700 dark:text-gray-200 truncate">{path}</p>
                       <p className="font-body text-[11px] text-gray-400">{desc}</p>
                     </div>
                   </div>
@@ -459,39 +459,39 @@ export function SettingsView() {
       )}
 
       {activeTab === 'account' && (
-        <div className="bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-3">
               <User className="w-4 h-4 text-gray-400" />
-              <h2 className="font-body text-[14px] font-semibold text-gray-800">Informacion de cuenta</h2>
+              <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Informacion de cuenta</h2>
             </div>
           </div>
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Nombre</p>
-                <p className="font-body text-[14px] text-gray-800 font-medium">{user?.name || profile?.full_name || '—'}</p>
+                <p className="font-body text-[14px] text-gray-800 dark:text-gray-100 font-medium">{user?.name || profile?.full_name || '—'}</p>
               </div>
-              <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Email</p>
-                <p className="font-body text-[14px] text-gray-800 font-medium truncate">{user?.email || '—'}</p>
+                <p className="font-body text-[14px] text-gray-800 dark:text-gray-100 font-medium truncate">{user?.email || '—'}</p>
               </div>
-              <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Rol</p>
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-body font-semibold ${
-                    user?.role === 'admin' ? 'bg-amber-100 text-amber-800' :
-                    user?.role === 'trainer' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-700'
+                    user?.role === 'admin' ? 'bg-[#F7C843]/20 dark:bg-[#F7C843]/10 text-[#8A6900] dark:text-[#F7C843]' :
+                    user?.role === 'trainer' ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' :
+                    'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200'
                   }`}>
                     {user?.role === 'admin' && <Shield className="w-3 h-3" />}
                     {user?.role === 'admin' ? 'Administrador' : user?.role === 'trainer' ? 'Coach' : 'Atleta'}
                   </span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-gray-50 border border-[#e5e7eb]">
+              <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <p className="font-body text-[11px] text-gray-400 uppercase tracking-wider mb-1">Membresia</p>
-                <p className="font-body text-[14px] text-gray-800 font-medium">{user?.membership_name || '—'}</p>
+                <p className="font-body text-[14px] text-gray-800 dark:text-gray-100 font-medium">{user?.membership_name || '—'}</p>
               </div>
             </div>
             <p className="font-body text-[12px] text-gray-400">
@@ -502,27 +502,27 @@ export function SettingsView() {
       )}
 
       {activeTab === 'notifications' && (
-        <div className="bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-3">
               <Bell className="w-4 h-4 text-gray-400" />
-              <h2 className="font-body text-[14px] font-semibold text-gray-800">Notificaciones</h2>
+              <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Notificaciones</h2>
             </div>
           </div>
           <div className="p-6">
-            <p className="font-body text-[13px] text-gray-500">Las preferencias de notificaciones estaran disponibles proximamente.</p>
+            <p className="font-body text-[13px] text-gray-500 dark:text-gray-400">Las preferencias de notificaciones estaran disponibles proximamente.</p>
           </div>
         </div>
       )}
 
       {(isAdmin || user?.role === 'trainer') && (
-        <div className="mt-6 bg-white border border-[#e5e7eb] rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#e5e7eb] bg-gray-50/50">
+        <div className="mt-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-3">
               <RefreshCw className="w-4 h-4 text-gray-400" />
               <div>
-                <h2 className="font-body text-[14px] font-semibold text-gray-800">Recalcular historial</h2>
-                <p className="font-body text-[12px] text-gray-500">Backfill completo de daily_load / daily_state desde la primera sesion a hoy. Idempotente.</p>
+                <h2 className="font-body text-[14px] font-semibold text-gray-800 dark:text-gray-100">Recalcular historial</h2>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Backfill completo de daily_load / daily_state desde la primera sesion a hoy. Idempotente.</p>
               </div>
             </div>
           </div>
@@ -541,7 +541,7 @@ export function SettingsView() {
             {recalcMessage && (
               <div className={`mt-4 flex items-center gap-2 p-3 rounded-xl text-[12px] font-body ${
                 recalcState === 'done'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30'
                   : 'bg-red-50 text-red-700 border border-red-200'
               }`}>
                 {recalcState === 'done' ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}

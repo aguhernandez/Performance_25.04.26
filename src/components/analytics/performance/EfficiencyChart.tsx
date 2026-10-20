@@ -6,10 +6,10 @@ const W = 980;
 const H = 300;
 const PAD = { top: 16, right: 52, bottom: 34, left: 46 };
 
-const EF_COLOR = '#2563eb';
-const DEC_COLOR = '#d97706';
-const EF_MA_COLOR = '#93c5fd';
-const DEC_MA_COLOR = '#fcd34d';
+const EF_COLOR = '#2A1F4A';
+const DEC_COLOR = '#8A6900';
+const EF_MA_COLOR = '#78658C';
+const DEC_MA_COLOR = '#F7C843';
 
 const VI_EXCLUDE_THRESHOLD = 1.10;
 
@@ -96,7 +96,7 @@ export function EfficiencyChart({ rows, efMovingAvg, decouplingMovingAvg }: {
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
             {efTicks.map(v => (
               <g key={`ef-${v}`}>
-                <line x1={PAD.left} y1={yEf(v)} x2={W - PAD.right} y2={yEf(v)} stroke="#eff6ff" strokeWidth="1" />
+                <line x1={PAD.left} y1={yEf(v)} x2={W - PAD.right} y2={yEf(v)} stroke="var(--chart-grid)" strokeWidth="1" />
                 <text x={PAD.left - 6} y={yEf(v) + 4} textAnchor="end" fontSize="10" fill={EF_COLOR} fontFamily="system-ui">{v.toFixed(1)}</text>
               </g>
             ))}
@@ -129,7 +129,7 @@ export function EfficiencyChart({ rows, efMovingAvg, decouplingMovingAvg }: {
 
             {points.map((r, i) =>
               i % xTickEvery === 0 ? (
-                <text key={`x-${r.activityId}`} x={xOf(i)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="system-ui">
+                <text key={`x-${r.activityId}`} x={xOf(i)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">
                   {fmtDay(r.date)}
                 </text>
               ) : null

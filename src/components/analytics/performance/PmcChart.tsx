@@ -116,9 +116,9 @@ export function PmcChart({ days, pmcStart, historyIncomplete }: {
       }
     >
       {historyIncomplete && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          <p className="font-body text-[11px] text-amber-700">
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-[#F7C843]/20 dark:bg-[#F7C843]/10 border border-[#F7C843]/40 dark:border-[#F7C843]/30">
+          <AlertTriangle className="w-4 h-4 text-[#8A6900] dark:text-[#F7C843] flex-shrink-0" />
+          <p className="font-body text-[11px] text-[#8A6900] dark:text-[#F7C843]">
             History is under 120 days — Fitness, Fatigue and Form are still warming up and should be read as directional, not absolute.
           </p>
         </div>
@@ -130,9 +130,9 @@ export function PmcChart({ days, pmcStart, historyIncomplete }: {
         <>
           <div className="flex flex-wrap items-center gap-4 mb-2">
             {sports.map(s => <LegendDot key={s} color={SPORT_COLORS[s] ?? '#94a3b8'} label={s.replace('_', ' ')} />)}
-            <LegendDot color="#0ea5e9" label="Fitness" />
-            <LegendDot color="#f97316" label="Fatigue" />
-            <LegendDot color="#16a34a" label="Form" />
+            <LegendDot color="#2A1F4A" label="Fitness" />
+            <LegendDot color="#8A6900" label="Fatigue" />
+            <LegendDot color="#2A1F4A" label="Form" />
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
             {/* warm-up shading */}
@@ -142,19 +142,19 @@ export function PmcChart({ days, pmcStart, historyIncomplete }: {
                 y={PAD.top}
                 width={xOf(warmUpCutoffIdx - 1, visible.length) - PAD.left}
                 height={plotH}
-                fill="#94a3b8"
+                fill="var(--chart-label)"
                 fillOpacity="0.08"
               />
             )}
             {warmUpCutoffIdx > 0 && (
-              <text x={xOf(Math.min(warmUpCutoffIdx - 1, 2), visible.length)} y={PAD.top + 14} fontSize="10" fill="#94a3b8" fontFamily="system-ui">warm-up</text>
+              <text x={xOf(Math.min(warmUpCutoffIdx - 1, 2), visible.length)} y={PAD.top + 14} fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">warm-up</text>
             )}
 
             {/* impulse y-grid */}
             {[0, maxImpulse * 0.5, maxImpulse].map((v, i) => (
               <g key={i}>
-                <line x1={PAD.left} y1={yLoad(v)} x2={W - PAD.right} y2={yLoad(v)} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={PAD.left - 6} y={yLoad(v) + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{Math.round(v)}</text>
+                <line x1={PAD.left} y1={yLoad(v)} x2={W - PAD.right} y2={yLoad(v)} stroke="var(--chart-grid)" strokeWidth="1" />
+                <text x={PAD.left - 6} y={yLoad(v) + 4} textAnchor="end" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">{Math.round(v)}</text>
               </g>
             ))}
 
@@ -189,17 +189,17 @@ export function PmcChart({ days, pmcStart, historyIncomplete }: {
 
             {/* form shaded areas */}
             {areas.down && <path d={areas.down} fill="#ef4444" fillOpacity="0.12" stroke="none" />}
-            {areas.up && <path d={areas.up} fill="#22c55e" fillOpacity="0.12" stroke="none" />}
+            {areas.up && <path d={areas.up} fill="#2A1F4A" fillOpacity="0.12" stroke="none" />}
 
             {/* state lines */}
-            <path d={linePath('fitness')} fill="none" stroke="#0ea5e9" strokeWidth="2" strokeLinejoin="round" />
-            <path d={linePath('fatigue')} fill="none" stroke="#f97316" strokeWidth="2" strokeLinejoin="round" />
-            <path d={linePath('form')} fill="none" stroke="#16a34a" strokeWidth="2" strokeLinejoin="round" />
+            <path d={linePath('fitness')} fill="none" stroke="#2A1F4A" strokeWidth="2" strokeLinejoin="round" />
+            <path d={linePath('fatigue')} fill="none" stroke="#8A6900" strokeWidth="2" strokeLinejoin="round" />
+            <path d={linePath('form')} fill="none" stroke="#2A1F4A" strokeWidth="2" strokeLinejoin="round" />
 
             {/* x labels */}
             {visible.map((d, i) =>
               i % xTickEvery === 0 ? (
-                <text key={d.date} x={xOf(i, visible.length)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="system-ui">
+                <text key={d.date} x={xOf(i, visible.length)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">
                   {fmtDay(d.date)}
                 </text>
               ) : null
@@ -211,9 +211,9 @@ export function PmcChart({ days, pmcStart, historyIncomplete }: {
               const x = xOf(idx, visible.length);
               const lines = [
                 { text: fmtDay(hover.date), bold: true },
-                { text: 'Fitness ' + (hover.fitness ?? 0).toFixed(1), color: '#0ea5e9' },
-                { text: 'Fatigue ' + (hover.fatigue ?? 0).toFixed(1), color: '#f97316' },
-                { text: 'Form ' + (hover.form ?? 0).toFixed(1), color: '#16a34a' },
+                { text: 'Fitness ' + (hover.fitness ?? 0).toFixed(1), color: '#2A1F4A' },
+                { text: 'Fatigue ' + (hover.fatigue ?? 0).toFixed(1), color: '#8A6900' },
+                { text: 'Form ' + (hover.form ?? 0).toFixed(1), color: '#2A1F4A' },
                 { text: 'Ramp rate ' + (hover.rampRate !== null ? hover.rampRate.toFixed(1) : '—'), color: '#64748b' },
               ];
               return (

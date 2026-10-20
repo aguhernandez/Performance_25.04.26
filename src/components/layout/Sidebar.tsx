@@ -48,7 +48,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete', theme, onT
         aria-label="Abrir navegación"
         className="lg:hidden fixed top-3 left-3 z-50 w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
       >
-        <Menu className="w-4 h-4 text-gray-600" />
+        <Menu className="w-4 h-4 text-gray-600 dark:text-gray-300" />
       </button>
 
       {mobileOpen && (
@@ -57,7 +57,7 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete', theme, onT
           <div className="relative w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex flex-col h-full shadow-xl pt-[env(safe-area-inset-top)]">
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 dark:border-gray-800">
               <img src="/asciende_the_athletes_support_platform.png" alt="Asciende" className="h-7 w-auto" />
-              <button onClick={() => setMobileOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setMobileOpen(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -130,14 +130,14 @@ export function Sidebar({ activeView, onViewChange, role = 'athlete', theme, onT
           <div className="px-3 pb-4">
             <div className="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
               <p className="font-body text-[9px] text-gray-400 uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Model</p>
-              <p className="font-body text-[11px] text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{t('impulseResponse')}</p>
+              <p className="font-body text-[11px] text-gray-600 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">{t('impulseResponse')}</p>
               <div className="mt-2 space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex justify-between">
-                  <span className="font-body text-[10px] text-gray-500">τ₁ {t('fitness')}</span>
+                  <span className="font-body text-[10px] text-gray-500 dark:text-gray-400">τ₁ {t('fitness')}</span>
                   <span className="font-body text-[10px] text-gray-400">30–50d</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-body text-[10px] text-gray-500">τ₂ {t('fatigue')}</span>
+                  <span className="font-body text-[10px] text-gray-500 dark:text-gray-400">τ₂ {t('fatigue')}</span>
                   <span className="font-body text-[10px] text-gray-400">5–10d</span>
                 </div>
               </div>

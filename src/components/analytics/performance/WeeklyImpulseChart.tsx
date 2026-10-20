@@ -8,8 +8,8 @@ const H = 300;
 const PAD = { top: 16, right: 52, bottom: 34, left: 46 };
 
 const MONOTONY_REF = 2.0;
-const STRAIN_COLOR = '#b45309';
-const MONOTONY_COLOR = '#0f766e';
+const STRAIN_COLOR = '#8A6900';
+const MONOTONY_COLOR = '#6b7280';
 
 type Mode = 'impulse' | 'foster';
 
@@ -137,7 +137,7 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
             ) : (
               <>
                 {sports.map(s => <LegendDot key={s} color={SPORT_COLORS[s] ?? '#94a3b8'} label={s.replace('_', ' ')} />)}
-                <LegendDot color="#0ea5e9" label="Ramp rate" />
+                <LegendDot color="#2A1F4A" label="Ramp rate" />
               </>
             )}
           </div>
@@ -145,14 +145,14 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
             {foster
               ? [0, maxStrain * 0.5, maxStrain].map((v, i) => (
                   <g key={i}>
-                    <line x1={PAD.left} y1={yStrain(v)} x2={W - PAD.right} y2={yStrain(v)} stroke="#f1f5f9" strokeWidth="1" />
+                    <line x1={PAD.left} y1={yStrain(v)} x2={W - PAD.right} y2={yStrain(v)} stroke="var(--chart-grid)" strokeWidth="1" />
                     <text x={PAD.left - 6} y={yStrain(v) + 4} textAnchor="end" fontSize="10" fill={STRAIN_COLOR} fontFamily="system-ui">{Math.round(v)}</text>
                   </g>
                 ))
               : [0, maxTotal * 0.5, maxTotal].map((v, i) => (
                   <g key={i}>
-                    <line x1={PAD.left} y1={yLoad(v)} x2={W - PAD.right} y2={yLoad(v)} stroke="#f1f5f9" strokeWidth="1" />
-                    <text x={PAD.left - 6} y={yLoad(v) + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{Math.round(v)}</text>
+                    <line x1={PAD.left} y1={yLoad(v)} x2={W - PAD.right} y2={yLoad(v)} stroke="var(--chart-grid)" strokeWidth="1" />
+                    <text x={PAD.left - 6} y={yLoad(v) + 4} textAnchor="end" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">{Math.round(v)}</text>
                   </g>
                 ))}
 
@@ -196,7 +196,7 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
                     })
                   )}
                   {w.partial && (
-                    <text x={x + barW / 2} y={PAD.top + 2} textAnchor="middle" fontSize="9" fill="#94a3b8" fontFamily="system-ui" fontStyle="italic">
+                    <text x={x + barW / 2} y={PAD.top + 2} textAnchor="middle" fontSize="9" fill="var(--chart-label)" fontFamily="system-ui" fontStyle="italic">
                       partial
                     </text>
                   )}
@@ -206,7 +206,7 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
             })}
 
             {/* lines */}
-            {!foster && <path d={rampPath} fill="none" stroke="#0ea5e9" strokeWidth="2" strokeLinejoin="round" />}
+            {!foster && <path d={rampPath} fill="none" stroke="#2A1F4A" strokeWidth="2" strokeLinejoin="round" />}
             {foster && (
               <>
                 <line
@@ -218,7 +218,7 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
                   strokeWidth="1"
                   strokeDasharray="5 4"
                 />
-                <text x={W - PAD.right - 4} y={yMon(MONOTONY_REF) - 5} textAnchor="end" fontSize="9" fill="#94a3b8" fontFamily="system-ui">2.0</text>
+                <text x={W - PAD.right - 4} y={yMon(MONOTONY_REF) - 5} textAnchor="end" fontSize="9" fill="var(--chart-label)" fontFamily="system-ui">2.0</text>
                 <path d={monotonyPath} fill="none" stroke={MONOTONY_COLOR} strokeWidth="2" strokeLinejoin="round" />
               </>
             )}
@@ -226,7 +226,7 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
             {/* x labels */}
             {weeks.map((w, i) =>
               i % xTickEvery === 0 ? (
-                <text key={w.weekStart} x={PAD.left + (i + 0.5) * (plotW / weeks.length)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="system-ui">
+                <text key={w.weekStart} x={PAD.left + (i + 0.5) * (plotW / weeks.length)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">
                   {fmtDay(w.weekStart)}
                 </text>
               ) : null
@@ -240,16 +240,16 @@ export function WeeklyImpulseChart({ weekly, weeklyLoad, currentWeekStart, quali
               const lines = foster
                 ? [
                     { text: `Week of ${fmtDay(w.weekStart)}${w.partial ? ' (partial)' : ''}`, bold: true },
-                    { text: `Total impulse: ${w.totalImpulseStored !== null ? w.totalImpulseStored.toFixed(1) : w.total.toFixed(1)}`, color: '#1e293b' },
+                    { text: `Total impulse: ${w.totalImpulseStored !== null ? w.totalImpulseStored.toFixed(1) : w.total.toFixed(1)}`, color: 'var(--chart-label)' },
                     { text: `Daily mean: ${(w.totalImpulseStored !== null ? w.totalImpulseStored / 7 : w.total / 7).toFixed(2)}`, color: '#64748b' },
                     { text: `Monotony: ${w.monotony !== null ? w.monotony.toFixed(2) : '—'}`, color: MONOTONY_COLOR },
                     { text: `Strain: ${w.strain !== null ? w.strain.toFixed(1) : '—'}`, color: STRAIN_COLOR },
                   ]
                 : [
                     { text: `Week of ${fmtDay(w.weekStart)}${w.partial ? ' (partial)' : ''}`, bold: true },
-                    { text: `Total: ${w.total.toFixed(1)}`, color: '#1e293b' },
+                    { text: `Total: ${w.total.toFixed(1)}`, color: 'var(--chart-label)' },
                     ...w.bySport.map(seg => ({ text: `${seg.sport.replace('_', ' ')}: ${seg.impulse.toFixed(1)}`, color: SPORT_COLORS[seg.sport] ?? '#94a3b8' })),
-                    { text: `Ramp rate: ${w.rampRate !== null ? w.rampRate.toFixed(1) : '—'}`, color: '#0ea5e9' },
+                    { text: `Ramp rate: ${w.rampRate !== null ? w.rampRate.toFixed(1) : '—'}`, color: '#2A1F4A' },
                   ];
               return (
                 <g>

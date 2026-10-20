@@ -68,17 +68,17 @@ export function RosterWeeklyStack({ athleteIds, athleteNames }: {
   const plotH = H - PAD.top - PAD.bottom;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
       <div className="flex items-center gap-2 mb-3">
         <BarChart3 className="w-4 h-4 text-gray-400" />
-        <h3 className="font-heading text-[14px] font-bold text-gray-900">Weekly impulse — last 8 weeks</h3>
+        <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">Weekly impulse — last 8 weeks</h3>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
         {[0, maxTotal / 2, maxTotal].map((v, i) => {
           const y = PAD.top + plotH - (v / maxTotal) * plotH;
           return (
             <g key={i}>
-              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="#f1f5f9" />
+              <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="var(--chart-grid)" />
               <text x={PAD.left - 6} y={y + 4} textAnchor="end" fontSize="9" fill="#94a3b8">{Math.round(v)}</text>
             </g>
           );

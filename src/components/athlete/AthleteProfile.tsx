@@ -29,7 +29,7 @@ type Tab = 'profile' | 'races' | 'blocks' | 'health';
 const SPORT_OPTIONS = ['cycling', 'running', 'triathlon', 'swimming', 'rowing', 'crossfit', 'other'];
 const BLOCK_TYPES = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 const EVENT_TYPES = ['injury', 'illness', 'surgery', 'medication_start', 'medication_end', 'other'] as const;
-const PRIORITY_COLORS: Record<string, string> = { a: '#ef4444', b: '#f59e0b', c: '#0ea5e9' };
+const PRIORITY_COLORS: Record<string, string> = { a: '#ef4444', b: '#8A6900', c: '#2A1F4A' };
 
 function validateProfile(form: Record<string, string>): string[] {
   const issues: string[] = [];
@@ -235,14 +235,14 @@ export function AthleteProfile({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-white">{t('athleteProfileTitle')}</h2>
-          <p className="text-[12px] text-slate-500 mt-0.5">{t('athleteProfileSubtitle')}</p>
+          <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">{t('athleteProfileTitle')}</h2>
+          <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">{t('athleteProfileSubtitle')}</p>
         </div>
         {athlete && sessions.length < 5 && onAddSession && (
           <button
             onClick={handleLoadDemo}
             disabled={demoLoading}
-            className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-200 font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-gray-800 dark:text-gray-100 font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
           >
             <Database className="w-3.5 h-3.5" />
             {demoLoading ? t('loadingDots') : t('loadDemoData')}
@@ -250,7 +250,7 @@ export function AthleteProfile({
         )}
       </div>
 
-      <div className="flex gap-1 bg-slate-800/40 p-1 rounded-xl">
+      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
@@ -259,8 +259,8 @@ export function AthleteProfile({
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[12px] font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#0d1420] text-white border border-slate-700/50'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -273,48 +273,48 @@ export function AthleteProfile({
       {activeTab === 'profile' && (
         <form onSubmit={handleSubmit} className="space-y-4">
           {validationIssues.length > 0 && (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-1.5">
+            <div className="bg-[#F7C843]/20 dark:bg-[#F7C843]/10 border border-[#F7C843]/40 dark:border-[#F7C843]/30 rounded-xl p-4 space-y-1.5">
               <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                <p className="text-[12px] font-semibold text-amber-400">{t('profileValidationIssues')}</p>
+                <AlertTriangle className="w-4 h-4 text-[#8A6900] dark:text-[#F7C843] flex-shrink-0" />
+                <p className="text-[12px] font-semibold text-[#8A6900] dark:text-[#F7C843]">{t('profileValidationIssues')}</p>
               </div>
               {validationIssues.map((issue, i) => (
-                <p key={i} className="text-[11px] text-amber-300/80 pl-6">• {issue}</p>
+                <p key={i} className="text-[11px] text-[#8A6900] dark:text-[#F7C843] pl-6">• {issue}</p>
               ))}
             </div>
           )}
 
           {validationIssues.length === 0 && form.name && (
-            <div className="bg-green-500/5 border border-green-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-              <p className="text-[12px] text-green-400">{t('profileParamsValid')}</p>
+            <div className="bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 rounded-xl px-4 py-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-[#2A1F4A] dark:text-[#B8A9E5] flex-shrink-0" />
+              <p className="text-[12px] text-[#2A1F4A] dark:text-[#B8A9E5]">{t('profileParamsValid')}</p>
             </div>
           )}
 
-          <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-3">
-            <h3 className="text-[12px] font-mono uppercase tracking-wider text-slate-400">{t('identity')}</h3>
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
+            <h3 className="text-[12px] font-mono uppercase tracking-wider text-gray-600 dark:text-gray-300">{t('identity')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1.5">{t('fullName')}</label>
+                <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1.5">{t('fullName')}</label>
                 <input type="text" value={form.name} onChange={e => setF('name', e.target.value)} required
                   placeholder={t('athleteNamePlaceholder')}
-                  className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                  className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
               </div>
               <div>
-                <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1.5">{t('primarySport')}</label>
+                <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1.5">{t('primarySport')}</label>
                 <select value={form.sport} onChange={e => setF('sport', e.target.value)}
-                  className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50 capitalize">
+                  className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843] capitalize">
                   {SPORT_OPTIONS.map(s => <option key={s} value={s} className="capitalize">{s}</option>)}
                 </select>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4 space-y-3">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-[12px] font-mono uppercase tracking-wider text-slate-400">{t('physiologicalParameters')}</h3>
+              <h3 className="text-[12px] font-mono uppercase tracking-wider text-gray-600 dark:text-gray-300">{t('physiologicalParameters')}</h3>
               <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
+                className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 transition-colors">
                 {showAdvanced ? <><ChevronUp className="w-3.5 h-3.5" /> {t('less')}</> : <><ChevronDown className="w-3.5 h-3.5" /> {t('advanced')}</>}
               </button>
             </div>
@@ -332,30 +332,30 @@ export function AthleteProfile({
                 { field: 'lean_mass_kg', label: t('leanMass'), unit: 'kg', step: '0.1', hint: t('fatFreeMass') },
               ].map(({ field, label, unit, step, hint }) => (
                 <div key={field}>
-                  <label className="block text-[10px] font-mono uppercase text-slate-500 mb-1">{label}</label>
+                  <label className="block text-[10px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                   <div className="relative">
                     <input type="number" value={form[field as keyof typeof form]} onChange={e => setF(field, e.target.value)}
                       step={step} min="0"
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 pr-8 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-600 font-mono pointer-events-none">{unit}</span>
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 pr-8 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 dark:text-gray-400 font-mono pointer-events-none">{unit}</span>
                   </div>
-                  <p className="text-[9px] text-slate-600 mt-0.5">{hint}</p>
+                  <p className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">{hint}</p>
                 </div>
               ))}
             </div>
 
             {athlete && (
-              <div className="pt-3 border-t border-slate-800/40">
-                <label className="block text-[10px] font-mono uppercase text-slate-500 mb-1">Effective from</label>
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <label className="block text-[10px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">Effective from</label>
                 <input type="date" value={form.effective_from} onChange={e => setF('effective_from', e.target.value)}
-                  className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
-                <p className="text-[9px] text-slate-600 mt-0.5">New CP / LT2 HR / threshold speed values apply from this date onward — earlier days keep their original values.</p>
+                  className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
+                <p className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">New CP / LT2 HR / threshold speed values apply from this date onward — earlier days keep their original values.</p>
               </div>
             )}
 
             {showAdvanced && (
-              <div className="pt-3 border-t border-slate-800/40 space-y-3">
-                <p className="text-[11px] text-slate-500">{t('sportWeights')}</p>
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{t('sportWeights')}</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { field: 'sport_weights_endurance', label: t('endurance'), hint: 'e.g. 0.7' },
@@ -363,32 +363,32 @@ export function AthleteProfile({
                     { field: 'sport_weights_other', label: t('other'), hint: 'e.g. 0.1' },
                   ].map(({ field, label, hint }) => (
                     <div key={field}>
-                      <label className="block text-[10px] font-mono uppercase text-slate-500 mb-1">{label}</label>
+                      <label className="block text-[10px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                       <input type="number" value={form[field as keyof typeof form]} onChange={e => setF(field, e.target.value)}
                         step="0.01" min="0" max="1"
-                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
-                      <p className="text-[9px] text-slate-600 mt-0.5">{hint}</p>
+                        className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
+                      <p className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">{hint}</p>
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-600">{t('weightsNormalized')}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">{t('weightsNormalized')}</p>
               </div>
             )}
           </div>
 
           {computedTau && (
-            <div className="bg-[#0d1420] border border-cyan-500/20 rounded-xl p-4">
-              <h3 className="text-[12px] font-mono uppercase tracking-wider text-cyan-500/70 mb-3">{t('tauPreview')}</h3>
-              <p className="text-[11px] text-slate-500 mb-3">{t('tauPreviewDesc')}</p>
+            <div className="bg-white dark:bg-gray-900 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 rounded-xl p-4">
+              <h3 className="text-[12px] font-mono uppercase tracking-wider text-[#2A1F4A] dark:text-[#B8A9E5] mb-3">{t('tauPreview')}</h3>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">{t('tauPreviewDesc')}</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: t('tauFitness'), value: `${computedTau.tauFitness}d`, desc: t('longTermAdaptationConst'), color: '#0ea5e9' },
-                  { label: t('tauFatigue'), value: `${computedTau.tauFatigue}d`, desc: t('shortTermStressConst'), color: '#f97316' },
+                  { label: t('tauFitness'), value: `${computedTau.tauFitness}d`, desc: t('longTermAdaptationConst'), color: '#2A1F4A' },
+                  { label: t('tauFatigue'), value: `${computedTau.tauFatigue}d`, desc: t('shortTermStressConst'), color: '#8A6900' },
                 ].map(({ label, value, desc, color }) => (
-                  <div key={label} className="text-center p-3 rounded-lg bg-slate-800/30 border border-slate-700/20">
-                    <p className="text-[10px] text-slate-500 font-mono uppercase mb-1">{label}</p>
+                  <div key={label} className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1">{label}</p>
                     <p className="text-[20px] font-bold font-mono" style={{ color }}>{value}</p>
-                    <p className="text-[9px] text-slate-600 mt-0.5">{desc}</p>
+                    <p className="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">{desc}</p>
                   </div>
                 ))}
               </div>
@@ -402,7 +402,7 @@ export function AthleteProfile({
           )}
 
           <button type="submit" disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-[#070b12] font-semibold text-[13px] py-3 rounded-lg transition-colors">
+            className="w-full flex items-center justify-center gap-2 bg-[#F7C843] hover:bg-[#E7B92D] disabled:opacity-50 text-[#2A1F4A] font-semibold text-[13px] py-3 rounded-lg transition-colors">
             {saved ? (
               <><CheckCircle className="w-4 h-4" /> {t('saved')}</>
             ) : (
@@ -415,10 +415,10 @@ export function AthleteProfile({
       {activeTab === 'races' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[12px] text-slate-500">{raceSchedule.length} {t('racesScheduled')}</p>
+            <p className="text-[12px] text-gray-500 dark:text-gray-400">{raceSchedule.length} {t('racesScheduled')}</p>
             <button
               onClick={() => setShowRaceForm(!showRaceForm)}
-              className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               {t('addRace')}
@@ -426,41 +426,41 @@ export function AthleteProfile({
           </div>
 
           {showRaceForm && (
-            <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-              <h3 className="text-[13px] font-semibold text-white mb-4">{t('newRace')}</h3>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-4">{t('newRace')}</h3>
               <form onSubmit={handleAddRace} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('raceName')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('raceName')}</label>
                     <input type="text" value={raceForm.race_name} onChange={e => setRaceForm(p => ({ ...p, race_name: e.target.value }))} required placeholder="e.g. Tour de Valle 2026"
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('raceDate')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('raceDate')}</label>
                     <input type="date" value={raceForm.race_date} onChange={e => setRaceForm(p => ({ ...p, race_date: e.target.value }))} required
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('raceType')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('raceType')}</label>
                     <input type="text" value={raceForm.race_type} onChange={e => setRaceForm(p => ({ ...p, race_type: e.target.value }))} placeholder="road, trail, crit..."
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('distanceKm')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('distanceKm')}</label>
                     <input type="number" value={raceForm.distance_km} onChange={e => setRaceForm(p => ({ ...p, distance_km: e.target.value }))} placeholder="80"
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('goalMin')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('goalMin')}</label>
                     <input type="number" value={raceForm.goal_duration_min} onChange={e => setRaceForm(p => ({ ...p, goal_duration_min: e.target.value }))} placeholder="150"
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('priority')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('priority')}</label>
                     <select value={raceForm.priority} onChange={e => setRaceForm(p => ({ ...p, priority: e.target.value as 'a' | 'b' | 'c' }))}
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50">
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]">
                       <option value="a">{t('priorityAPeak')}</option>
                       <option value="b">{t('priorityBImportant')}</option>
                       <option value="c">{t('priorityCTraining')}</option>
@@ -468,13 +468,13 @@ export function AthleteProfile({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('notes')}</label>
+                  <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('notes')}</label>
                   <input type="text" value={raceForm.notes} onChange={e => setRaceForm(p => ({ ...p, notes: e.target.value }))} placeholder="Optional notes..."
-                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                 </div>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('addRace')}</button>
-                  <button type="button" onClick={() => setShowRaceForm(false)} className="px-4 py-2 rounded-lg border border-slate-700/50 text-slate-400 hover:text-white text-[13px] transition-colors">{t('cancel')}</button>
+                  <button type="submit" className="flex-1 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('addRace')}</button>
+                  <button type="button" onClick={() => setShowRaceForm(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-[13px] transition-colors">{t('cancel')}</button>
                 </div>
               </form>
             </div>
@@ -482,24 +482,24 @@ export function AthleteProfile({
 
           <div className="space-y-2">
             {raceSchedule.length === 0 && !showRaceForm && (
-              <div className="text-center py-12 bg-[#0d1420] border border-slate-800/60 rounded-xl">
+              <div className="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
                 <Trophy className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                <p className="text-slate-500 text-[13px]">{t('noRacesScheduled')}</p>
-                <p className="text-slate-600 text-[12px] mt-1">{t('addTargetRaces')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[13px]">{t('noRacesScheduled')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] mt-1">{t('addTargetRaces')}</p>
               </div>
             )}
             {[...raceSchedule].sort((a, b) => a.race_date.localeCompare(b.race_date)).map(race => {
               const daysUntil = Math.ceil((new Date(race.race_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
               const isPast = daysUntil < 0;
               return (
-                <div key={race.id} className="bg-[#0d1420] border border-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-4">
+                <div key={race.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center gap-4">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: `${PRIORITY_COLORS[race.priority]}15`, border: `1px solid ${PRIORITY_COLORS[race.priority]}30` }}>
                     <Trophy className="w-4 h-4" style={{ color: PRIORITY_COLORS[race.priority] }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-white truncate">{race.race_name}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">{race.race_name}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                       {new Date(race.race_date).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
                       {race.distance_km && ` · ${race.distance_km}km`}
                       {race.race_type && ` · ${race.race_type}`}
@@ -510,14 +510,14 @@ export function AthleteProfile({
                       {race.priority.toUpperCase()}-Race
                     </span>
                     {!isPast && (
-                      <p className="text-[11px] text-slate-500 mt-0.5">{daysUntil}{t('daysAway')}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{daysUntil}{t('daysAway')}</p>
                     )}
                     {isPast && (
-                      <p className="text-[11px] text-slate-600 mt-0.5">{t('completed')}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{t('completed')}</p>
                     )}
                   </div>
                   {onDeleteRace && (
-                    <button onClick={() => onDeleteRace(race.id)} className="text-slate-600 hover:text-red-400 transition-colors ml-2">
+                    <button onClick={() => onDeleteRace(race.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors ml-2">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -531,10 +531,10 @@ export function AthleteProfile({
       {activeTab === 'blocks' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[12px] text-slate-500">{trainingBlocks.length} {t('trainingBlocks')}</p>
+            <p className="text-[12px] text-gray-500 dark:text-gray-400">{trainingBlocks.length} {t('trainingBlocks')}</p>
             <button
               onClick={() => setShowBlockForm(!showBlockForm)}
-              className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               {t('addBlock')}
@@ -542,36 +542,36 @@ export function AthleteProfile({
           </div>
 
           {showBlockForm && (
-            <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-              <h3 className="text-[13px] font-semibold text-white mb-4">{t('newTrainingBlock')}</h3>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-4">{t('newTrainingBlock')}</h3>
               <form onSubmit={handleAddBlock} className="space-y-3">
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('blockType')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('blockType')}</label>
                     <select value={blockForm.block_type} onChange={e => setBlockForm(p => ({ ...p, block_type: e.target.value as typeof BLOCK_TYPES[number] }))}
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50 capitalize">
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843] capitalize">
                       {BLOCK_TYPES.map(bt => <option key={bt} value={bt} className="capitalize">{bt}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('startDate')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('startDate')}</label>
                     <input type="date" value={blockForm.start_date} onChange={e => setBlockForm(p => ({ ...p, start_date: e.target.value }))} required
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('endDate')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('endDate')}</label>
                     <input type="date" value={blockForm.end_date} onChange={e => setBlockForm(p => ({ ...p, end_date: e.target.value }))} required
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('targetFocus')}</label>
+                  <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('targetFocus')}</label>
                   <input type="text" value={blockForm.target_focus} onChange={e => setBlockForm(p => ({ ...p, target_focus: e.target.value }))} placeholder={t('targetFocusPlaceholder')}
-                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                 </div>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('addBlock')}</button>
-                  <button type="button" onClick={() => setShowBlockForm(false)} className="px-4 py-2 rounded-lg border border-slate-700/50 text-slate-400 hover:text-white text-[13px] transition-colors">{t('cancel')}</button>
+                  <button type="submit" className="flex-1 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('addBlock')}</button>
+                  <button type="button" onClick={() => setShowBlockForm(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-[13px] transition-colors">{t('cancel')}</button>
                 </div>
               </form>
             </div>
@@ -579,32 +579,32 @@ export function AthleteProfile({
 
           <div className="space-y-2">
             {trainingBlocks.length === 0 && !showBlockForm && (
-              <div className="text-center py-12 bg-[#0d1420] border border-slate-800/60 rounded-xl">
+              <div className="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
                 <Calendar className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                <p className="text-slate-500 text-[13px]">{t('noBlocksDefined')}</p>
-                <p className="text-slate-600 text-[12px] mt-1">{t('structureSeason')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[13px]">{t('noBlocksDefined')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] mt-1">{t('structureSeason')}</p>
               </div>
             )}
             {[...trainingBlocks].sort((a, b) => a.start_date.localeCompare(b.start_date)).map(block => {
-              const blockColors: Record<string, string> = { base: '#0ea5e9', build: '#f59e0b', peak: '#ef4444', taper: '#22c55e', recovery: '#8b5cf6' };
+              const blockColors: Record<string, string> = { base: '#2A1F4A', build: '#8A6900', peak: '#ef4444', taper: '#2A1F4A', recovery: '#2A1F4A' };
               const color = blockColors[block.block_type] ?? '#94a3b8';
               const days = Math.ceil((new Date(block.end_date).getTime() - new Date(block.start_date).getTime()) / (1000 * 60 * 60 * 24));
               return (
-                <div key={block.id} className="bg-[#0d1420] border border-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-4">
+                <div key={block.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center gap-4">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: `${color}15`, border: `1px solid ${color}30` }}>
                     <Activity className="w-4 h-4" style={{ color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-white capitalize">{block.block_type} {t('blockLabel')}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[13px] font-medium text-gray-900 dark:text-white capitalize">{block.block_type} {t('blockLabel')}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                       {new Date(block.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} → {new Date(block.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       {block.target_focus && ` · ${block.target_focus}`}
                     </p>
                   </div>
-                  <span className="text-[11px] text-slate-500 flex-shrink-0">{days}d</span>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400 flex-shrink-0">{days}d</span>
                   {onDeleteBlock && (
-                    <button onClick={() => onDeleteBlock(block.id)} className="text-slate-600 hover:text-red-400 transition-colors ml-2">
+                    <button onClick={() => onDeleteBlock(block.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors ml-2">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -618,10 +618,10 @@ export function AthleteProfile({
       {activeTab === 'health' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[12px] text-slate-500">{healthHistory.length} {t('healthEvents')}</p>
+            <p className="text-[12px] text-gray-500 dark:text-gray-400">{healthHistory.length} {t('healthEvents')}</p>
             <button
               onClick={() => setShowHealthForm(!showHealthForm)}
-              className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               {t('logEvent')}
@@ -629,41 +629,41 @@ export function AthleteProfile({
           </div>
 
           {showHealthForm && (
-            <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-              <h3 className="text-[13px] font-semibold text-white mb-4">{t('newHealthEvent')}</h3>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-4">{t('newHealthEvent')}</h3>
               <form onSubmit={handleAddHealthEvent} className="space-y-3">
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('eventDate')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('eventDate')}</label>
                     <input type="date" value={healthForm.event_date} onChange={e => setHealthForm(p => ({ ...p, event_date: e.target.value }))} required
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('eventType')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('eventType')}</label>
                     <select value={healthForm.event_type} onChange={e => setHealthForm(p => ({ ...p, event_type: e.target.value as typeof EVENT_TYPES[number] }))}
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:border-cyan-500/50 capitalize">
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843] capitalize">
                       {EVENT_TYPES.map(et => <option key={et} value={et} className="capitalize">{et.replace('_', ' ')}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('recoveryDays')}</label>
+                    <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('recoveryDays')}</label>
                     <input type="number" value={healthForm.recovery_expected_days} onChange={e => setHealthForm(p => ({ ...p, recovery_expected_days: e.target.value }))} placeholder="7"
-                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono uppercase text-slate-500 mb-1">{t('description')}</label>
+                  <label className="block text-[11px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{t('description')}</label>
                   <input type="text" value={healthForm.description} onChange={e => setHealthForm(p => ({ ...p, description: e.target.value }))} required placeholder="e.g. Left knee pain, mild respiratory infection..."
-                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[13px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50" />
+                    className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]" />
                 </div>
                 <div className="flex items-center gap-3">
                   <input type="checkbox" id="is_current" checked={healthForm.is_current} onChange={e => setHealthForm(p => ({ ...p, is_current: e.target.checked }))}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30" />
-                  <label htmlFor="is_current" className="text-[12px] text-slate-400">{t('currentlyAffecting')}</label>
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-[#2A1F4A] dark:text-[#B8A9E5] focus:ring-[#F7C843]/30" />
+                  <label htmlFor="is_current" className="text-[12px] text-gray-600 dark:text-gray-300">{t('currentlyAffecting')}</label>
                 </div>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('logEvent')}</button>
-                  <button type="button" onClick={() => setShowHealthForm(false)} className="px-4 py-2 rounded-lg border border-slate-700/50 text-slate-400 hover:text-white text-[13px] transition-colors">{t('cancel')}</button>
+                  <button type="submit" className="flex-1 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[13px] py-2 rounded-lg transition-colors">{t('logEvent')}</button>
+                  <button type="button" onClick={() => setShowHealthForm(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-[13px] transition-colors">{t('cancel')}</button>
                 </div>
               </form>
             </div>
@@ -671,36 +671,36 @@ export function AthleteProfile({
 
           <div className="space-y-2">
             {healthHistory.length === 0 && !showHealthForm && (
-              <div className="text-center py-12 bg-[#0d1420] border border-slate-800/60 rounded-xl">
+              <div className="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
                 <Shield className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                <p className="text-slate-500 text-[13px]">{t('noHealthEvents')}</p>
-                <p className="text-slate-600 text-[12px] mt-1">{t('trackHealthEvents')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[13px]">{t('noHealthEvents')}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] mt-1">{t('trackHealthEvents')}</p>
               </div>
             )}
             {[...healthHistory].sort((a, b) => b.event_date.localeCompare(a.event_date)).map(event => {
-              const eventColors: Record<string, string> = { injury: '#ef4444', illness: '#f59e0b', surgery: '#f97316', medication_start: '#0ea5e9', medication_end: '#22c55e', other: '#94a3b8' };
+              const eventColors: Record<string, string> = { injury: '#ef4444', illness: '#8A6900', surgery: '#8A6900', medication_start: '#2A1F4A', medication_end: '#2A1F4A', other: '#94a3b8' };
               const color = eventColors[event.event_type] ?? '#94a3b8';
               return (
-                <div key={event.id} className="bg-[#0d1420] border border-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-4">
+                <div key={event.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 flex items-center gap-4">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: `${color}15`, border: `1px solid ${color}30` }}>
                     <Shield className="w-4 h-4" style={{ color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-[13px] font-medium text-white truncate">{event.description}</p>
+                      <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">{event.description}</p>
                       {event.is_current && (
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 flex-shrink-0">{t('activeStatus')}</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                       {new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       {` · ${event.event_type.replace('_', ' ')}`}
                       {event.recovery_expected_days && ` · ~${event.recovery_expected_days}d ${t('recoveryLabel')}`}
                     </p>
                   </div>
                   {onDeleteHealthEvent && (
-                    <button onClick={() => onDeleteHealthEvent(event.id)} className="text-slate-600 hover:text-red-400 transition-colors ml-2">
+                    <button onClick={() => onDeleteHealthEvent(event.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors ml-2">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}

@@ -23,13 +23,13 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 }
 
 function NumberInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} type="number" className={`mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-[13px] text-gray-800 ${props.className ?? ''}`} />;
+  return <input {...props} type="number" className={`mt-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 font-mono text-[13px] text-gray-800 dark:text-gray-100 ${props.className ?? ''}`} />;
 }
 
 function Card({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return <div className="rounded-xl bg-gray-50 px-4 py-3">
+  return <div className="rounded-xl bg-gray-50 dark:bg-gray-800 px-4 py-3">
     <p className="font-mono text-[10px] uppercase tracking-wide text-gray-400">{label}</p>
-    <p className="mt-0.5 font-heading text-lg font-bold text-gray-900">{value}</p>
+    <p className="mt-0.5 font-heading text-lg font-bold text-gray-900 dark:text-white">{value}</p>
     {sub && <p className="font-body text-[11px] text-gray-400">{sub}</p>}
   </div>;
 }
@@ -196,40 +196,40 @@ export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: 
 
   return <div className="space-y-5">
     <div>
-      <h2 className="font-heading text-xl font-bold text-gray-900">{es ? 'Contrarreloj en bici' : 'Cycling time trial'}</h2>
-      <p className="mt-0.5 font-body text-[13px] text-gray-500">{es ? 'Potencia → velocidad → tiempo, con perfil del recorrido y condiciones ambientales.' : 'Power → speed → time using course profile and environmental conditions.'}</p>
+      <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">{es ? 'Contrarreloj en bici' : 'Cycling time trial'}</h2>
+      <p className="mt-0.5 font-body text-[13px] text-gray-500 dark:text-gray-400">{es ? 'Potencia → velocidad → tiempo, con perfil del recorrido y condiciones ambientales.' : 'Power → speed → time using course profile and environmental conditions.'}</p>
     </div>
 
-    <section className="rounded-xl border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800">{es ? 'Datos de Performance' : 'Performance data'}</h3>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-gray-50 p-3">
-        <div className="text-[12px] text-gray-600">
+    <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800 dark:text-gray-100">{es ? 'Datos de Performance' : 'Performance data'}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
+        <div className="text-[12px] text-gray-600 dark:text-gray-300">
           <p className="font-semibold">{cpData.loading ? (es ? 'Cargando curva…' : 'Loading power curve…') : `${pdCurve.length} ${es ? 'puntos MMP de streams guardados' : 'stored stream MMP points'}`}</p>
           {cpModel && <p className="mt-1">CP {Math.round(cpModel.cp)} W · W′ {(cpModel.wPrimeJ / 1000).toFixed(1)} kJ · R² {cpModel.r2.toFixed(3)} · {es ? `confianza ${cpModel.confidence}` : `${cpModel.confidence} confidence`}</p>}
           <p className="mt-1 text-[10px] text-gray-400">{es ? 'El simulador usa la curva MMP guardada en Performance. La curva no indica si el esfuerzo fue en estado descansado.' : 'Uses the MMP curve saved in Performance. The curve does not identify rested efforts.'}</p>
         </div>
-        <label className="flex items-center gap-2 text-[12px] text-gray-700">
+        <label className="flex items-center gap-2 text-[12px] text-gray-700 dark:text-gray-200">
           <input type="checkbox" checked={usePerformanceCurve} onChange={e => setUsePerformanceCurve(e.target.checked)} />
           {es ? 'Usar curva de Performance' : 'Use Performance curve'}
         </label>
-        <button onClick={() => void syncPowerStreams()} disabled={syncing || cpData.loading} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[11px] text-gray-700 disabled:opacity-50">
+        <button onClick={() => void syncPowerStreams()} disabled={syncing || cpData.loading} className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-[11px] text-gray-700 dark:text-gray-200 disabled:opacity-50">
           <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />{syncing ? (es ? 'Sincronizando…' : 'Syncing…') : (es ? 'Traer streams del HUB' : 'Sync HUB power streams')}
         </button>
       </div>
-      {syncMessage && <p role="status" className="mt-2 text-[11px] text-gray-600">{syncMessage}</p>}
+      {syncMessage && <p role="status" className="mt-2 text-[11px] text-gray-600 dark:text-gray-300">{syncMessage}</p>}
       {(!usePerformanceCurve || !curveCanFit) && <div className="mt-3 grid grid-cols-2 gap-3 md:max-w-md">
         <Field label="CP (W)"><NumberInput min={1} value={manualCp} onChange={e => setManualCp(e.target.value)} placeholder={es ? 'Potencia crítica' : 'Critical power'} /></Field>
         <Field label="W′ (kJ)"><NumberInput min={0.1} step={0.1} value={manualWPrimeKj} onChange={e => setManualWPrimeKj(e.target.value)} placeholder={es ? 'Capacidad W′' : 'W′ capacity'} /></Field>
       </div>}
-      {cpData.error && <p className="mt-2 text-[11px] text-amber-700">{es ? 'No se pudo leer Performance; puedes introducir CP y W′ manualmente.' : 'Could not load Performance data; CP and W′ can be entered manually.'}</p>}
+      {cpData.error && <p className="mt-2 text-[11px] text-[#8A6900] dark:text-[#F7C843]">{es ? 'No se pudo leer Performance; puedes introducir CP y W′ manualmente.' : 'Could not load Performance data; CP and W′ can be entered manually.'}</p>}
     </section>
 
-    <section className="rounded-xl border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800">{es ? 'Recorrido' : 'Course'}</h3>
+    <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800 dark:text-gray-100">{es ? 'Recorrido' : 'Course'}</h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Field label={es ? 'Archivo GPX' : 'GPX file'} hint={courseName || (es ? 'Sin archivo: se usa un circuito llano.' : 'No file: a flat course is used.')}>
           <span className="mt-1 flex items-center gap-2">
-            <input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" onChange={e => void uploadGpx(e.target.files?.[0])} className="min-w-0 text-[11px] text-gray-500" />
+            <input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" onChange={e => void uploadGpx(e.target.files?.[0])} className="min-w-0 text-[11px] text-gray-500 dark:text-gray-400" />
             <Upload className="h-4 w-4 shrink-0 text-gray-400" />
           </span>
         </Field>
@@ -237,12 +237,12 @@ export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: 
         <Field label={es ? 'Altitud llano (m)' : 'Flat course elevation (m)'}><NumberInput value={elevation} onChange={e => setElevation(Number(e.target.value))} /></Field>
         <Field label={es ? 'Viento frente (+) / cola (−), m/s' : 'Headwind (+) / tailwind (−), m/s'}><NumberInput step={0.1} value={headwind} onChange={e => setHeadwind(Number(e.target.value))} /></Field>
       </div>
-      {course && <button onClick={() => { setCourse(null); setCourseName(''); }} className="mt-2 text-[11px] text-blue-700 underline">{es ? `Usar recorrido llano (${course.distance_km.toFixed(1)} km)` : `Use flat course (${course.distance_km.toFixed(1)} km)`}</button>}
-      {course && <p className="mt-2 text-[11px] text-gray-500">{course.distance_km.toFixed(2)} km · +{Math.round(course.totalAscent_m)} m · {course.segments.length} {es ? 'tramos' : 'segments'}</p>}
+      {course && <button onClick={() => { setCourse(null); setCourseName(''); }} className="mt-2 text-[11px] text-[#2A1F4A] dark:text-[#B8A9E5] underline">{es ? `Usar recorrido llano (${course.distance_km.toFixed(1)} km)` : `Use flat course (${course.distance_km.toFixed(1)} km)`}</button>}
+      {course && <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">{course.distance_km.toFixed(2)} km · +{Math.round(course.totalAscent_m)} m · {course.segments.length} {es ? 'tramos' : 'segments'}</p>}
     </section>
 
-    <section className="rounded-xl border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800">{es ? 'Atleta, bici y ambiente' : 'Rider, bike and conditions'}</h3>
+    <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800 dark:text-gray-100">{es ? 'Atleta, bici y ambiente' : 'Rider, bike and conditions'}</h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Field label={es ? 'Masa ciclista + ropa (kg)' : 'Rider + clothing mass (kg)'}><NumberInput min={30} step={0.1} value={mass} onChange={e => setMass(Number(e.target.value))} /></Field>
         <Field label={es ? 'Bici y equipo (kg)' : 'Bike and equipment (kg)'} hint={es ? 'Vacío = 9,5 kg asumidos' : 'Blank = assumed 9.5 kg'}><NumberInput min={0} step={0.1} value={equipmentMass} onChange={e => setEquipmentMass(e.target.value)} placeholder="9.5" /></Field>
@@ -257,27 +257,27 @@ export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: 
       </div>
     </section>
 
-    <section className="rounded-xl border border-gray-200 bg-white p-4">
-      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800">{es ? 'Plan de potencia' : 'Power plan'}</h3>
+    <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+      <h3 className="mb-3 font-heading text-[14px] font-bold text-gray-800 dark:text-gray-100">{es ? 'Plan de potencia' : 'Power plan'}</h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Field label={es ? 'Tipo de plan' : 'Plan type'}><select value={mode} onChange={e => setMode(e.target.value as PlanMode)} className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px]">
+        <Field label={es ? 'Tipo de plan' : 'Plan type'}><select value={mode} onChange={e => setMode(e.target.value as PlanMode)} className="mt-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-[13px]">
           <option value="even">{es ? 'Uniforme sostenible' : 'Even sustainable'}</option>
           <option value="fixed">{es ? 'Potencia constante' : 'Fixed power'}</option>
           <option value="custom">{es ? 'Potencia por km' : 'Power by km'}</option>
         </select></Field>
         {mode === 'even' && <Field label={es ? 'Esfuerzo (% sostenible)' : 'Effort (% sustainable)'}><NumberInput min={50} max={120} value={effortPct} onChange={e => setEffortPct(Number(e.target.value))} /></Field>}
         {mode === 'fixed' && <Field label={es ? 'Potencia (W)' : 'Power (W)'}><NumberInput min={1} value={fixedPower} onChange={e => setFixedPower(Number(e.target.value))} /></Field>}
-        {mode === 'custom' && <Field label={es ? 'Vatios por km, separados por coma' : 'Watts per km, comma-separated'} hint={es ? 'El último valor se repite hasta el final.' : 'The last value repeats to the finish.'}><input value={customPower} onChange={e => setCustomPower(e.target.value)} placeholder="280, 300, 290" className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-[13px]" /></Field>}
+        {mode === 'custom' && <Field label={es ? 'Vatios por km, separados por coma' : 'Watts per km, comma-separated'} hint={es ? 'El último valor se repite hasta el final.' : 'The last value repeats to the finish.'}><input value={customPower} onChange={e => setCustomPower(e.target.value)} placeholder="280, 300, 290" className="mt-1 w-full rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 font-mono text-[13px]" /></Field>}
         <div className="flex items-end gap-2">
-          <button onClick={run} className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-[13px] font-semibold text-white hover:bg-gray-700"><Play className="h-3.5 w-3.5" />{es ? 'Simular' : 'Simulate'}</button>
-          <button onClick={runOptimization} disabled={mode !== 'even'} title={es ? 'Optimiza el reparto manteniendo el NP objetivo' : 'Optimizes pacing while keeping target NP'} className="rounded-lg border border-gray-200 px-3 py-2 text-[12px] text-gray-700 disabled:opacity-40">{es ? 'Optimizar' : 'Optimize'}</button>
+          <button onClick={run} className="flex items-center gap-2 rounded-lg bg-[#F7C843] px-4 py-2 text-[13px] font-semibold text-[#2A1F4A] hover:bg-[#E7B92D]"><Play className="h-3.5 w-3.5" />{es ? 'Simular' : 'Simulate'}</button>
+          <button onClick={runOptimization} disabled={mode !== 'even'} title={es ? 'Optimiza el reparto manteniendo el NP objetivo' : 'Optimizes pacing while keeping target NP'} className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-[12px] text-gray-700 dark:text-gray-200 disabled:opacity-40">{es ? 'Optimizar' : 'Optimize'}</button>
         </div>
       </div>
     </section>
 
     {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-[12px] text-red-700">{error}</div>}
     {result && <div className="space-y-4">
-      {optimized && <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-[12px] text-blue-800">{es ? 'Optimización del modelo: ' : 'Model optimization: '}{formatHMS(optimized.even.time_s)} → {formatHMS(optimized.optimized.time_s)} · {es ? 'ahorro estimado' : 'estimated saving'} {optimized.gain_s.toFixed(1)} s ({optimized.gain_pct.toFixed(2)}%). {es ? 'Es una mejora simulada, no una garantía en carrera.' : 'This is a simulated gain, not a race guarantee.'}</div>}
+      {optimized && <div className="rounded-lg border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 p-3 text-[12px] text-[#2A1F4A] dark:text-[#B8A9E5]">{es ? 'Optimización del modelo: ' : 'Model optimization: '}{formatHMS(optimized.even.time_s)} → {formatHMS(optimized.optimized.time_s)} · {es ? 'ahorro estimado' : 'estimated saving'} {optimized.gain_s.toFixed(1)} s ({optimized.gain_pct.toFixed(2)}%). {es ? 'Es una mejora simulada, no una garantía en carrera.' : 'This is a simulated gain, not a race guarantee.'}</div>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card label={es ? 'Tiempo' : 'Time'} value={formatHMS(result.time_s)} sub={`${result.distance_km.toFixed(2)} km`} />
         <Card label={es ? 'Velocidad media' : 'Average speed'} value={`${result.avgSpeed_kmh.toFixed(1)} km/h`} />
@@ -288,17 +288,17 @@ export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: 
         <Card label="CdA / Crr" value={`${qualityLabel('CdA', result.dataQuality.cda)} · ${qualityLabel('Crr', result.dataQuality.crr)}`} />
         <Card label={es ? 'Modelo / viento' : 'Model / wind'} value={`${result.dataQuality.athleteModel} · ${result.dataQuality.wind}`} sub={`${result.airDensity_kgm3.toFixed(3)} kg/m³`} />
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
         <div className="space-y-1">
-          {result.messages.map((m, i) => <p key={i} className="flex items-start gap-2 text-[11px] text-gray-600"><span className="mt-0.5 text-amber-500">{m.severity === 'warning' || m.severity === 'danger' ? <AlertTriangle className="h-3.5 w-3.5" /> : <Info className="h-3.5 w-3.5" />}</span>{formatCyclingMessage(m, es ? 'es' : 'en')}</p>)}
+          {result.messages.map((m, i) => <p key={i} className="flex items-start gap-2 text-[11px] text-gray-600 dark:text-gray-300"><span className="mt-0.5 text-[#8A6900] dark:text-[#F7C843]">{m.severity === 'warning' || m.severity === 'danger' ? <AlertTriangle className="h-3.5 w-3.5" /> : <Info className="h-3.5 w-3.5" />}</span>{formatCyclingMessage(m, es ? 'es' : 'en')}</p>)}
           <p className="text-[10px] text-gray-400">{qualityLabel('transmisión', result.dataQuality.drivetrainEff)} · {qualityLabel(es ? 'masa del equipo' : 'equipment mass', result.dataQuality.equipmentMass)} · {result.dataQuality.course}</p>
         </div>
-        <button onClick={() => void saveScenario()} disabled={saved} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-[12px] text-gray-700 disabled:opacity-50"><Save className="h-3.5 w-3.5" />{saved ? (es ? 'Guardado' : 'Saved') : (es ? 'Guardar escenario' : 'Save scenario')}</button>
+        <button onClick={() => void saveScenario()} disabled={saved} className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-[12px] text-gray-700 dark:text-gray-200 disabled:opacity-50"><Save className="h-3.5 w-3.5" />{saved ? (es ? 'Guardado' : 'Saved') : (es ? 'Guardar escenario' : 'Save scenario')}</button>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <table className="w-full text-[11px]">
-          <thead className="bg-gray-50 text-gray-500"><tr>{[es ? 'km' : 'km', es ? 'Tiempo' : 'Time', es ? 'Velocidad' : 'Speed', es ? 'Potencia' : 'Power', es ? 'Pendiente' : 'Grade', es ? 'Viento frente' : 'Headwind'].map(x => <th key={x} className="px-3 py-2 text-right font-semibold first:text-left">{x}</th>)}</tr></thead>
-          <tbody>{result.splits.map((s, i) => <tr key={i} className="border-t border-gray-50 text-gray-700"><td className="px-3 py-1.5 font-mono">{s.km.toFixed(1)}</td><td className="px-3 py-1.5 text-right font-mono">{formatHMS(s.time_s)}</td><td className="px-3 py-1.5 text-right font-mono">{s.speed_kmh.toFixed(1)}</td><td className="px-3 py-1.5 text-right font-mono">{Math.round(s.power_w)}</td><td className="px-3 py-1.5 text-right font-mono">{s.grade_pct.toFixed(1)}%</td><td className="px-3 py-1.5 text-right font-mono">{s.headwind_ms.toFixed(1)} m/s</td></tr>)}</tbody>
+          <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400"><tr>{[es ? 'km' : 'km', es ? 'Tiempo' : 'Time', es ? 'Velocidad' : 'Speed', es ? 'Potencia' : 'Power', es ? 'Pendiente' : 'Grade', es ? 'Viento frente' : 'Headwind'].map(x => <th key={x} className="px-3 py-2 text-right font-semibold first:text-left">{x}</th>)}</tr></thead>
+          <tbody>{result.splits.map((s, i) => <tr key={i} className="border-t border-gray-50 text-gray-700 dark:text-gray-200"><td className="px-3 py-1.5 font-mono">{s.km.toFixed(1)}</td><td className="px-3 py-1.5 text-right font-mono">{formatHMS(s.time_s)}</td><td className="px-3 py-1.5 text-right font-mono">{s.speed_kmh.toFixed(1)}</td><td className="px-3 py-1.5 text-right font-mono">{Math.round(s.power_w)}</td><td className="px-3 py-1.5 text-right font-mono">{s.grade_pct.toFixed(1)}%</td><td className="px-3 py-1.5 text-right font-mono">{s.headwind_ms.toFixed(1)} m/s</td></tr>)}</tbody>
         </table>
       </div>
     </div>}

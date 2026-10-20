@@ -91,21 +91,27 @@ export function useSimulationProfile(athlete: Athlete | null) {
 export function useRaceScenarios(athleteId: string | null | undefined) {
   const [scenarios, setScenarios] = useState<RaceScenarioRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refetch = useCallback(async () => {
     if (!athleteId) {
       setScenarios([]);
       setLoading(false);
+      setError(null);
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error: loadError } = await supabase
       .from('race_scenarios')
       .select('*')
       .eq('athlete_id', athleteId)
       .order('created_at', { ascending: false })
       .limit(50);
-    if (!error) setScenarios((data ?? []) as RaceScenarioRecord[]);
+    if (loadError) setError(loadError.message);
+    else {
+      setError(null);
+      setScenarios((data ?? []) as RaceScenarioRecord[]);
+    }
     setLoading(false);
   }, [athleteId]);
 
@@ -114,14 +120,22 @@ export function useRaceScenarios(athleteId: string | null | undefined) {
   const save = useCallback(async (kind: RaceScenarioKind, name: string, params: Record<string, unknown>, result: Record<string, unknown> | null) => {
     if (!athleteId) return;
     const row: RaceScenarioInsert = { athlete_id: athleteId, kind, name, params, result };
-    const { error } = await supabase.from('race_scenarios').insert(row);
-    if (!error) await refetch();
+    const { error: saveError } = await supabase.from('race_scenarios').insert(row);
+    if (saveError) {
+      setError(saveError.message);
+      throw saveError;
+    }
+    await refetch();
   }, [athleteId, refetch]);
 
   const remove = useCallback(async (id: string) => {
-    const { error } = await supabase.from('race_scenarios').delete().eq('id', id);
-    if (!error) setScenarios(prev => prev.filter(s => s.id !== id));
+    const { error: deleteError } = await supabase.from('race_scenarios').delete().eq('id', id);
+    if (deleteError) {
+      setError(deleteError.message);
+      throw deleteError;
+    }
+    setScenarios(prev => prev.filter(s => s.id !== id));
   }, []);
 
-  return { scenarios, loading, save, remove };
+  return { scenarios, loading, error, save, remove };
 }

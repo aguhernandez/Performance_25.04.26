@@ -15,11 +15,11 @@ interface SessionListProps {
 }
 
 const TYPE_CONFIG: Record<SessionType, { icon: React.ElementType; color: string; label: string }> = {
-  endurance: { icon: Activity, color: '#0ea5e9', label: 'Endurance' },
-  strength: { icon: Dumbbell, color: '#f97316', label: 'Strength' },
-  beach_volleyball: { icon: Waves, color: '#22c55e', label: 'Beach Volleyball' },
-  running: { icon: Activity, color: '#a78bfa', label: 'Running' },
-  cycling: { icon: Bike, color: '#f59e0b', label: 'Cycling' },
+  endurance: { icon: Activity, color: '#2A1F4A', label: 'Endurance' },
+  strength: { icon: Dumbbell, color: '#8A6900', label: 'Strength' },
+  beach_volleyball: { icon: Waves, color: '#2A1F4A', label: 'Beach Volleyball' },
+  running: { icon: Activity, color: '#2A1F4A', label: 'Running' },
+  cycling: { icon: Bike, color: '#8A6900', label: 'Cycling' },
   other: { icon: MoreHorizontal, color: '#94a3b8', label: 'Other' },
 };
 
@@ -54,12 +54,12 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold text-white">Training Sessions</h2>
-          <p className="text-[12px] text-slate-500 mt-0.5">{sessions.length} sessions logged</p>
+          <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">Training Sessions</h2>
+          <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">{sessions.length} sessions logged</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-[#070b12] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 bg-[#F7C843] hover:bg-[#E7B92D] text-[#2A1F4A] font-semibold text-[12px] px-3 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Log Session
@@ -74,8 +74,8 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
       />
 
       {showForm && (
-        <div className="bg-[#0d1420] border border-slate-800/60 rounded-xl p-4">
-          <h3 className="text-[13px] font-semibold text-white mb-4">New Session</h3>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-4">New Session</h3>
           <SessionForm
             athleteId={athlete.id}
             athlete={athlete}
@@ -94,7 +94,7 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
           return (
             <div
               key={session.id}
-              className="bg-[#0d1420] border border-slate-800/60 rounded-xl overflow-hidden hover:border-slate-700/60 transition-colors"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:border-gray-300 dark:border-gray-600/60 transition-colors"
             >
               <div className="flex items-center gap-3 px-4 py-3">
                 <div
@@ -106,7 +106,7 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[13px] font-medium text-white truncate">
+                    <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">
                       {session.title || `${typeConf.label} Session`}
                     </p>
                     <span
@@ -116,7 +116,7 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
                       {typeConf.label}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                     {new Date(session.session_date).toLocaleDateString('en-US', {
                       weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
                     })}
@@ -128,25 +128,25 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
 
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <div className="text-right">
-                    <p className="text-[10px] text-slate-600 font-mono uppercase">Impulse</p>
-                    <p className="text-[13px] font-bold font-mono text-cyan-400">{session.impulse.toFixed(3)}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Impulse</p>
+                    <p className="text-[13px] font-bold font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{session.impulse.toFixed(3)}</p>
                   </div>
                   {session.rpe && (
                     <div className="text-right">
-                      <p className="text-[10px] text-slate-600 font-mono uppercase">RPE</p>
-                      <p className="text-[13px] font-bold font-mono text-slate-300">{session.rpe}/10</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">RPE</p>
+                      <p className="text-[13px] font-bold font-mono text-gray-700 dark:text-gray-200">{session.rpe}/10</p>
                     </div>
                   )}
                   <button
                     onClick={() => setExpandedId(expanded ? null : session.id)}
-                    className="text-slate-600 hover:text-slate-400 transition-colors"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors"
                   >
                     {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                   <button
                     onClick={() => handleDelete(session.id)}
                     disabled={deletingId === session.id}
-                    className="text-slate-600 hover:text-red-400 transition-colors disabled:opacity-40"
+                    className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors disabled:opacity-40"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -154,49 +154,49 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
               </div>
 
               {expanded && (
-                <div className="border-t border-slate-800/40 px-4 py-3 bg-slate-800/10">
+                <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-100 dark:bg-gray-800/10">
                   <div className="grid grid-cols-4 gap-3 text-[11px]">
                     {session.normalized_power_watts && (
                       <div>
-                        <p className="text-slate-500 font-mono uppercase">NP</p>
-                        <p className="text-white font-medium">{session.normalized_power_watts}W</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-mono uppercase">NP</p>
+                        <p className="text-gray-900 dark:text-white font-medium">{session.normalized_power_watts}W</p>
                       </div>
                     )}
                     {session.distance_km && (
                       <div>
-                        <p className="text-slate-500 font-mono uppercase">Distance</p>
-                        <p className="text-white font-medium">{session.distance_km}km</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-mono uppercase">Distance</p>
+                        <p className="text-gray-900 dark:text-white font-medium">{session.distance_km}km</p>
                       </div>
                     )}
                     {session.elevation_m && (
                       <div>
-                        <p className="text-slate-500 font-mono uppercase">Elevation</p>
-                        <p className="text-white font-medium">{session.elevation_m}m</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-mono uppercase">Elevation</p>
+                        <p className="text-gray-900 dark:text-white font-medium">{session.elevation_m}m</p>
                       </div>
                     )}
                     {session.max_hr && (
                       <div>
-                        <p className="text-slate-500 font-mono uppercase">Max HR</p>
-                        <p className="text-white font-medium">{session.max_hr}bpm</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-mono uppercase">Max HR</p>
+                        <p className="text-gray-900 dark:text-white font-medium">{session.max_hr}bpm</p>
                       </div>
                     )}
                   </div>
                   {session.notes && (
-                    <p className="text-[12px] text-slate-400 mt-2 border-t border-slate-800/40 pt-2">{session.notes}</p>
+                    <p className="text-[12px] text-gray-600 dark:text-gray-300 mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">{session.notes}</p>
                   )}
-                  <div className="mt-2 border-t border-slate-800/40 pt-2">
+                  <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
                     <ActivityDetail session={session} athlete={athlete} />
                   </div>
                   {session.strength_exercises && Array.isArray(session.strength_exercises) && session.strength_exercises.length > 0 && (
-                    <div className="mt-2 border-t border-slate-800/40 pt-2">
-                      <p className="text-[10px] text-slate-500 font-mono uppercase mb-1.5">Exercises</p>
+                    <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1.5">Exercises</p>
                       <div className="space-y-1">
                         {(session.strength_exercises as import('../../lib/database.types').StrengthExercise[]).map((ex, i) => (
                           <div key={i} className="flex items-center gap-3 text-[11px]">
-                            <span className="text-slate-300 font-medium min-w-[120px]">{ex.name || `Exercise ${i + 1}`}</span>
-                            <span className="text-slate-500">{ex.sets}×{ex.reps} @ {ex.load_kg}kg</span>
-                            <span className="text-slate-600">RIR {ex.rir}</span>
-                            {ex.bar_velocity_ms && <span className="text-slate-600">{ex.bar_velocity_ms}m/s</span>}
+                            <span className="text-gray-700 dark:text-gray-200 font-medium min-w-[120px]">{ex.name || `Exercise ${i + 1}`}</span>
+                            <span className="text-gray-500 dark:text-gray-400">{ex.sets}×{ex.reps} @ {ex.load_kg}kg</span>
+                            <span className="text-gray-500 dark:text-gray-400">RIR {ex.rir}</span>
+                            {ex.bar_velocity_ms && <span className="text-gray-500 dark:text-gray-400">{ex.bar_velocity_ms}m/s</span>}
                           </div>
                         ))}
                       </div>
@@ -209,17 +209,17 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
         })}
 
         {filteredSessions.length === 0 && !showForm && (
-          <div className="text-center py-12 bg-[#0d1420] border border-slate-800/60 rounded-xl">
+          <div className="text-center py-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
             <Activity className="w-8 h-8 text-slate-700 mx-auto mb-2" />
             {sessions.length === 0 ? (
               <>
-                <p className="text-slate-500 text-[13px]">No sessions logged yet</p>
-                <p className="text-slate-600 text-[12px] mt-1">Add your first training session to start modeling performance</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[13px]">No sessions logged yet</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] mt-1">Add your first training session to start modeling performance</p>
               </>
             ) : (
               <>
-                <p className="text-slate-500 text-[13px]">No sessions match your filters</p>
-                <p className="text-slate-600 text-[12px] mt-1">Try adjusting your search or filter criteria</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[13px]">No sessions match your filters</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] mt-1">Try adjusting your search or filter criteria</p>
               </>
             )}
           </div>

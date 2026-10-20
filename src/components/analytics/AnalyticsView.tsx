@@ -49,8 +49,8 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coa
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-gray-900">{t('analyticsTitle')}</h1>
-        <p className="font-body text-[13px] text-gray-500 mt-0.5">
+        <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">{t('analyticsTitle')}</h1>
+        <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
           {t('analyticsSubtitle')}
         </p>
       </div>
@@ -62,11 +62,11 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coa
             onClick={() => setActiveTab(tab.id)}
             className={`flex-shrink-0 flex flex-col items-start px-4 py-3 rounded-xl border transition-all ${
               activeTab === tab.id
-                ? 'bg-gray-900 border-gray-900 text-white'
-                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                ? 'bg-[#F7C843] border-[#F7C843] text-[#2A1F4A]'
+                : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300 hover:bg-gray-50 dark:bg-gray-800'
             }`}
           >
-            <span className={`font-body text-[12px] font-semibold ${activeTab === tab.id ? 'text-white' : 'text-gray-700'}`}>
+            <span className={`font-body text-[12px] font-semibold ${activeTab === tab.id ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200'}`}>
               {tab.label}
             </span>
             <span className={`font-body text-[10px] mt-0.5 ${activeTab === tab.id ? 'text-gray-300' : 'text-gray-400'}`}>

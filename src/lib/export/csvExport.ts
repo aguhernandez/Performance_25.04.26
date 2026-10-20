@@ -16,7 +16,7 @@ function downloadCsv(content: string, filename: string) {
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function exportBannisterHistory(history: DailyBannisterResult[], athleteName: string) {

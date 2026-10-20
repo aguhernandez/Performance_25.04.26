@@ -34,11 +34,11 @@ const PAD = { top: 10, right: 12, bottom: 20, left: 40 };
 function Chip({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
     <div
-      className="px-2 py-1 rounded-md bg-slate-800/60 border border-slate-700/50"
+      className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
       title={label}
     >
-      <span className="text-[9px] uppercase tracking-wide text-slate-500 font-mono">{label}</span>
-      <span className={`ml-1.5 text-[11px] font-semibold font-mono ${warn ? 'text-amber-400' : 'text-slate-100'}`}>{value}</span>
+      <span className="text-[9px] uppercase tracking-wide text-gray-500 dark:text-gray-400 font-mono">{label}</span>
+      <span className={`ml-1.5 text-[11px] font-semibold font-mono ${warn ? 'text-[#8A6900] dark:text-[#F7C843]' : 'text-gray-900 dark:text-white'}`}>{value}</span>
     </div>
   );
 }
@@ -185,33 +185,33 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
             <Chip label="<25% time" value={metrics.seconds_below_25pct !== null ? `${metrics.seconds_below_25pct}s` : '—'} />
           </div>
         ) : (
-          <p className="text-[11px] text-slate-500 italic">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">
             No stored stream metrics for this session — requires power stream ingestion.
           </p>
         )
       ) : (
-        <p className="text-[11px] text-slate-600">Loading metrics…</p>
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">Loading metrics…</p>
       )}
 
-      <div className="border-t border-slate-800/40 pt-2">
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
         {wbalState === 'idle' && (
           <button
             onClick={loadWbal}
-            className="text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+            className="text-[11px] font-medium text-[#2A1F4A] dark:text-[#B8A9E5] hover:text-[#2A1F4A] dark:text-[#B8A9E5] transition-colors"
           >
             Load W′bal chart
           </button>
         )}
-        {wbalState === 'loading' && <p className="text-[11px] text-slate-500">Loading W′bal…</p>}
+        {wbalState === 'loading' && <p className="text-[11px] text-gray-500 dark:text-gray-400">Loading W′bal…</p>}
         {wbalState === 'no-stream' && (
-          <p className="text-[11px] text-slate-500 italic">Requires power stream</p>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">Requires power stream</p>
         )}
         {wbalState === 'no-cp' && (
-          <p className="text-[11px] text-slate-500 italic">Requires high-confidence CP</p>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">Requires high-confidence CP</p>
         )}
         {wbalState === 'ready' && series && chart && (
           <div>
-            <p className="text-[10px] font-mono uppercase text-slate-500 mb-1">
+            <p className="text-[10px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">
               W′ balance — CP {Math.round(cp!)}W · W′ {Math.round(wPrimeJ! / 100) / 10}kJ
             </p>
             <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
@@ -226,7 +226,7 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
               <path
                 d={series.map((p, i) => `${i === 0 ? 'M' : 'L'} ${chart.xOf(p.t)} ${chart.yOf(chart.wPrimeKj - p.wbalJ / 1000)} `).join('')}
                 fill="none"
-                stroke="#22d3ee"
+                stroke="#2A1F4A"
                 strokeWidth="1.5"
                 strokeLinejoin="round"
               />
@@ -235,7 +235,7 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
                 y1={chart.warnY}
                 x2={W - PAD.right}
                 y2={chart.warnY}
-                stroke="#f59e0b"
+                stroke="#8A6900"
                 strokeWidth="1"
                 strokeDasharray="4 3"
               />
@@ -281,13 +281,13 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
               />
               {hover && (
                 <g>
-                  <line x1={hover.x} y1={PAD.top} x2={hover.x} y2={PAD.top + chart.plotH} stroke="#334155" strokeWidth="0.5" />
-                  <circle cx={hover.x} cy={hover.y} r="3" fill="#22d3ee" />
+                  <line x1={hover.x} y1={PAD.top} x2={hover.x} y2={PAD.top + chart.plotH} stroke="var(--chart-label)" strokeWidth="0.5" />
+                  <circle cx={hover.x} cy={hover.y} r="3" fill="#2A1F4A" />
                   <text
                     x={Math.min(hover.x + 6, W - 70)}
                     y={Math.max(12, hover.y - 6)}
                     fontSize="10"
-                    fill="#e2e8f0"
+                    fill="var(--chart-grid)"
                     fontFamily="system-ui"
                   >
                     {(hover.point.wbalJ / 1000).toFixed(1)} kJ · {Math.floor(hover.point.t / 60)}:{String(hover.point.t % 60).padStart(2, '0')}

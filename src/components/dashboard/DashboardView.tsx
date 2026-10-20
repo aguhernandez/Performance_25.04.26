@@ -104,11 +104,14 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
           {TABS.map(tab => (
             <button
               key={tab.id}
+              type="button"
+              aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'bg-[#F7C843] text-[#2A1F4A]'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+
               }`}
             >
               {tab.icon}
@@ -119,7 +122,7 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
                 </span>
               )}
               {tab.id === 'hub' && hubConnected && (
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2A1F4A] dark:bg-[#B8A9E5] flex-shrink-0" />
               )}
             </button>
           ))}

@@ -161,7 +161,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4 py-8">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
@@ -169,8 +169,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             <span className="font-heading text-xl font-bold" style={{ color: '#2A1F4A' }}>ASC</span>
             <span className="font-heading text-xl font-bold" style={{ color: '#F7C843' }}>Impulse</span>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-gray-900 mb-1">Welcome to your performance engine</h1>
-          <p className="font-body text-[13px] text-gray-500">Complete your athlete profile in 4 quick steps</p>
+          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-white mb-1">Welcome to your performance engine</h1>
+          <p className="font-body text-[13px] text-gray-500 dark:text-gray-400">Complete your athlete profile in 4 quick steps</p>
         </div>
 
         <div className="flex items-center justify-between mb-8 px-2">
@@ -182,12 +182,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               <div key={s.id} className="flex flex-col items-center gap-1 flex-1">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
-                    done ? 'border-green-500 bg-green-50' :
+                    done ? 'border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10' :
                     active ? 'border-[#F7C843] bg-[#F7C843]/10' :
-                    'border-gray-200 bg-white'
+                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
                   }`}
                 >
-                  {done ? <Check className="w-4 h-4 text-green-500" /> : <Icon className={`w-4 h-4 ${active ? 'text-[#2A1F4A]' : 'text-gray-400'}`} />}
+                  {done ? <Check className="w-4 h-4 text-[#2A1F4A] dark:text-[#B8A9E5]" /> : <Icon className={`w-4 h-4 ${active ? 'text-[#2A1F4A]' : 'text-gray-400'}`} />}
                 </div>
                 <span className={`font-body text-[10px] ${active ? 'text-[#2A1F4A] font-semibold' : 'text-gray-400'}`}>{s.label}</span>
                 {i < STEPS.length - 1 && (
@@ -198,27 +198,27 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           })}
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
           {step === 'identity' && (
             <div className="space-y-5">
               <div>
-                <h2 className="font-heading text-[17px] font-bold text-gray-900 mb-1">Tell us about you</h2>
-                <p className="font-body text-[12px] text-gray-500">Basic info to personalize your model</p>
+                <h2 className="font-heading text-[17px] font-bold text-gray-900 dark:text-white mb-1">Tell us about you</h2>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Basic info to personalize your model</p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">Your Name</label>
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Your Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="Athlete name"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843] focus:ring-2 focus:ring-[#F7C843]/20"
+                  className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843] focus:ring-2 focus:ring-[#F7C843]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-2">Primary Sport</label>
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Primary Sport</label>
                 <div className="grid grid-cols-2 gap-2">
                   {SPORT_OPTIONS.map(s => (
                     <button
@@ -228,7 +228,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all ${
                         sport === s.value
                           ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                       }`}
                     >
                       <span className="text-base">{s.emoji}</span>
@@ -240,7 +240,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">Body Weight (kg)</label>
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Body Weight (kg)</label>
                   <input
                     type="number"
                     value={weightKg}
@@ -248,15 +248,15 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     min="30"
                     max="200"
                     step="0.1"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843]"
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">Training Experience</label>
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">Training Experience</label>
                   <select
                     value={experienceYears}
                     onChange={e => setExperienceYears(parseInt(e.target.value))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 focus:outline-none focus:border-[#F7C843]"
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-[13px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]"
                   >
                     {EXPERIENCE_OPTIONS.map(o => (
                       <option key={o.value} value={o.value}>{o.label}</option>
@@ -270,12 +270,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           {step === 'physiology' && (
             <div className="space-y-5">
               <div>
-                <h2 className="font-heading text-[17px] font-bold text-gray-900 mb-1">Physiological Parameters</h2>
-                <p className="font-body text-[12px] text-gray-500">These personalize the Bannister model. We've estimated values from your profile — refine if you have lab data.</p>
+                <h2 className="font-heading text-[17px] font-bold text-gray-900 dark:text-white mb-1">Physiological Parameters</h2>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">These personalize the Bannister model. We've estimated values from your profile — refine if you have lab data.</p>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                <p className="font-body text-[11px] text-amber-700">
+              <div className="bg-[#F7C843]/20 dark:bg-[#F7C843]/10 border border-[#F7C843]/40 dark:border-[#F7C843]/30 rounded-xl p-3">
+                <p className="font-body text-[11px] text-[#8A6900] dark:text-[#F7C843]">
                   <strong>Estimated values</strong> based on your sport and experience. You can leave these as-is and the model will refine over time as you log sessions.
                 </p>
               </div>
@@ -288,7 +288,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   onChange={e => setHasLabData(e.target.checked)}
                   className="rounded"
                 />
-                <label htmlFor="hasLab" className="font-body text-[12px] text-gray-600 cursor-pointer">
+                <label htmlFor="hasLab" className="font-body text-[12px] text-gray-600 dark:text-gray-300 cursor-pointer">
                   I have recent lab test results (VO2max, CP, FTP)
                 </label>
               </div>
@@ -302,7 +302,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                   { label: 'Resting HR (bpm)', value: restingHr, set: setRestingHr, est: '60', step: '1', hint: 'Morning resting HR' },
                 ].map(({ label, value, set, est, step: s, hint }) => (
                   <div key={label}>
-                    <label className="block text-[10px] font-mono uppercase text-gray-500 mb-1">{label}</label>
+                    <label className="block text-[10px] font-mono uppercase text-gray-500 dark:text-gray-400 mb-1">{label}</label>
                     <input
                       type="number"
                       value={hasLabData ? value : ''}
@@ -311,7 +311,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       step={s}
                       disabled={!hasLabData}
                       className={`w-full border rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:border-[#F7C843] ${
-                        hasLabData ? 'border-gray-200 text-gray-900' : 'border-gray-100 text-gray-400 bg-gray-50 cursor-not-allowed'
+                        hasLabData ? 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white' : 'border-gray-100 dark:border-gray-800 text-gray-400 bg-gray-50 dark:bg-gray-800 cursor-not-allowed'
                       }`}
                     />
                     <p className="text-[9px] text-gray-400 mt-0.5">{hasLabData ? hint : `Est: ${est}`}</p>
@@ -324,12 +324,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           {step === 'goals' && (
             <div className="space-y-5">
               <div>
-                <h2 className="font-heading text-[17px] font-bold text-gray-900 mb-1">What are you training for?</h2>
-                <p className="font-body text-[12px] text-gray-500">Your goal shapes recommendations and load targets</p>
+                <h2 className="font-heading text-[17px] font-bold text-gray-900 dark:text-white mb-1">What are you training for?</h2>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Your goal shapes recommendations and load targets</p>
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-2">Primary Goal</label>
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Primary Goal</label>
                 <div className="space-y-2">
                   {GOAL_OPTIONS.map(g => (
                     <button
@@ -339,7 +339,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl border text-left transition-all ${
                         primaryGoal === g.value
                           ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                       }`}
                     >
                       {primaryGoal === g.value && <Check className="w-3.5 h-3.5 text-[#2A1F4A] flex-shrink-0" />}
@@ -350,7 +350,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-2">Timeline</label>
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Timeline</label>
                 <div className="grid grid-cols-3 gap-2">
                   {TIMELINE_OPTIONS.map(t => (
                     <button
@@ -360,7 +360,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                       className={`px-3 py-2 rounded-xl border text-center transition-all ${
                         goalTimelineWeeks === t.value
                           ? 'border-[#F7C843] bg-[#F7C843]/10 text-[#2A1F4A] font-semibold'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                       }`}
                     >
                       <span className="font-body text-[12px]">{t.label}</span>
@@ -374,8 +374,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           {step === 'confirm' && (
             <div className="space-y-5">
               <div>
-                <h2 className="font-heading text-[17px] font-bold text-gray-900 mb-1">Ready to launch</h2>
-                <p className="font-body text-[12px] text-gray-500">Here's a summary of your athlete profile</p>
+                <h2 className="font-heading text-[17px] font-bold text-gray-900 dark:text-white mb-1">Ready to launch</h2>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400">Here's a summary of your athlete profile</p>
               </div>
 
               {(() => {
@@ -383,24 +383,24 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 const weight = parseFloat(weightKg) || 75;
                 return (
                   <div className="space-y-3">
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
-                      <p className="font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Identity</p>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2.5">
+                      <p className="font-body text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Identity</p>
                       <div className="flex justify-between">
-                        <span className="font-body text-[13px] text-gray-600">Name</span>
-                        <span className="font-body text-[13px] font-semibold text-gray-900">{name}</span>
+                        <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">Name</span>
+                        <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white">{name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-body text-[13px] text-gray-600">Sport</span>
-                        <span className="font-body text-[13px] font-semibold text-gray-900 capitalize">{sport}</span>
+                        <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">Sport</span>
+                        <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white capitalize">{sport}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-body text-[13px] text-gray-600">Weight</span>
-                        <span className="font-body text-[13px] font-semibold text-gray-900">{weight} kg</span>
+                        <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">Weight</span>
+                        <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white">{weight} kg</span>
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
-                      <p className="font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Physiology {!hasLabData && '(Estimated)'}</p>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2.5">
+                      <p className="font-body text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Physiology {!hasLabData && '(Estimated)'}</p>
                       {[
                         ['VO2max', `${physio.vo2max} ml/kg/min`],
                         ['Critical Power', `${physio.cp_watts} W (${(physio.cp_watts / weight).toFixed(1)} W/kg)`],
@@ -408,29 +408,29 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                         ['Max HR', `${physio.max_hr} bpm`],
                       ].map(([k, v]) => (
                         <div key={k} className="flex justify-between">
-                          <span className="font-body text-[13px] text-gray-600">{k}</span>
-                          <span className="font-body text-[13px] font-semibold text-gray-900">{v}</span>
+                          <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">{k}</span>
+                          <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white">{v}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
-                      <p className="font-body text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Goals</p>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-2.5">
+                      <p className="font-body text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Goals</p>
                       <div className="flex justify-between">
-                        <span className="font-body text-[13px] text-gray-600">Goal</span>
-                        <span className="font-body text-[13px] font-semibold text-gray-900 capitalize">{primaryGoal.replace(/_/g, ' ')}</span>
+                        <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">Goal</span>
+                        <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white capitalize">{primaryGoal.replace(/_/g, ' ')}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-body text-[13px] text-gray-600">Timeline</span>
-                        <span className="font-body text-[13px] font-semibold text-gray-900">{goalTimelineWeeks} weeks</span>
+                        <span className="font-body text-[13px] text-gray-600 dark:text-gray-300">Timeline</span>
+                        <span className="font-body text-[13px] font-semibold text-gray-900 dark:text-white">{goalTimelineWeeks} weeks</span>
                       </div>
                     </div>
                   </div>
                 );
               })()}
 
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                <p className="font-body text-[11px] text-blue-700">
+              <div className="bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 rounded-xl p-3">
+                <p className="font-body text-[11px] text-[#2A1F4A] dark:text-[#B8A9E5]">
                   The model will refine these estimates as you log sessions. You can update your profile at any time in Settings.
                 </p>
               </div>
@@ -448,7 +448,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:border-gray-300 font-body text-[13px] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300 font-body text-[13px] transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back
@@ -476,7 +476,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             <div
               key={s.id}
               className={`h-1.5 rounded-full transition-all ${
-                i === stepIndex ? 'w-6 bg-[#2A1F4A]' : i < stepIndex ? 'w-3 bg-[#F7C843]' : 'w-3 bg-gray-200'
+                i === stepIndex ? 'w-6 bg-[#2A1F4A]' : i < stepIndex ? 'w-3 bg-[#F7C843]' : 'w-3 bg-gray-200 dark:bg-gray-700'
               }`}
             />
           ))}

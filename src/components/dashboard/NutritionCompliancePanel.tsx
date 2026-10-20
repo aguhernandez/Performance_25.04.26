@@ -11,7 +11,7 @@ interface NutritionCompliancePanelProps {
 function ScoreBar({ value, max = 100, color }: { value: number; max?: number; color: string }) {
   const pct = Math.min((value / max) * 100, 100);
   return (
-    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+    <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
       <div
         className="h-full rounded-full transition-all duration-500"
         style={{ width: `${pct}%`, backgroundColor: color }}
@@ -24,11 +24,11 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
   const recentLogs = logs.slice(0, 7);
   const avgSleep = recentLogs.length > 0 ? recentLogs.reduce((s, l) => s + l.sleep_hours, 0) / recentLogs.length : 0;
 
-  const eaColor = compliance.energyAvailability < 25 ? '#ef4444' : compliance.energyAvailability > 55 ? '#f59e0b' : '#22c55e';
-  const overallColor = compliance.overallCompliance < 50 ? '#ef4444' : compliance.overallCompliance < 75 ? '#f59e0b' : '#22c55e';
+  const eaColor = compliance.energyAvailability < 25 ? '#ef4444' : compliance.energyAvailability > 55 ? '#8A6900' : '#2A1F4A';
+  const overallColor = compliance.overallCompliance < 50 ? '#ef4444' : compliance.overallCompliance < 75 ? '#8A6900' : '#2A1F4A';
 
   const AlertIcon = compliance.deficit ? AlertCircle : compliance.excess ? TrendingDown : compliance.overallCompliance > 75 ? CheckCircle : Info;
-  const alertColor = compliance.deficit ? '#ef4444' : compliance.excess ? '#f59e0b' : compliance.overallCompliance > 75 ? '#22c55e' : '#0ea5e9';
+  const alertColor = compliance.deficit ? '#ef4444' : compliance.excess ? '#8A6900' : compliance.overallCompliance > 75 ? '#2A1F4A' : '#8A6900';
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
@@ -60,20 +60,22 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
             <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Recovery Score</span>
             <span className="text-[10px] font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{compliance.recoveryScore.toFixed(0)}%</span>
           </div>
-          <ScoreBar value={compliance.recoveryScore} max={100} color="#0ea5e9" />
+          <ScoreBar value={compliance.recoveryScore} max={100} color="#2A1F4A" />
+
           <p className="text-[9px] text-gray-600 dark:text-gray-500 mt-0.5">Sleep duration + quality weighted</p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         {[
-          { label: 'Protein', value: compliance.proteinAdherence, unit: '%', color: '#22c55e', target: `${(weightKg * 1.8).toFixed(0)}g target` },
-          { label: 'Carbs', value: compliance.carbAdherence, unit: '%', color: '#f59e0b', target: `${(weightKg * 5).toFixed(0)}g target` },
-          { label: 'Fat', value: compliance.fatAdherence, unit: '%', color: '#a78bfa', target: '≥20% total kcal' },
+          { label: 'Protein', value: compliance.proteinAdherence, unit: '%', color: '#2A1F4A', target: `${(weightKg * 1.8).toFixed(0)}g target` },
+          { label: 'Carbs', value: compliance.carbAdherence, unit: '%', color: '#8A6900', target: `${(weightKg * 5).toFixed(0)}g target` },
+          { label: 'Fat', value: compliance.fatAdherence, unit: '%', color: '#2A1F4A', target: '≥20% total kcal' },
         ].map(({ label, value, color, target }) => (
           <div key={label} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2.5 border border-gray-200 dark:border-gray-700">
             <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1">{label}</p>
-            <p className="text-[18px] font-bold font-mono" style={{ color: value >= 80 ? color : value >= 60 ? '#f59e0b' : '#ef4444' }}>
+            <p className="text-[18px] font-bold font-mono" style={{ color: value >= 80 ? color : value >= 60 ? '#8A6900' : '#ef4444' }}>
+
               {value.toFixed(0)}%
             </p>
             <p className="text-[9px] text-gray-600 dark:text-gray-500">{target}</p>
@@ -95,7 +97,7 @@ export function NutritionCompliancePanel({ logs, compliance, weightKg }: Nutriti
           <div className="flex items-end gap-1 h-10">
             {recentLogs.slice(0, 7).reverse().map((log, i) => {
               const h = Math.min((log.sleep_hours / 9) * 40, 40);
-              const color = log.sleep_hours >= 8 ? '#22c55e' : log.sleep_hours >= 7 ? '#f59e0b' : '#ef4444';
+              const color = log.sleep_hours >= 8 ? '#2A1F4A' : log.sleep_hours >= 7 ? '#8A6900' : '#ef4444';
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-0.5 group">
                   <div

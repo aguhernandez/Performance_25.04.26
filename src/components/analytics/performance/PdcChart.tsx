@@ -9,8 +9,8 @@ const RANGES = [
 ];
 
 const SERIES_COLORS: Record<string, string> = {
-  '42d': '#2563eb',
-  '90d': '#16a34a',
+  '42d': '#2A1F4A',
+  '90d': '#2A1F4A',
   'all': '#94a3b8',
 };
 
@@ -101,14 +101,14 @@ export function PdcChart({ windows, cpModel, hasStreams }: {
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }} onMouseLeave={() => setHover(null)}>
             {yTicks.map(v => (
               <g key={v}>
-                <line x1={PAD.left} y1={yOf(v)} x2={W - PAD.right} y2={yOf(v)} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={PAD.left - 6} y={yOf(v) + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{v}</text>
+                <line x1={PAD.left} y1={yOf(v)} x2={W - PAD.right} y2={yOf(v)} stroke="var(--chart-grid)" strokeWidth="1" />
+                <text x={PAD.left - 6} y={yOf(v) + 4} textAnchor="end" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">{v}</text>
               </g>
             ))}
             {X_TICKS.map(t => (
               <g key={t}>
                 <line x1={xOf(t)} y1={PAD.top} x2={xOf(t)} y2={PAD.top + plotH} stroke="#f8fafc" strokeWidth="1" />
-                <text x={xOf(t)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{fmtDur(t)}</text>
+                <text x={xOf(t)} y={H - PAD.bottom + 16} textAnchor="middle" fontSize="10" fill="var(--chart-label)" fontFamily="system-ui">{fmtDur(t)}</text>
               </g>
             ))}
 
@@ -193,7 +193,7 @@ export function PdcChart({ windows, cpModel, hasStreams }: {
                       x={xOf(p.duration_s) + 130 + 24 > W ? xOf(p.duration_s) - 140 : xOf(p.duration_s) + 22}
                       y={yOf(p.watts) + (yOf(p.watts) > H / 2 ? 48 : -38)}
                       fontSize="10"
-                      fill="#2563eb"
+                      fill="#2A1F4A"
                       fontFamily="system-ui"
                       style={{ cursor: 'pointer', textDecoration: 'underline' }}
                     >
@@ -206,7 +206,7 @@ export function PdcChart({ windows, cpModel, hasStreams }: {
           </svg>
 
           {cpModel && (
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-4 pt-4 border-t border-gray-100">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               {[
                 { label: 'CP', value: `${cpModel.cp} W` },
                 { label: "W'", value: `${(cpModel.wPrimeJ / 1000).toFixed(1)} kJ` },
@@ -217,7 +217,7 @@ export function PdcChart({ windows, cpModel, hasStreams }: {
               ].map(c => (
                 <div key={c.label}>
                   <p className="font-body text-[10px] text-gray-400 uppercase tracking-wide">{c.label}</p>
-                  <p className="font-heading text-[15px] font-bold text-gray-800 capitalize">{c.value}</p>
+                  <p className="font-heading text-[15px] font-bold text-gray-800 dark:text-gray-100 capitalize">{c.value}</p>
                 </div>
               ))}
             </div>

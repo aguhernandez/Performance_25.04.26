@@ -40,20 +40,20 @@ export function SessionFilters({ filters, onChange, totalCount, filteredCount }:
     <div className="space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
         <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
           <input
             type="text"
             value={filters.search}
             onChange={e => set({ search: e.target.value })}
             placeholder="Search sessions..."
-            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg pl-8 pr-3 py-2 text-[12px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50"
+            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg pl-8 pr-3 py-2 text-[12px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]"
           />
         </div>
 
         <select
           value={filters.type}
           onChange={e => set({ type: e.target.value as SessionFilterState['type'] })}
-          className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none focus:border-cyan-500/50"
+          className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[12px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]"
         >
           {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
@@ -61,13 +61,13 @@ export function SessionFilters({ filters, onChange, totalCount, filteredCount }:
         <select
           value={filters.sortBy}
           onChange={e => set({ sortBy: e.target.value as SessionFilterState['sortBy'] })}
-          className="bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-[12px] text-white focus:outline-none focus:border-cyan-500/50"
+          className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[12px] text-gray-900 dark:text-white focus:outline-none focus:border-[#F7C843]"
         >
           {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
 
         <div className="relative">
-          <SlidersHorizontal className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+          <SlidersHorizontal className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 dark:text-gray-400" />
           <input
             type="number"
             value={filters.minImpulse}
@@ -75,14 +75,14 @@ export function SessionFilters({ filters, onChange, totalCount, filteredCount }:
             placeholder="Min impulse"
             step="0.01"
             min="0"
-            className="w-[120px] bg-slate-800/50 border border-slate-700/50 rounded-lg pl-7 pr-2 py-2 text-[12px] text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/50"
+            className="w-[120px] bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg pl-7 pr-2 py-2 text-[12px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]"
           />
         </div>
 
         {hasFilters && (
           <button
             onClick={() => onChange({ search: '', type: 'all', sortBy: 'date_desc', minImpulse: '' })}
-            className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors"
+            className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition-colors"
           >
             <X className="w-3 h-3" />
             Clear
@@ -91,7 +91,7 @@ export function SessionFilters({ filters, onChange, totalCount, filteredCount }:
       </div>
 
       {hasFilters && (
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">
           Showing {filteredCount} of {totalCount} sessions
         </p>
       )}

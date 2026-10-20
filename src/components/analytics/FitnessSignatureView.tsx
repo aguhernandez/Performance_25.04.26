@@ -59,10 +59,10 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
   }, [athlete, ftpHistory, cpData.cpModel]);
 
   const metrics = {
-    cp: { label: t('criticalPower'), unit: 'W', color: '#2563eb' },
-    wPrime: { label: t('wPrimeKj'), unit: 'kJ', color: '#d97706' },
-    pMax: { label: t('peakPower'), unit: 'W', color: '#16a34a' },
-    cpPerKg: { label: t('cpKg'), unit: 'W/kg', color: '#dc2626' },
+    cp: { label: t('criticalPower'), unit: 'W', color: '#2A1F4A' },
+    wPrime: { label: t('wPrimeKj'), unit: 'kJ', color: '#8A6900' },
+    pMax: { label: t('peakPower'), unit: 'W', color: '#2A1F4A' },
+    cpPerKg: { label: t('cpKg'), unit: 'W/kg', color: '#8A6900' },
   };
 
   const currentMetric = metrics[selectedMetric];
@@ -107,8 +107,8 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-bold text-gray-900">{t('fsTitle')}</h2>
-          <p className="font-body text-[13px] text-gray-500 mt-0.5">
+          <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">{t('fsTitle')}</h2>
+          <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
             {t('fsSubtitle')}
           </p>
         </div>
@@ -118,7 +118,7 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
               key={key}
               onClick={() => setSelectedMetric(key as typeof selectedMetric)}
               className={`px-3 py-1.5 rounded-lg font-body text-[12px] font-medium transition-all ${
-                selectedMetric === key ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                selectedMetric === key ? 'text-gray-900 dark:text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:bg-gray-700'
               }`}
               style={selectedMetric === key ? { backgroundColor: meta.color } : {}}
             >
@@ -134,41 +134,41 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
             label: t('currentCp'),
             value: current ? `${current.cp}W` : '—',
             sub: current ? `${current.cpPerKg.toFixed(2)} W/kg` : '—',
-            color: '#2563eb',
+            color: '#2A1F4A',
           },
           {
             label: t('currentWPrime'),
             value: current ? `${Math.round(current.wPrime / 1000 * 10) / 10} kJ` : '—',
             sub: current ? `${current.wPrime}J total` : '—',
-            color: '#d97706',
+            color: '#8A6900',
           },
           {
             label: t('peakPower'),
             value: current ? `${current.pMax}W` : '—',
             sub: current ? `${(current.pMax / (athlete.weight_kg || 70)).toFixed(2)} W/kg` : '—',
-            color: '#16a34a',
+            color: '#2A1F4A',
           },
           {
             label: t('cpTrend'),
             value: trendPct !== 0 ? `${trendPct > 0 ? '+' : ''}${trendPct.toFixed(1)}%` : '—',
             sub: values.length > 1 ? t('vsFirstTest') : t('vsBaseline'),
-            color: trendPct > 0 ? '#16a34a' : trendPct < 0 ? '#ef4444' : '#6b7280',
+            color: trendPct > 0 ? '#2A1F4A' : trendPct < 0 ? '#ef4444' : '#6b7280',
           },
         ].map(card => (
-          <div key={card.label} className="bg-white border border-gray-200 rounded-xl p-4">
-            <p className="font-body text-[11px] text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
+          <div key={card.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p className="font-body text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{card.label}</p>
             <p className="font-heading text-[22px] font-bold" style={{ color: card.color }}>{card.value}</p>
             <p className="font-body text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-heading text-[14px] font-bold text-gray-900">{currentMetric.label} Over Time</h3>
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">{currentMetric.label} Over Time</h3>
           <div className="flex items-center gap-2">
             {trend !== 0 && (
-              <span className={`font-body text-[12px] font-medium px-2 py-0.5 rounded-full ${trend > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+              <span className={`font-body text-[12px] font-medium px-2 py-0.5 rounded-full ${trend > 0 ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' : 'bg-red-50 text-red-700'}`}>
                 {trend > 0 ? '+' : ''}{trendPct.toFixed(1)}%
               </span>
             )}
@@ -184,7 +184,7 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full" style={{ height: 220 }}>
             {[minVal, (minVal + maxVal) / 2, maxVal].map((v, i) => (
               <g key={i}>
-                <line x1={padding.left} y1={yScale(v)} x2={chartWidth - padding.right} y2={yScale(v)} stroke="#f1f5f9" strokeWidth="1" />
+                <line x1={padding.left} y1={yScale(v)} x2={chartWidth - padding.right} y2={yScale(v)} stroke="var(--chart-grid)" strokeWidth="1" />
                 <text x={padding.left - 6} y={yScale(v) + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">
                   {selectedMetric === 'cpPerKg' ? v.toFixed(2) : selectedMetric === 'wPrime' ? v.toFixed(1) : Math.round(v)}
                 </text>
@@ -219,8 +219,8 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
         )}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">{t('testHistory')}</h3>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+        <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white mb-4">{t('testHistory')}</h3>
         {signatureHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-24 text-gray-400">
             <p className="font-body text-[13px]">{t('noLabTestsRecorded')}</p>
@@ -230,7 +230,7 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-gray-800">
                   <th className="font-body text-[11px] text-gray-400 text-left pb-2">{t('date')}</th>
                   <th className="font-body text-[11px] text-gray-400 text-right pb-2">{t('cpW')}</th>
                   <th className="font-body text-[11px] text-gray-400 text-right pb-2">{t('ftpW')}</th>
@@ -245,18 +245,18 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
                   const prev = i > 0 ? signatureHistory[i - 1] : null;
                   const delta = prev ? entry.cp - prev.cp : null;
                   return (
-                    <tr key={entry.date} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="font-body text-[12px] text-gray-700 py-2">{entry.date}</td>
-                      <td className="font-heading text-[13px] font-bold text-blue-600 text-right py-2">{entry.cp}</td>
-                      <td className="font-body text-[12px] text-gray-600 text-right py-2">{entry.ftpWatts}</td>
-                      <td className="font-body text-[12px] text-gray-600 text-right py-2">{Math.round(entry.wPrime / 1000 * 10) / 10}</td>
-                      <td className="font-body text-[12px] text-gray-600 text-right py-2">{entry.cpPerKg.toFixed(2)}</td>
+                    <tr key={entry.date} className="border-b border-gray-50 hover:bg-gray-50 dark:bg-gray-800 transition-colors">
+                      <td className="font-body text-[12px] text-gray-700 dark:text-gray-200 py-2">{entry.date}</td>
+                      <td className="font-heading text-[13px] font-bold text-[#2A1F4A] dark:text-[#B8A9E5] text-right py-2">{entry.cp}</td>
+                      <td className="font-body text-[12px] text-gray-600 dark:text-gray-300 text-right py-2">{entry.ftpWatts}</td>
+                      <td className="font-body text-[12px] text-gray-600 dark:text-gray-300 text-right py-2">{Math.round(entry.wPrime / 1000 * 10) / 10}</td>
+                      <td className="font-body text-[12px] text-gray-600 dark:text-gray-300 text-right py-2">{entry.cpPerKg.toFixed(2)}</td>
                       <td className="text-right py-2">
-                        <span className={`font-body text-[10px] px-1.5 py-0.5 rounded-full ${entry.source === 'lab' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`font-body text-[10px] px-1.5 py-0.5 rounded-full ${entry.source === 'lab' ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                           {entry.source}
                         </span>
                       </td>
-                      <td className={`font-body text-[12px] text-right py-2 ${delta === null ? '' : delta > 0 ? 'text-green-600' : delta < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                      <td className={`font-body text-[12px] text-right py-2 ${delta === null ? '' : delta > 0 ? 'text-[#2A1F4A] dark:text-[#B8A9E5]' : delta < 0 ? 'text-red-500' : 'text-gray-400'}`}>
                         {delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta}W`}
                       </td>
                     </tr>
@@ -269,8 +269,8 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
       </div>
 
       {previous && current && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">Latest vs Previous</h3>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white mb-4">Latest vs Previous</h3>
           <div className="grid grid-cols-2 gap-6">
             {[
               { label: 'Critical Power', prev: previous.cp, curr: current.cp, unit: 'W' },
@@ -283,15 +283,15 @@ export function FitnessSignatureView({ athlete, labTests, cpData }: Props) {
               const diff = currNum - prevNum;
               const diffPct = prevNum > 0 ? (diff / prevNum) * 100 : 0;
               return (
-                <div key={row.label} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={row.label} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
-                    <p className="font-body text-[11px] text-gray-500">{row.label}</p>
+                    <p className="font-body text-[11px] text-gray-500 dark:text-gray-400">{row.label}</p>
                     <div className="flex items-baseline gap-2 mt-0.5">
-                      <span className="font-heading text-[18px] font-bold text-gray-900">{row.curr} {row.unit}</span>
+                      <span className="font-heading text-[18px] font-bold text-gray-900 dark:text-white">{row.curr} {row.unit}</span>
                       <span className="font-body text-[11px] text-gray-400">prev: {row.prev}</span>
                     </div>
                   </div>
-                  <span className={`font-body text-[13px] font-medium px-2 py-1 rounded-lg ${diff > 0 ? 'bg-green-50 text-green-700' : diff < 0 ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+                  <span className={`font-body text-[13px] font-medium px-2 py-1 rounded-lg ${diff > 0 ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' : diff < 0 ? 'bg-red-50 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                     {diff > 0 ? '+' : ''}{diffPct.toFixed(1)}%
                   </span>
                 </div>

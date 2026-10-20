@@ -16,7 +16,7 @@ export function UnderConstructionModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 space-y-6">
         {/* Language Selector - Top Right */}
         <div className="flex justify-end gap-2">
           <button
@@ -24,7 +24,7 @@ export function UnderConstructionModal() {
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
               lang === 'en'
                 ? 'bg-[#F7C843] text-[#2A1F4A]'
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300'
             }`}
           >
             EN
@@ -34,7 +34,7 @@ export function UnderConstructionModal() {
             className={`px-3 py-1 rounded text-xs font-body font-semibold transition-all ${
               lang === 'es'
                 ? 'bg-[#F7C843] text-[#2A1F4A]'
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300'
             }`}
           >
             ES
@@ -51,7 +51,7 @@ export function UnderConstructionModal() {
           <h1 className="font-heading font-black text-2xl" style={{ color: '#2A1F4A' }}>
             {t('underConstructionTitle')}
           </h1>
-          <p className="font-body text-sm text-gray-600 leading-relaxed">
+          <p className="font-body text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
             {t('underConstructionMessage')}
           </p>
         </div>

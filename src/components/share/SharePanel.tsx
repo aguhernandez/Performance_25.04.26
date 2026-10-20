@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Share2, Link, Plus, Trash2, Copy, Check, Eye, Clock, ChevronDown, ExternalLink, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { ShareableLink, ShareableLinkInsert } from '../../lib/database.types';
@@ -56,18 +56,44 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
   const [newLink, setNewLink] = useState<NewLinkState>({ ...DEFAULT_NEW });
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
 
   const apiBase = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/athlete-api`;
 
   const fetchLinks = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('shareable_links')
-      .select('*')
-      .eq('athlete_id', athleteId)
-      .order('created_at', { ascending: false });
-    if (!error && data) setLinks(data);
-    setLoading(false);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('shareable_links')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setLinks(data ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load share links');
+    } finally {
+      setLoading(false);
+    }
   }, [athleteId]);
 
   useEffect(() => {
@@ -116,9 +142,13 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
 
   const copyUrl = async (link: ShareableLink) => {
     const url = `${apiBase}/share/${link.token}`;
-    await navigator.clipboard.writeText(url);
-    setCopiedId(link.id);
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(link.id);
+      window.setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not copy link');
+    }
   };
 
   const toggle = (field: keyof Pick<NewLinkState, 'includeNutrition' | 'includeSessions' | 'includeLab'>) => {
@@ -126,26 +156,27 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
   };
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className={`relative ${open ? 'z-30' : ''}`}>
       <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="dialog"
         onClick={() => setOpen(prev => !prev)}
-        className="flex items-center gap-1.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 hover:text-gray-900 font-body font-medium text-[12px] px-3 py-2 rounded-xl transition-colors"
+        className="flex items-center gap-1.5 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white font-body font-medium text-[12px] px-3 py-2 rounded-xl transition-colors"
       >
         <Share2 className="w-3.5 h-3.5" />
         Share
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
         {links.length > 0 && (
-          <span className="text-[9px] font-bold bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded-full">
+          <span className="text-[9px] font-bold bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] px-1.5 py-0.5 rounded-full">
             {links.length}
           </span>
         )}
       </button>
 
       {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1.5 z-20 w-[380px] bg-white border border-gray-200 rounded-[16px] shadow-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div role="dialog" aria-label="Shareable API Links" className="absolute right-0 top-full mt-1.5 z-20 w-[380px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-[16px] shadow-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <div>
                 <p className="font-heading text-[13px]" style={{ color: '#2A1F4A' }}>Shareable API Links</p>
                 <p className="font-body text-[10px] text-gray-400 mt-0.5">Read-only JSON access for coaches & tools</p>
@@ -159,11 +190,17 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
               </button>
             </div>
 
+            {error && !showNew && (
+              <p role="alert" className="mx-3 mt-3 font-body text-[11px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-2.5 py-1.5">
+                {error}
+              </p>
+            )}
+
             {showNew && (
-              <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-3">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 space-y-3">
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-heading text-[11px] uppercase tracking-wider" style={{ color: '#2A1F4A' }}>New Share Link</p>
-                  <button onClick={() => setShowNew(false)} className="text-gray-300 hover:text-gray-500 transition-colors">
+                  <button onClick={() => setShowNew(false)} className="text-gray-300 hover:text-gray-500 dark:text-gray-400 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -205,9 +242,9 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                           className="w-8 h-4 rounded-full transition-colors relative flex-shrink-0 cursor-pointer"
                           style={{ backgroundColor: newLink[field] ? '#F7C843' : '#e5e7eb' }}
                         >
-                          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${newLink[field] ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white dark:bg-gray-900 shadow-sm transition-transform ${newLink[field] ? 'translate-x-4' : 'translate-x-0.5'}`} />
                         </div>
-                        <span className="font-body text-[11px] text-gray-500 group-hover:text-gray-700 transition-colors">{label}</span>
+                        <span className="font-body text-[11px] text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:text-gray-200 transition-colors">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -230,7 +267,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
             <div className="max-h-80 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-gray-200 dark:border-gray-700 border-t-gray-400 rounded-full animate-spin" />
                 </div>
               ) : links.length === 0 ? (
                 <div className="py-8 text-center">
@@ -246,11 +283,11 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                     return (
                       <div
                         key={link.id}
-                        className={`rounded-xl border p-3 ${expired ? 'border-red-100 bg-red-50 opacity-60' : 'border-gray-100 bg-gray-50'}`}
+                        className={`rounded-xl border p-3 ${expired ? 'border-red-100 bg-red-50 opacity-60' : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800'}`}
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="min-w-0">
-                            <p className="font-body text-[12px] font-semibold text-gray-700 truncate">{link.label}</p>
+                            <p className="font-body text-[12px] font-semibold text-gray-700 dark:text-gray-200 truncate">{link.label}</p>
                             <p className="font-body text-[10px] text-gray-400 truncate mt-0.5">{link.token}</p>
                           </div>
                           <button
@@ -267,7 +304,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                             link.include_nutrition && 'Nutrition',
                             link.include_lab && 'Lab',
                           ].filter(Boolean).map(tag => (
-                            <span key={tag as string} className="font-body text-[9px] uppercase tracking-wider bg-sky-50 text-sky-500 border border-sky-100 px-1.5 py-0.5 rounded">
+                            <span key={tag as string} className="font-body text-[9px] uppercase tracking-wider bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30 px-1.5 py-0.5 rounded">
                               {tag}
                             </span>
                           ))}
@@ -282,15 +319,15 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <div className="flex-1 min-w-0 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                          <div className="flex-1 min-w-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1">
                             <p className="font-body text-[9px] text-gray-400 truncate">{apiUrl}</p>
                           </div>
                           <button
                             onClick={() => copyUrl(link)}
-                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-gray-300 text-[10px] text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-[10px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 transition-colors flex-shrink-0"
                           >
                             {copiedId === link.id ? (
-                              <><Check className="w-3 h-3 text-green-500" /> Copied</>
+                              <><Check className="w-3 h-3 text-[#2A1F4A] dark:text-[#B8A9E5]" /> Copied</>
                             ) : (
                               <><Copy className="w-3 h-3" /> Copy</>
                             )}
@@ -299,7 +336,7 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
                             href={apiUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center p-1.5 rounded-lg bg-white border border-gray-200 hover:border-gray-300 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                            className="flex items-center p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors flex-shrink-0"
                           >
                             <ExternalLink className="w-3 h-3" />
                           </a>
@@ -317,16 +354,15 @@ export function SharePanel({ athleteId, userId }: SharePanelProps) {
               )}
             </div>
 
-            <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50">
+            <div className="px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
               <p className="font-body text-[9px] text-gray-400">
-                API endpoint: <span className="text-gray-500">{apiBase}/share/&#123;token&#125;</span>
+                API endpoint: <span className="text-gray-500 dark:text-gray-400">{apiBase}/share/&#123;token&#125;</span>
               </p>
               <p className="font-body text-[9px] text-gray-300 mt-0.5">
                 Sub-routes: /sessions · /nutrition · /lab
               </p>
             </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );

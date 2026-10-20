@@ -1,20 +1,20 @@
 import type { ReactNode } from 'react';
 
 export const SPORT_COLORS: Record<string, string> = {
-  endurance: '#2563eb',
-  cycling: '#7c3aed',
-  running: '#d97706',
-  strength: '#dc2626',
-  beach_volleyball: '#16a34a',
+  endurance: '#2A1F4A',
+  cycling: '#8A6900',
+  running: '#6b7280',
+  strength: '#8A6900',
+  beach_volleyball: '#2A1F4A',
   other: '#94a3b8',
 };
 
 export type Quality = 'measured' | 'modelled' | 'estimated';
 
 export const QUALITY_META: Record<Quality, { label: string; color: string; bg: string }> = {
-  measured: { label: 'Measured', color: '#15803d', bg: 'rgba(22,163,74,0.12)' },
-  modelled: { label: 'Modelled', color: '#1d4ed8', bg: 'rgba(37,99,235,0.12)' },
-  estimated: { label: 'Estimated', color: '#b45309', bg: 'rgba(217,119,6,0.12)' },
+  measured: { label: 'Measured', color: '#2A1F4A', bg: 'rgba(42,31,74,0.10)' },
+  modelled: { label: 'Modelled', color: '#8A6900', bg: 'rgba(247,200,67,0.18)' },
+  estimated: { label: 'Estimated', color: '#6b7280', bg: 'rgba(107,114,128,0.10)' },
 };
 
 export function QualityBadge({ quality }: { quality: Quality }) {
@@ -39,13 +39,13 @@ export function RangeSelector({
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+    <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
       {options.map(opt => (
         <button
           key={opt.key}
           onClick={() => onChange(opt.key)}
           className={`px-2 py-1 rounded-md font-body text-[11px] transition-all ${
-            value === opt.key ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-700'
+            value === opt.key ? 'bg-[#F7C843] text-[#2A1F4A]' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
           }`}
         >
           {opt.label}
@@ -59,7 +59,7 @@ export function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
-      <span className="font-body text-[10px] text-gray-500">{label}</span>
+      <span className="font-body text-[10px] text-gray-500 dark:text-gray-400">{label}</span>
     </div>
   );
 }
@@ -76,11 +76,11 @@ export function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-heading text-[14px] font-bold text-gray-900">{title}</h3>
-          {subtitle && <p className="font-body text-[11px] text-gray-400 mt-0.5">{subtitle}</p>}
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">{title}</h3>
+          {subtitle && <p className="font-body text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{subtitle}</p>}
         </div>
         {controls && <div className="flex-shrink-0">{controls}</div>}
       </div>
@@ -140,14 +140,14 @@ export function svgTooltip(
   const by = Math.max(8, Math.min(y - h / 2, 300 - h));
   return (
     <g>
-      <rect x={bx} y={by} width={w} height={h} rx="6" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+      <rect x={bx} y={by} width={w} height={h} rx="6" fill="var(--chart-card-background)" stroke="var(--chart-grid)" strokeWidth="1" />
       {lines.map((line, i) => (
         <text
           key={i}
           x={bx + 10}
           y={by + 20 + i * 15}
           fontSize="11"
-          fill={line.color ?? '#1e293b'}
+          fill={line.color ?? 'var(--chart-label)'}
           fontFamily="system-ui"
           fontWeight={line.bold ? 'bold' : 'normal'}
         >

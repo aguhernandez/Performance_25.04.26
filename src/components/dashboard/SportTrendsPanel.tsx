@@ -113,7 +113,7 @@ export function SportTrendsPanel({ sessions, sportBreakdown }: SportTrendsPanelP
                     <span className="text-[11px] text-gray-700 dark:text-gray-300">{d.label}</span>
                     <span className="text-[11px] font-mono text-gray-600 dark:text-gray-400">{d.sessions} sessions</span>
                   </div>
-                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{ width: `${d.pct}%`, backgroundColor: d.color }}

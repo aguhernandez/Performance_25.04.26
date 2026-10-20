@@ -13,7 +13,7 @@ interface Props {
   cpData: AthleteCpData;
 }
 
-const PERIOD_COLORS = ['#2563eb', '#16a34a', '#d97706', '#94a3b8'];
+const PERIOD_COLORS = ['#2A1F4A', '#2A1F4A', '#8A6900', '#94a3b8'];
 
 export function PowerDurationView({ athlete, cpData }: Props) {
   const { t } = useLanguage();
@@ -107,8 +107,8 @@ export function PowerDurationView({ athlete, cpData }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-bold text-gray-900">{t('pdcTitle')}</h2>
-          <p className="font-body text-[13px] text-gray-500 mt-0.5">
+          <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">{t('pdcTitle')}</h2>
+          <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
             {t('pdcSubtitle')}
           </p>
         </div>
@@ -118,8 +118,8 @@ export function PowerDurationView({ athlete, cpData }: Props) {
       </div>
 
       {!hasModel ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-          <p className="font-body text-[14px] text-gray-500">{t('noPowerDataAvailable')}</p>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+          <p className="font-body text-[14px] text-gray-500 dark:text-gray-400">{t('noPowerDataAvailable')}</p>
           <p className="font-body text-[12px] text-gray-400 mt-1">
             {cpModel?.reason === 'insufficient_data' || cpModel?.status === 'insufficient_data'
               ? t('noPowerDataDesc')
@@ -130,33 +130,33 @@ export function PowerDurationView({ athlete, cpData }: Props) {
       <>
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: t('criticalPower'), value: `${cpModel?.cp ?? 0}W`, sub: `${((cpModel?.cp ?? 0) / bodyWeightKg).toFixed(2)} W/kg`, color: '#2563eb' },
-          { label: t('wPrime'), value: `${Math.round((cpModel?.wPrimeJ ?? 0) / 1000 * 10) / 10} kJ`, sub: `${cpModel?.wPrimeJ ?? 0}J`, color: '#d97706' },
-          { label: t('peakPower'), value: cpModel && cpModel.pMax > 0 ? `${cpModel.pMax}W` : '—', sub: cpModel && cpModel.pMax > 0 ? `${(cpModel.pMax / bodyWeightKg).toFixed(2)} W/kg` : 'no 1 s stream data', color: '#16a34a' },
+          { label: t('criticalPower'), value: `${cpModel?.cp ?? 0}W`, sub: `${((cpModel?.cp ?? 0) / bodyWeightKg).toFixed(2)} W/kg`, color: '#2A1F4A' },
+          { label: t('wPrime'), value: `${Math.round((cpModel?.wPrimeJ ?? 0) / 1000 * 10) / 10} kJ`, sub: `${cpModel?.wPrimeJ ?? 0}J`, color: '#8A6900' },
+          { label: t('peakPower'), value: cpModel && cpModel.pMax > 0 ? `${cpModel.pMax}W` : '—', sub: cpModel && cpModel.pMax > 0 ? `${(cpModel.pMax / bodyWeightKg).toFixed(2)} W/kg` : 'no 1 s stream data', color: '#2A1F4A' },
           { label: t('modelFit'), value: cpModel ? `${Math.round(cpModel.r2 * 100)}%` : '—', sub: `${cpModel?.nPoints ?? 0} points · ${cpModel?.confidence ?? 'low'}`, color: '#6b7280' },
         ].map(card => (
-          <div key={card.label} className="bg-white border border-gray-200 rounded-xl p-4">
-            <p className="font-body text-[11px] text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
+          <div key={card.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p className="font-body text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{card.label}</p>
             <p className="font-heading text-[22px] font-bold" style={{ color: card.color }}>{card.value}</p>
             <p className="font-body text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
         <div className="flex items-center gap-5 mb-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-8 h-0.5 bg-blue-600" />
-            <span className="font-body text-[11px] text-gray-500">{t('pdcModel')}</span>
+            <div className="w-8 h-0.5 bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10" />
+            <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">{t('pdcModel')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-8 h-0.5 bg-gray-400" />
-            <span className="font-body text-[11px] text-gray-500">{t('allTimeMmp')}</span>
+            <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">{t('allTimeMmp')}</span>
           </div>
           {periodPath && (
             <div className="flex items-center gap-1.5">
               <div className="w-8 h-0.5" style={{ backgroundColor: PERIOD_COLORS[0] }} />
-              <span className="font-body text-[11px] text-gray-500">Last 30 days</span>
+              <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">Last 30 days</span>
             </div>
           )}
         </div>
@@ -172,7 +172,7 @@ export function PowerDurationView({ athlete, cpData }: Props) {
               <line
                 x1={padding.left} y1={yScale(v)}
                 x2={chartWidth - padding.right} y2={yScale(v)}
-                stroke="#f1f5f9" strokeWidth="1"
+                stroke="var(--chart-grid)" strokeWidth="1"
               />
               <text
                 x={padding.left - 6} y={yScale(v) + 4}
@@ -189,7 +189,7 @@ export function PowerDurationView({ athlete, cpData }: Props) {
               <line
                 x1={xScale(dur)} y1={padding.top}
                 x2={xScale(dur)} y2={chartHeight - padding.bottom}
-                stroke="#f1f5f9" strokeWidth="1"
+                stroke="var(--chart-grid)" strokeWidth="1"
               />
               <text
                 x={xScale(dur)} y={chartHeight - padding.bottom + 14}
@@ -227,7 +227,7 @@ export function PowerDurationView({ athlete, cpData }: Props) {
           <path
             d={pdcPath}
             fill="none"
-            stroke="#2563eb"
+            stroke="#2A1F4A"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -240,7 +240,7 @@ export function PowerDurationView({ athlete, cpData }: Props) {
               cy={yScale(pt.power)}
               r={hoveredDuration === pt.duration ? 6 : 4}
               fill="white"
-              stroke="#2563eb"
+              stroke="#2A1F4A"
               strokeWidth="2"
               style={{ cursor: 'pointer' }}
               onMouseEnter={() => setHoveredDuration(pt.duration)}
@@ -254,8 +254,8 @@ export function PowerDurationView({ athlete, cpData }: Props) {
             const cy = yScale(pt.power);
             return (
               <g>
-                <rect x={cx + 8} y={cy - 22} width={90} height={40} rx="4" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                <text x={cx + 13} y={cy - 8} fontSize="11" fill="#1e293b" fontFamily="system-ui" fontWeight="bold">{pt.power}W</text>
+                <rect x={cx + 8} y={cy - 22} width={90} height={40} rx="4" fill="var(--chart-card-background)" stroke="var(--chart-grid)" strokeWidth="1" />
+                <text x={cx + 13} y={cy - 8} fontSize="11" fill="var(--chart-label)" fontFamily="system-ui" fontWeight="bold">{pt.power}W</text>
                 <text x={cx + 13} y={cy + 6} fontSize="10" fill="#64748b" fontFamily="system-ui">{formatDuration(pt.duration)}</text>
                 <text x={cx + 13} y={cy + 18} fontSize="10" fill="#64748b" fontFamily="system-ui">{(pt.power / bodyWeightKg).toFixed(2)} W/kg</text>
               </g>
@@ -268,8 +268,8 @@ export function PowerDurationView({ athlete, cpData }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">{t('powerZones')}</h3>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white mb-4">{t('powerZones')}</h3>
           <div className="space-y-2">
             {powerZones.map(zone => {
               const maxW = zone.max === 9999 ? (cpModel?.pMax || zonesCp * 1.5) : zone.max;
@@ -279,12 +279,12 @@ export function PowerDurationView({ athlete, cpData }: Props) {
                   <span className="font-body text-[11px] text-gray-400 w-4">{zone.zone}</span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="font-body text-[11px] text-gray-700">{zone.name}</span>
+                      <span className="font-body text-[11px] text-gray-700 dark:text-gray-200">{zone.name}</span>
                       <span className="font-body text-[11px] text-gray-400">
                         {zone.min}–{zone.max === 9999 ? `${cpModel?.pMax || zonesCp * 1.5}+` : zone.max}W
                       </span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{ width: `${widthPct}%`, backgroundColor: zone.color }}
@@ -297,8 +297,8 @@ export function PowerDurationView({ athlete, cpData }: Props) {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">{t('mmpRecords')}</h3>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white mb-4">{t('mmpRecords')}</h3>
           {allTimeData.points.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-gray-400">
               <p className="font-body text-[13px]">{t('noPowerDataAvailable')}</p>
@@ -311,14 +311,14 @@ export function PowerDurationView({ athlete, cpData }: Props) {
                 const isRecent = periodPt && periodPt.power >= pt.power * 0.98;
                 return (
                   <div key={pt.duration} className="flex items-center justify-between py-1.5 border-b border-gray-50">
-                    <span className="font-body text-[12px] text-gray-600">{formatDuration(pt.duration)}</span>
+                    <span className="font-body text-[12px] text-gray-600 dark:text-gray-300">{formatDuration(pt.duration)}</span>
                     <div className="flex items-center gap-3">
                       <span className="font-body text-[12px] text-gray-400">{(pt.power / bodyWeightKg).toFixed(2)} W/kg</span>
-                      <span className={`font-heading text-[13px] font-bold ${isRecent ? 'text-green-600' : 'text-gray-800'}`}>
+                      <span className={`font-heading text-[13px] font-bold ${isRecent ? 'text-[#2A1F4A] dark:text-[#B8A9E5]' : 'text-gray-800 dark:text-gray-100'}`}>
                         {pt.power}W
                       </span>
                       {isRecent && (
-                        <span className="font-body text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">{t('recent')}</span>
+                        <span className="font-body text-[9px] bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5] px-1.5 py-0.5 rounded-full">{t('recent')}</span>
                       )}
                     </div>
                   </div>

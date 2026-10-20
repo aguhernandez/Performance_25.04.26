@@ -13,6 +13,8 @@
   --chart-form: #6b7280;
   --chart-grid: #e5e7eb;
   --chart-label: #6b7280;
+  --chart-card-background: #ffffff;
+
   --heatmap-empty: #f3f4f6;
   --secondary-purple: #514068;
   --light-purple: #78658C;
@@ -37,6 +39,8 @@
   --chart-form: #D1D5DB;
   --chart-grid: #374151;
   --chart-label: #9ca3af;
+  --chart-card-background: #111315;
+
   --heatmap-empty: #1b1d21;
   --text-primary: #f9fafb;
   --text-secondary: #d1d5db;

@@ -17,7 +17,7 @@ export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
 
   if (data.loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-12 text-center">
         <p className="font-body text-[13px] text-gray-400">Loading performance data…</p>
       </div>
     );
@@ -25,7 +25,7 @@ export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
 
   if (data.error) {
     return (
-      <div className="bg-white border border-red-200 rounded-xl p-8 text-center">
+      <div className="bg-white dark:bg-gray-900 border border-red-200 rounded-xl p-8 text-center">
         <p className="font-body text-[13px] text-red-600">{data.error}</p>
       </div>
     );
@@ -36,8 +36,8 @@ export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-xl font-bold text-gray-900">Performance</h2>
-        <p className="font-body text-[13px] text-gray-500 mt-0.5">
+        <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">Performance</h2>
+        <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
           Persistent model history — impulse, fitness, power and efficiency from stored daily and stream data
         </p>
       </div>

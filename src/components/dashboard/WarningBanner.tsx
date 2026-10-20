@@ -23,10 +23,10 @@ const WARNING_CONFIG = {
   },
   acute_fatigue: {
     icon: Zap,
-    borderColor: 'border-amber-500/30',
-    bgColor: 'bg-amber-500/5',
-    iconColor: 'text-amber-400',
-    badgeColor: 'bg-amber-500/10 text-amber-400',
+    borderColor: 'border-[#F7C843]/40 dark:border-[#F7C843]/30',
+    bgColor: 'bg-[#F7C843]/20 dark:bg-[#F7C843]/10',
+    iconColor: 'text-[#8A6900] dark:text-[#F7C843]',
+    badgeColor: 'bg-[#F7C843]/20 dark:bg-[#F7C843]/10 text-[#8A6900] dark:text-[#F7C843]',
   },
   stagnation: {
     icon: MinusCircle,

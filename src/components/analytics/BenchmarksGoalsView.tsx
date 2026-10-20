@@ -20,10 +20,10 @@ interface GoalInput {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  elite: '#7c3aed',
-  competitive: '#2563eb',
-  trained: '#16a34a',
-  recreational: '#d97706',
+  elite: '#2A1F4A',
+  competitive: '#2A1F4A',
+  trained: '#2A1F4A',
+  recreational: '#8A6900',
   beginner: '#94a3b8',
 };
 
@@ -91,18 +91,18 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-bold text-gray-900">Benchmarks & Goals</h2>
-          <p className="font-body text-[13px] text-gray-500 mt-0.5">
+          <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">Benchmarks & Goals</h2>
+          <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
             Compare performance to population standards and track your targets
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           {(['benchmarks', 'goals'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 rounded-md font-body text-[12px] font-medium transition-all ${
-                activeTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                activeTab === tab ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
               }`}
             >
               {tab === 'benchmarks' ? 'Population Benchmarks' : 'My Goals'}
@@ -113,13 +113,13 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
 
       {activeTab === 'benchmarks' && (
         <div className="space-y-4">
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <p className="font-body text-[12px] text-gray-500 uppercase tracking-wide mb-1">Overall Percentile</p>
+                <p className="font-body text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Overall Percentile</p>
                 <div className="flex items-baseline gap-3">
-                  <span className="font-heading text-[42px] font-bold text-gray-900">{benchmarks.overallPercentile}</span>
-                  <span className="font-body text-[16px] text-gray-500">th percentile</span>
+                  <span className="font-heading text-[42px] font-bold text-gray-900 dark:text-white">{benchmarks.overallPercentile}</span>
+                  <span className="font-body text-[16px] text-gray-500 dark:text-gray-400">th percentile</span>
                 </div>
               </div>
               <div className="text-right">
@@ -134,7 +134,7 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
               </div>
             </div>
 
-            <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden mb-1">
+            <div className="relative h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-1">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
@@ -154,32 +154,32 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
 
           <div className="space-y-3">
             {benchmarks.metrics.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-                <p className="font-body text-[14px] text-gray-500">Complete your athlete profile to see benchmark comparisons</p>
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+                <p className="font-body text-[14px] text-gray-500 dark:text-gray-400">Complete your athlete profile to see benchmark comparisons</p>
                 <p className="font-body text-[12px] text-gray-400 mt-1">Add VO2max, CP, FTP, and weight data</p>
               </div>
             ) : (
               benchmarks.metrics.map(metric => (
-                <div key={metric.metric} className="bg-white border border-gray-200 rounded-xl p-5">
+                <div key={metric.metric} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <p className="font-body text-[11px] text-gray-400 uppercase tracking-wide">{metric.category}</p>
-                      <p className="font-heading text-[16px] font-bold text-gray-900 mt-0.5">{metric.metric}</p>
+                      <p className="font-heading text-[16px] font-bold text-gray-900 dark:text-white mt-0.5">{metric.metric}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-heading text-[24px] font-bold text-gray-900">{metric.value} <span className="font-body text-[14px] text-gray-400">{metric.unit}</span></p>
-                      <p className="font-body text-[12px] font-medium" style={{ color: metric.percentile >= 70 ? '#16a34a' : metric.percentile >= 50 ? '#d97706' : '#6b7280' }}>
+                      <p className="font-heading text-[24px] font-bold text-gray-900 dark:text-white">{metric.value} <span className="font-body text-[14px] text-gray-400">{metric.unit}</span></p>
+                      <p className="font-body text-[12px] font-medium" style={{ color: metric.percentile >= 70 ? '#2A1F4A' : metric.percentile >= 50 ? '#8A6900' : '#6b7280' }}>
                         {metric.label}
                       </p>
                     </div>
                   </div>
                   <div className="relative">
-                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
                           width: `${metric.percentile}%`,
-                          background: metric.percentile >= 85 ? '#7c3aed' : metric.percentile >= 70 ? '#2563eb' : metric.percentile >= 50 ? '#16a34a' : metric.percentile >= 30 ? '#d97706' : '#94a3b8',
+                          background: metric.percentile >= 85 ? '#2A1F4A' : metric.percentile >= 70 ? '#2A1F4A' : metric.percentile >= 50 ? '#2A1F4A' : metric.percentile >= 30 ? '#8A6900' : '#94a3b8',
                         }}
                       />
                     </div>
@@ -192,7 +192,7 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
                     </div>
                   </div>
                   <div className="mt-2 text-right">
-                    <span className="font-body text-[11px] text-gray-500">{metric.percentile}th percentile</span>
+                    <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">{metric.percentile}th percentile</span>
                   </div>
                 </div>
               ))
@@ -204,41 +204,41 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
       {activeTab === 'goals' && (
         <div className="space-y-4">
           {goals.map((goal, i) => (
-            <div key={goal.id + i} className="bg-white border border-gray-200 rounded-xl p-5">
+            <div key={goal.id + i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1 grid grid-cols-4 gap-3 mr-4">
                   <div>
-                    <label className="font-body text-[11px] text-gray-500 block mb-1">Label</label>
+                    <label className="font-body text-[11px] text-gray-500 dark:text-gray-400 block mb-1">Label</label>
                     <input
                       value={goalInputs[i]?.label ?? ''}
                       onChange={e => updateGoal(i, 'label', e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                   </div>
                   <div>
-                    <label className="font-body text-[11px] text-gray-500 block mb-1">Current</label>
+                    <label className="font-body text-[11px] text-gray-500 dark:text-gray-400 block mb-1">Current</label>
                     <input
                       type="number"
                       value={goalInputs[i]?.currentValue ?? ''}
                       onChange={e => updateGoal(i, 'currentValue', parseFloat(e.target.value) || 0)}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                   </div>
                   <div>
-                    <label className="font-body text-[11px] text-gray-500 block mb-1">Target</label>
+                    <label className="font-body text-[11px] text-gray-500 dark:text-gray-400 block mb-1">Target</label>
                     <input
                       type="number"
                       value={goalInputs[i]?.targetValue ?? ''}
                       onChange={e => updateGoal(i, 'targetValue', parseFloat(e.target.value) || 0)}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                   </div>
                   <div>
-                    <label className="font-body text-[11px] text-gray-500 block mb-1">Unit</label>
+                    <label className="font-body text-[11px] text-gray-500 dark:text-gray-400 block mb-1">Unit</label>
                     <input
                       value={goalInputs[i]?.unit ?? ''}
                       onChange={e => updateGoal(i, 'unit', e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 font-body text-[12px] focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                   </div>
                 </div>
@@ -251,15 +251,15 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-body text-[11px] text-gray-500">Progress</span>
-                  <span className="font-body text-[11px] font-medium text-gray-700">{goal.progressPct.toFixed(1)}%</span>
+                  <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">Progress</span>
+                  <span className="font-body text-[11px] font-medium text-gray-700 dark:text-gray-200">{goal.progressPct.toFixed(1)}%</span>
                 </div>
-                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${Math.min(100, goal.progressPct)}%`,
-                      backgroundColor: goal.progressPct >= 90 ? '#16a34a' : goal.progressPct >= 60 ? '#d97706' : '#2563eb',
+                      backgroundColor: goal.progressPct >= 90 ? '#2A1F4A' : goal.progressPct >= 60 ? '#8A6900' : '#2A1F4A',
                     }}
                   />
                 </div>
@@ -269,12 +269,12 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
                   </span>
                   <div className="flex items-center gap-3">
                     {goal.estimatedWeeksToTarget !== null && (
-                      <span className="font-body text-[11px] text-gray-500">
+                      <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">
                         ~{goal.estimatedWeeksToTarget} weeks to target
                       </span>
                     )}
                     {goal.estimatedWeeksToTarget !== null && (
-                      <span className={`font-body text-[10px] px-2 py-0.5 rounded-full ${goal.onTrack ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+                      <span className={`font-body text-[10px] px-2 py-0.5 rounded-full ${goal.onTrack ? 'bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 text-[#2A1F4A] dark:text-[#B8A9E5]' : 'bg-[#F7C843]/20 dark:bg-[#F7C843]/10 text-[#8A6900] dark:text-[#F7C843]'}`}>
                         {goal.onTrack ? 'On track' : 'Needs attention'}
                       </span>
                     )}
@@ -286,7 +286,7 @@ export function BenchmarksGoalsView({ athlete, labTests, fitnessHistory, cpData 
 
           <button
             onClick={addGoal}
-            className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl font-body text-[13px] text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-all"
+            className="w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl font-body text-[13px] text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-all"
           >
             + Add Goal
           </button>

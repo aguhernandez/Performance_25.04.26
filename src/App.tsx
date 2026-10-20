@@ -169,10 +169,8 @@ function AppContent() {
     return <LoadingScreen message={t('initializing')} />;
   }
 
-  // Coach / head coach role — bypass athlete data flow and show coach dashboard.
-  // The roster is the coach home; clicking a row opens that athlete's
-  // Performance view in read-with-edit mode. Head coach sees the same roster
-  // with an extra coach column + filter and totals row, read-only editing.
+  // Coach / head coach role — the roster is the home screen. Opening a row
+  // gives the coach the athlete's full workspace and existing evaluation tools.
   const isCoachRole = profile?.role === 'coach' || profile?.role === 'head_coach' || profile?.role === 'admin';
 
   if (isCoachRole) {
@@ -195,6 +193,12 @@ function AppContent() {
             ) : rosterAthlete ? (
               <CoachAthletePerformanceView
                 row={rosterAthlete}
+                coachId={user?.id ?? profile?.hub_user_id ?? ''}
+                hubConnected={hubConnected}
+                hubSnapshot={hubSnapshot}
+                hubLoading={hubLoading}
+                hubError={hubError}
+                onRefreshHub={refreshHub}
                 onBack={() => setRosterAthlete(null)}
               />
             ) : (

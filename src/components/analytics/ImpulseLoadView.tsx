@@ -10,11 +10,11 @@ interface Props {
 }
 
 const SPORT_COLORS: Record<string, string> = {
-  endurance: '#2563eb',
-  cycling: '#7c3aed',
-  running: '#d97706',
-  strength: '#dc2626',
-  beach_volleyball: '#16a34a',
+  endurance: '#2A1F4A',
+  cycling: '#2A1F4A',
+  running: '#8A6900',
+  strength: '#8A6900',
+  beach_volleyball: '#2A1F4A',
   other: '#94a3b8',
 };
 
@@ -97,8 +97,8 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-xl font-bold text-gray-900">{t('impulseLoadTitle')}</h2>
-          <p className="font-body text-[13px] text-gray-500 mt-0.5">
+          <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">{t('impulseLoadTitle')}</h2>
+          <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
             {t('impulseLoadSubtitle')}
           </p>
         </div>
@@ -108,17 +108,17 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
               type="checkbox"
               checked={includeStrength}
               onChange={e => setIncludeStrength(e.target.checked)}
-              className="w-4 h-4 accent-gray-900"
+              className="w-4 h-4 accent-[#2A1F4A]"
             />
-            <span className="font-body text-[12px] text-gray-600">{t('includeStrength')}</span>
+            <span className="font-body text-[12px] text-gray-600 dark:text-gray-300">{t('includeStrength')}</span>
           </label>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             {(['overview', 'acwr', 'weekly'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-3 py-1.5 rounded-md font-body text-[12px] font-medium transition-all ${
-                  activeTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  activeTab === tab ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
                 }`}
               >
                 {tab === 'overview' ? t('impulseOverviewTab') : tab === 'acwr' ? 'ACWR' : t('impulseWeeklyTab')}
@@ -130,13 +130,13 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
 
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: t('fitnessLabel'), value: '—', sub: t('fitnessDesc'), color: '#2563eb' },
-          { label: t('avgDailyImpulse'), value: avgDaily.toFixed(1), sub: `${daysWithTraining} ${t('trainingDays')}`, color: '#16a34a' },
+          { label: t('fitnessLabel'), value: '—', sub: t('fitnessDesc'), color: '#2A1F4A' },
+          { label: t('avgDailyImpulse'), value: avgDaily.toFixed(1), sub: `${daysWithTraining} ${t('trainingDays')}`, color: '#2A1F4A' },
           { label: t('totalImpulseLabel'), value: Math.round(totalImpulse).toString(), sub: `${rows.length} ${t('sessionsTotal')}`, color: '#6b7280' },
-          { label: t('measuredQuality'), value: `${measuredPct}%`, sub: t('measuredQualityDesc'), color: measuredPct >= 70 ? '#16a34a' : '#f59e0b' },
+          { label: t('measuredQuality'), value: `${measuredPct}%`, sub: t('measuredQualityDesc'), color: measuredPct >= 70 ? '#2A1F4A' : '#8A6900' },
         ].map(card => (
-          <div key={card.label} className="bg-white border border-gray-200 rounded-xl p-4">
-            <p className="font-body text-[11px] text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
+          <div key={card.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p className="font-body text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{card.label}</p>
             <p className="font-heading text-[22px] font-bold" style={{ color: card.color }}>{card.value}</p>
             <p className="font-body text-[11px] text-gray-400 mt-0.5">{card.sub}</p>
           </div>
@@ -144,19 +144,19 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
       </div>
 
       {activeTab === 'overview' && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-heading text-[14px] font-bold text-gray-900 mb-4">{t('impulseBySport')}</h3>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+          <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white mb-4">{t('impulseBySport')}</h3>
           <div className="grid grid-cols-3 gap-3">
             {Array.from(sportTotals.entries()).map(([sport, total]) => {
               const pct = totalImpulse > 0 ? (total / totalImpulse) * 100 : 0;
               return (
-                <div key={sport} className="bg-gray-50 rounded-lg p-3">
+                <div key={sport} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1.5">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: SPORT_COLORS[sport] ?? '#94a3b8' }} />
-                    <span className="font-body text-[11px] text-gray-600 capitalize">{sport.replace('_', ' ')}</span>
+                    <span className="font-body text-[11px] text-gray-600 dark:text-gray-300 capitalize">{sport.replace('_', ' ')}</span>
                   </div>
-                  <p className="font-heading text-[16px] font-bold text-gray-800">{Math.round(total)}</p>
-                  <div className="h-1 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
+                  <p className="font-heading text-[16px] font-bold text-gray-800 dark:text-gray-100">{Math.round(total)}</p>
+                  <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-1.5 overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: SPORT_COLORS[sport] ?? '#94a3b8' }} />
                   </div>
                 </div>
@@ -167,16 +167,16 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
             )}
           </div>
 
-          <div className="mt-5 pt-4 border-t border-gray-100">
-            <h4 className="font-body text-[12px] text-gray-500 uppercase tracking-wide mb-3">{t('intensitySources')}</h4>
+          <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <h4 className="font-body text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{t('intensitySources')}</h4>
             <div className="flex flex-wrap gap-3">
               {Object.entries(SOURCE_LABELS).map(([source, label]) => {
                 const count = rows.filter(r => r.intensitySource === source).length;
                 if (count === 0) return null;
                 return (
-                  <div key={source} className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2.5 py-1.5">
-                    <span className="font-body text-[11px] text-gray-500">{label}</span>
-                    <span className="font-heading text-[12px] font-bold text-gray-800">{count}</span>
+                  <div key={source} className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg px-2.5 py-1.5">
+                    <span className="font-body text-[11px] text-gray-500 dark:text-gray-400">{label}</span>
+                    <span className="font-heading text-[12px] font-bold text-gray-800 dark:text-gray-100">{count}</span>
                   </div>
                 );
               })}
@@ -189,9 +189,9 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
       )}
 
       {activeTab === 'acwr' && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-heading text-[14px] font-bold text-gray-900">Acute:Chronic Workload Ratio</h3>
+            <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">Acute:Chronic Workload Ratio</h3>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getACWRColor(acwrSummary.riskZone) }} />
               <span className="font-body text-[12px] font-medium" style={{ color: getACWRColor(acwrSummary.riskZone) }}>
@@ -203,11 +203,11 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
           <div className="grid grid-cols-4 gap-4 mb-5">
             {[
               { label: 'Current ACWR', value: acwrSummary.current?.acwr.toFixed(2) ?? '—', color: getACWRColor(acwrSummary.riskZone) },
-              { label: 'Acute Load (7d)', value: acwrSummary.current?.acuteLoad.toFixed(1) ?? '—', color: '#d97706' },
+              { label: 'Acute Load (7d)', value: acwrSummary.current?.acuteLoad.toFixed(1) ?? '—', color: '#8A6900' },
               { label: 'Chronic Load (28d)', value: acwrSummary.current?.chronicLoad.toFixed(1) ?? '—', color: '#6b7280' },
-              { label: 'Trend', value: acwrSummary.trendDirection, color: acwrSummary.trendDirection === 'increasing' ? '#ef4444' : acwrSummary.trendDirection === 'decreasing' ? '#16a34a' : '#6b7280' },
+              { label: 'Trend', value: acwrSummary.trendDirection, color: acwrSummary.trendDirection === 'increasing' ? '#ef4444' : acwrSummary.trendDirection === 'decreasing' ? '#2A1F4A' : '#6b7280' },
             ].map(c => (
-              <div key={c.label} className="text-center p-3 bg-gray-50 rounded-lg">
+              <div key={c.label} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="font-body text-[10px] text-gray-400 uppercase tracking-wide mb-1">{c.label}</p>
                 <p className="font-heading text-[18px] font-bold capitalize" style={{ color: c.color }}>{c.value}</p>
               </div>
@@ -226,7 +226,7 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
                 return (
                   <g key={line}>
                     <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y}
-                      stroke={isZone ? '#fde68a' : '#f1f5f9'} strokeWidth={isZone ? 1.5 : 1}
+                      stroke={isZone ? '#F7C843' : 'var(--chart-grid)'} strokeWidth={isZone ? 1.5 : 1}
                       strokeDasharray={isZone ? '4 2' : undefined} />
                     <text x={padding.left - 6} y={y + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{line}</text>
                   </g>
@@ -253,13 +253,13 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
           <div className="flex items-center gap-4 mt-3">
             {[
               { color: '#94a3b8', label: 'Underload (<0.8)' },
-              { color: '#22c55e', label: 'Optimal (0.8-1.3)' },
-              { color: '#f59e0b', label: 'Caution (1.3-1.5)' },
+              { color: '#2A1F4A', label: 'Optimal (0.8-1.3)' },
+              { color: '#8A6900', label: 'Caution (1.3-1.5)' },
               { color: '#ef4444', label: 'High Risk (>1.5)' },
             ].map(z => (
               <div key={z.label} className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: z.color }} />
-                <span className="font-body text-[10px] text-gray-500">{z.label}</span>
+                <span className="font-body text-[10px] text-gray-500 dark:text-gray-400">{z.label}</span>
               </div>
             ))}
           </div>
@@ -267,16 +267,16 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
       )}
 
       {activeTab === 'weekly' && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-heading text-[14px] font-bold text-gray-900">{t('weeklyImpulseDistribution')}</h3>
+            <h3 className="font-heading text-[14px] font-bold text-gray-900 dark:text-white">{t('weeklyImpulseDistribution')}</h3>
             <div className="flex items-center gap-2">
               {[8, 16, 26, 52].map(w => (
                 <button
                   key={w}
                   onClick={() => setShowWeeks(w)}
                   className={`px-2 py-1 rounded-md font-body text-[11px] transition-all ${
-                    showWeeks === w ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    showWeeks === w ? 'bg-[#F7C843] text-[#2A1F4A]' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:bg-gray-700'
                   }`}
                 >
                   {w}w
@@ -295,7 +295,7 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
                 const y = padding.top + chartHeight - padding.bottom - (v / maxWeekly) * (chartHeight - padding.top - padding.bottom);
                 return (
                   <g key={i}>
-                    <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                    <line x1={padding.left} y1={y} x2={chartWidth - padding.right} y2={y} stroke="var(--chart-grid)" strokeWidth="1" />
                     <text x={padding.left - 6} y={y + 4} textAnchor="end" fontSize="10" fill="#94a3b8" fontFamily="system-ui">{Math.round(v)}</text>
                   </g>
                 );
@@ -307,7 +307,7 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
                 const y = chartHeight - padding.bottom - barH;
                 return (
                   <g key={week.weekStart}>
-                    <rect x={x + 1} y={y} width={barWidth} height={Math.max(0, barH)} fill="#2563eb" fillOpacity="0.85" rx="1" />
+                    <rect x={x + 1} y={y} width={barWidth} height={Math.max(0, barH)} fill="#2A1F4A" fillOpacity="0.85" rx="1" />
                     {recentWeekly.length <= 12 && (
                       <text x={x + barWidth / 2} y={chartHeight - padding.bottom + 12} textAnchor="middle" fontSize="9" fill="#94a3b8" fontFamily="system-ui">
                         {week.weekStart.substring(5, 10)}
@@ -325,7 +325,7 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
               return (
                 <div key={sport} className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                  <span className="font-body text-[10px] text-gray-500 capitalize">{sport.replace('_', ' ')}</span>
+                  <span className="font-body text-[10px] text-gray-500 dark:text-gray-400 capitalize">{sport.replace('_', ' ')}</span>
                 </div>
               );
             })}
@@ -334,7 +334,7 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-right">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-gray-100 dark:border-gray-800">
                   <th className="font-body text-[10px] text-gray-400 text-left pb-1.5">{t('week')}</th>
                   <th className="font-body text-[10px] text-gray-400 pb-1.5">{t('totalImpulseLabel')}</th>
                   <th className="font-body text-[10px] text-gray-400 pb-1.5">{t('fitnessLabel')}</th>
@@ -343,9 +343,9 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
               <tbody>
                 {recentWeekly.slice(-8).map(week => (
                   <tr key={week.weekStart} className="border-b border-gray-50">
-                    <td className="font-body text-[11px] text-gray-600 text-left py-1">{week.weekStart}</td>
-                    <td className={`font-body text-[11px] py-1 ${week.total > avgDaily * 7 * 1.2 ? 'text-orange-600 font-medium' : 'text-gray-700'}`}>{week.total.toFixed(0)}</td>
-                    <td className="font-body text-[11px] text-blue-600 py-1">{Object.entries(week.byType).map(([k, v]) => `${k}: ${Math.round(v)}`).join(' · ')}</td>
+                    <td className="font-body text-[11px] text-gray-600 dark:text-gray-300 text-left py-1">{week.weekStart}</td>
+                    <td className={`font-body text-[11px] py-1 ${week.total > avgDaily * 7 * 1.2 ? 'text-[#8A6900] dark:text-[#F7C843] font-medium' : 'text-gray-700 dark:text-gray-200'}`}>{week.total.toFixed(0)}</td>
+                    <td className="font-body text-[11px] text-[#2A1F4A] dark:text-[#B8A9E5] py-1">{Object.entries(week.byType).map(([k, v]) => `${k}: ${Math.round(v)}`).join(' · ')}</td>
                   </tr>
                 ))}
               </tbody>
