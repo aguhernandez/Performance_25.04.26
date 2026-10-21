@@ -20,7 +20,6 @@ import { useAthleteCpModel } from './hooks/useAthleteCpModel';
 import { useCoachAssignment } from './hooks/useCoachAssignment';
 import type { ThresholdOverrides } from './lib/engine/impulse';
 import { LandingPage } from './components/landing/LandingPage';
-import { UnderConstructionModal } from './components/UnderConstructionModal';
 import { CoachView } from './components/coach/CoachView';
 import { CoachRosterView } from './components/coach/CoachRosterView';
 import { CoachAthletePerformanceView } from './components/coach/CoachAthletePerformanceView';
@@ -338,9 +337,6 @@ function AppContent() {
 
 export default function App() {
   return (
-    <>
-      <UnderConstructionModal />
-      <AppContent />
-    </>
+    <AppContent />
   );
 }
