@@ -256,6 +256,10 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
 
   const addNutrition = useCallback(() => { void reloadRelatedData(); }, [reloadRelatedData]);
 
+  const handleWorkspaceTabChange = (tab: WorkspaceTab) => {
+    setActiveTab(tab);
+  };
+
   const tabs: { id: WorkspaceTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'dashboard', label: es ? 'Resumen' : 'Dashboard', icon: LayoutDashboard },
     { id: 'performance', label: es ? 'Rendimiento' : 'Performance', icon: Activity },
@@ -294,14 +298,21 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
             key={id}
             type="button"
             aria-pressed={activeTab === id}
-            onClick={() => setActiveTab(id)}
-            className={`flex shrink-0 items-center gap-2 rounded-t-lg px-3 py-2.5 font-body text-[12px] font-medium transition-colors ${activeTab === id ? 'border-b-2 border-[#F7C843] bg-[#F7C843]/15 text-[#2A1F4A] dark:text-[#F7C843]' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'}`}
+            aria-current={activeTab === id ? 'page' : undefined}
+            onClick={() => handleWorkspaceTabChange(id)}
+            className={`flex shrink-0 items-center gap-2 rounded-t-lg px-3 py-2.5 font-body text-[12px] font-medium transition-all duration-150 ${activeTab === id ? 'border-b-2 border-[#F7C843] bg-[#F7C843]/15 text-[#2A1F4A] dark:text-[#F7C843]' : 'border-b-2 border-transparent text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'}`}
           >
             <Icon className="h-4 w-4" />{label}
           </button>
         ))}
       </nav>
 
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#F7C843]" />
+        {es ? 'Vista activa' : 'Active view'}: {tabs.find(tab => tab.id === activeTab)?.label}
+      </div>
+
+      <div key={activeTab}>
       {activeTab === 'dashboard' && engine && (
         <DashboardView
           engine={engine}
@@ -345,6 +356,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
         />
       )}
       {activeTab === 'simulator' && <SimulatorView athlete={athlete} sessions={sessions} athleteEmail={athleteEmail} />}
+      </div>
     </div>
   );
 }
