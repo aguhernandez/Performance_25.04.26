@@ -52,10 +52,6 @@ export function hubWorkoutsToSessions(
         title: w.name || `${w.sport ?? 'Training'} — Hub`,
         duration_min: duration,
         impulse: tss,
-        rpe: null,
-        avg_power_watts: null,
-        avg_hr: null,
-        distance_km: null,
         notes: `Imported from Hub (Strava). Workout type: ${w.workout_type}. Status: ${w.status}.`,
         raw_data: { hub_workout_id: w.id, hub_tss: w.tss, hub_intensity_zone: w.intensity_zone },
       } as SessionInsert;
@@ -85,10 +81,9 @@ export function hubPowerStreamsToSessions(
       session_type: mapSport(s.sport),
       title: `Hub Activity ${s.activity_id.slice(0, 8)}`,
       duration_min: durationMin,
-      avg_power_watts: avgPower ? Math.round(avgPower) : null,
-      avg_hr: avgHr ? Math.round(avgHr) : null,
-      impulse: 0, // will be computed by the engine on recompute
-      distance_km: null,
+      ...(avgPower ? { avg_power_watts: Math.round(avgPower) } : {}),
+      ...(avgHr ? { avg_hr: Math.round(avgHr) } : {}),
+      impulse: 0,
       notes: `Imported from Hub power stream. Activity ID: ${s.activity_id}.`,
       raw_data: { hub_activity_id: s.activity_id, stream_points: s.series?.time_s?.length ?? 0 },
     } as SessionInsert;

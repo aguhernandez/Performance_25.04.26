@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Activity, ArrowLeft, BarChart3, ClipboardList, FlaskConical, Heart,
   LayoutDashboard, UserRound, Utensils, Zap,
@@ -11,6 +11,7 @@ import type {
 } from '../../lib/database.types';
 import type { RosterRow } from '../../lib/rosterAlerts';
 import { useEngine } from '../../hooks/useEngine';
+import { hubWorkoutsToSessions } from '../../lib/hub/hubImport';
 import { useAthleteCpModel } from '../../hooks/useAthleteCpModel';
 import type { HubSnapshot } from '../../hooks/useHubData';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -56,8 +57,16 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hubSyncMessage, setHubSyncMessage] = useState<string | null>(null);
+  const refreshRequestedRef = useRef(false);
+  const importedForAthleteRef = useRef<string | null>(null);
 
-  useEffect(() => { setActiveTab('dashboard'); }, [row.athlete_id]);
+  useEffect(() => {
+    setActiveTab('dashboard');
+    refreshRequestedRef.current = false;
+    importedForAthleteRef.current = null;
+    setHubSyncMessage(null);
+  }, [row.athlete_id]);
 
   const reloadRelatedData = useCallback(async () => {
     const [sessionsRes, labsRes, nutritionRes, hrvRes, racesRes, blocksRes, healthRes, profileRes] = await Promise.all([
@@ -68,7 +77,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
       supabase.from('race_schedule').select('*').eq('athlete_id', row.athlete_id).order('race_date', { ascending: true }),
       supabase.from('training_blocks').select('*').eq('athlete_id', row.athlete_id).order('start_date', { ascending: false }),
       supabase.from('athlete_health_history').select('*').eq('athlete_id', row.athlete_id).order('event_date', { ascending: false }),
-      supabase.from('profiles').select('email').eq('hub_user_id', athlete?.user_id ?? '').maybeSingle(),
+      supabase.from('profiles').select('email').or(`id.eq.${athlete?.user_id ?? ''},hub_user_id.eq.${athlete?.user_id ?? ''}`).maybeSingle(),
     ]);
 
     const firstError = sessionsRes.error ?? labsRes.error ?? nutritionRes.error ?? hrvRes.error ?? racesRes.error ?? blocksRes.error ?? healthRes.error;
@@ -80,7 +89,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     setRaceSchedule((racesRes.data ?? []) as RaceScheduleEntry[]);
     setTrainingBlocks((blocksRes.data ?? []) as TrainingBlock[]);
     setHealthHistory((healthRes.data ?? []) as HealthHistoryEntry[]);
-    setAthleteEmail(profileRes.data?.email ?? '');
+    setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? '');
   }, [row.athlete_id, athlete?.user_id]);
 
   useEffect(() => {
@@ -107,7 +116,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
         supabase.from('race_schedule').select('*').eq('athlete_id', row.athlete_id).order('race_date', { ascending: true }),
         supabase.from('training_blocks').select('*').eq('athlete_id', row.athlete_id).order('start_date', { ascending: false }),
         supabase.from('athlete_health_history').select('*').eq('athlete_id', row.athlete_id).order('event_date', { ascending: false }),
-        supabase.from('profiles').select('email').eq('hub_user_id', selectedAthlete.user_id).maybeSingle(),
+        supabase.from('profiles').select('email').or(`id.eq.${selectedAthlete.user_id},hub_user_id.eq.${selectedAthlete.user_id}`).maybeSingle(),
       ]);
       if (cancelled) return;
       const firstError = sessionsRes.error ?? labsRes.error ?? nutritionRes.error ?? hrvRes.error ?? racesRes.error ?? blocksRes.error ?? healthRes.error;
@@ -119,7 +128,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
       setRaceSchedule((racesRes.data ?? []) as RaceScheduleEntry[]);
       setTrainingBlocks((blocksRes.data ?? []) as TrainingBlock[]);
       setHealthHistory((healthRes.data ?? []) as HealthHistoryEntry[]);
-      setAthleteEmail(profileRes.data?.email ?? '');
+      setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? '');
       setLoading(false);
     })().catch(err => {
       if (!cancelled) {
@@ -129,6 +138,56 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     });
     return () => { cancelled = true; };
   }, [row.athlete_id]);
+
+  const addSessions = useCallback(async (items: SessionInsert[]) => {
+    if (items.length) {
+      const { error: insertError } = await supabase.from('sessions').insert(items);
+      if (insertError) throw insertError;
+    }
+    await reloadRelatedData();
+    if (athlete && items.length) {
+      const firstDate = items.reduce((min, item) => item.session_date < min ? item.session_date : min, items[0].session_date);
+      requestRecompute(athlete, firstDate, { onError: err => console.error('session recompute failed', err) });
+    }
+  }, [athlete, reloadRelatedData]);
+
+  useEffect(() => {
+    if (!athleteEmail || !hubConnected || refreshRequestedRef.current) return;
+    refreshRequestedRef.current = true;
+    setHubSyncMessage(es ? 'Sincronizando entrenamientos del Hub…' : 'Syncing Hub training…');
+    void onRefreshHub(athleteEmail);
+  }, [athleteEmail, hubConnected, onRefreshHub, es]);
+
+  useEffect(() => {
+    const schedule = hubSnapshot.trainingSchedule;
+    const hubProfileEmail = hubSnapshot.athleteProfile?.athlete.email;
+    if (!athlete || !athleteEmail || hubProfileEmail !== athleteEmail || !schedule || importedForAthleteRef.current === athlete.id) return;
+
+    const existingIds = new Set(
+      sessions.map(session => {
+        const raw = session.raw_data;
+        return raw && typeof raw.hub_workout_id === 'string' ? raw.hub_workout_id : null;
+      }).filter((id): id is string => id !== null)
+    );
+    const newWorkouts = schedule.workouts.filter(workout =>
+      (workout.status === 'completed' || workout.status === 'done' || workout.actual_duration_minutes !== null) &&
+      !existingIds.has(workout.id)
+    );
+
+    importedForAthleteRef.current = athlete.id;
+    if (newWorkouts.length === 0) {
+      setHubSyncMessage(es ? 'Entrenamientos del Hub ya sincronizados.' : 'Hub training is already synchronized.');
+      return;
+    }
+
+    const importedSessions = hubWorkoutsToSessions(newWorkouts, athlete.id);
+    void addSessions(importedSessions)
+      .then(() => setHubSyncMessage(es ? `${newWorkouts.length} entrenamientos del Hub añadidos a las sesiones.` : `${newWorkouts.length} Hub workouts added to sessions.`))
+      .catch(() => {
+        importedForAthleteRef.current = null;
+        setHubSyncMessage(es ? 'No se pudieron sincronizar los entrenamientos del Hub.' : 'Hub training could not be synchronized.');
+      });
+  }, [athlete, athleteEmail, hubConnected, hubSnapshot, sessions, addSessions, es]);
 
   const cpData = useAthleteCpModel(athlete);
   const cpModelOverride = cpData.cpModel?.status === 'ok'
@@ -172,18 +231,6 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     if (insertError) throw insertError;
     await reloadRelatedData();
     if (athlete && data?.session_date) requestRecompute(athlete, data.session_date, { onError: err => console.error('session recompute failed', err) });
-  }, [athlete, reloadRelatedData]);
-
-  const addSessions = useCallback(async (items: SessionInsert[]) => {
-    if (items.length) {
-      const { error: insertError } = await supabase.from('sessions').insert(items);
-      if (insertError) throw insertError;
-    }
-    await reloadRelatedData();
-    if (athlete && items.length) {
-      const firstDate = items.reduce((min, item) => item.session_date < min ? item.session_date : min, items[0].session_date);
-      requestRecompute(athlete, firstDate, { onError: err => console.error('session recompute failed', err) });
-    }
   }, [athlete, reloadRelatedData]);
 
   const deleteSession = useCallback(async (id: string) => {
@@ -327,6 +374,9 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
           athleteEmail={athleteEmail || null}
           onRefreshHub={() => { if (athleteEmail) void onRefreshHub(athleteEmail); }}
         />
+      )}
+      {activeTab === 'dashboard' && hubSyncMessage && (
+        <p className="mt-3 font-body text-[11px] text-gray-500 dark:text-gray-400">{hubSyncMessage}</p>
       )}
       {activeTab === 'dashboard' && !engine && <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">Performance model is not available yet.</div>}
       {activeTab === 'performance' && <PerformanceView athlete={athlete} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
