@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Activity, Dumbbell, FlaskConical, BarChart3, Layers, Utensils, Bell, Link2 } from 'lucide-react';
 import type { EngineOutput } from '../../lib/engine/types';
-import type { Athlete, Session, NutritionLog } from '../../lib/database.types';
+import type { Session, NutritionLog, SessionInsert } from '../../lib/database.types';
 import { MetricCard } from './MetricCard';
 import { PerformanceChart } from './PerformanceChart';
 import { WarningBanner } from './WarningBanner';
@@ -31,11 +31,12 @@ interface DashboardViewProps {
   hubError: string | null;
   athleteEmail: string | null;
   onRefreshHub: () => void;
+  onImportSessions: (sessions: SessionInsert[]) => Promise<void>;
 }
 
 type Tab = 'overview' | 'compartments' | 'load' | 'analytics' | 'alerts' | 'hub';
 
-export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId, hubConnected, hubSnapshot, hubLoading, hubError, athleteEmail, onRefreshHub }: DashboardViewProps) {
+export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId, hubConnected, hubSnapshot, hubLoading, hubError, athleteEmail, onRefreshHub, onImportSessions }: DashboardViewProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const { t } = useLanguage();
 
@@ -193,7 +194,9 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
             loading={hubLoading}
             error={hubError}
             athleteEmail={athleteEmail}
+            athleteId={athlete.id}
             onRefresh={onRefreshHub}
+            onImportSessions={onImportSessions}
           />
         );
     }

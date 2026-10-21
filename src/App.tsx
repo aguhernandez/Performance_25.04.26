@@ -252,6 +252,7 @@ function AppContent() {
               hubError={hubError}
               athleteEmail={user?.email ?? null}
               onRefreshHub={() => user?.email && refreshHub(user.email)}
+              onImportSessions={addSessions}
             />
           )}
 

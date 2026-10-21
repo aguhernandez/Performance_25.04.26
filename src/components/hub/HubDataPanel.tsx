@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { RefreshCw, Link2, Link2Off, AlertCircle, ChevronDown, ChevronUp, Activity, Heart, Zap, Scale, Utensils, Moon, Droplets, TrendingUp, Calendar } from 'lucide-react';
+import { RefreshCw, Link2, Link2Off, AlertCircle, ChevronDown, ChevronUp, Activity, Heart, Zap, Scale, Utensils, Moon, Droplets, TrendingUp, Calendar, Download, CheckCircle2 } from 'lucide-react';
 import type { HubSnapshot } from '../../hooks/useHubData';
+import type { SessionInsert } from '../../lib/database.types';
+import { hubWorkoutsToSessions } from '../../lib/hub/hubImport';
 
 interface HubDataPanelProps {
   hubConnected: boolean;
@@ -8,7 +10,9 @@ interface HubDataPanelProps {
   loading: boolean;
   error: string | null;
   athleteEmail: string | null;
+  athleteId: string | null;
   onRefresh: () => void;
+  onImportSessions: (sessions: SessionInsert[]) => Promise<void>;
 }
 
 function StatPill({ label, value, unit }: { label: string; value: string | number | null; unit?: string }) {
@@ -62,7 +66,10 @@ function WellnessBar({ label, value, max = 10, color }: { label: string; value: 
   );
 }
 
-export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEmail, onRefresh }: HubDataPanelProps) {
+export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEmail, athleteId, onRefresh, onImportSessions }: HubDataPanelProps) {
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ count: number } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   if (!hubConnected) {
     return (
       <div className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -285,6 +292,83 @@ export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEm
                 )}
               </div>
             ))}
+          </div>
+        </Section>
+      ) : null}
+
+      {snapshot.trainingSchedule?.workouts?.length ? (
+        <Section title="Entrenamientos (Strava)" icon={<Calendar className="w-3.5 h-3.5" />}>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-[#2A1F4A]/5 dark:bg-[#B8A9E5]/10 border border-[#2A1F4A]/20 dark:border-[#B8A9E5]/30">
+              <p className="font-body text-[11px] text-[#2A1F4A] dark:text-[#B8A9E5]">
+                {snapshot.trainingSchedule.workouts.filter(w => w.status === 'completed' || w.actual_duration_minutes !== null).length} entrenamientos completados
+              </p>
+              <button
+                onClick={async () => {
+                  if (!athleteId) return;
+                  setImporting(true);
+                  setImportError(null);
+                  setImportResult(null);
+                  try {
+                    const sessions = hubWorkoutsToSessions(snapshot.trainingSchedule!.workouts, athleteId);
+                    if (sessions.length === 0) {
+                      setImportError('No hay entrenamientos completados para importar');
+                    } else {
+                      await onImportSessions(sessions);
+                      setImportResult({ count: sessions.length });
+                    }
+                  } catch {
+                    setImportError('Error al importar entrenamientos');
+                  } finally {
+                    setImporting(false);
+                  }
+                }}
+                disabled={importing || !athleteId}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-body font-semibold transition-all disabled:opacity-50"
+                style={{ backgroundColor: '#F7C843', color: '#2A1F4A' }}
+              >
+                {importing ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                {importing ? 'Importando...' : 'Importar como sesiones'}
+              </button>
+            </div>
+
+            {importResult && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 border border-green-200">
+                <CheckCircle2 className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                <span className="font-body text-[11px] text-green-700">
+                  {importResult.count} sesiones importadas. Los graficos y calculos se actualizaran.
+                </span>
+              </div>
+            )}
+
+            {importError && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-red-50 border border-red-200">
+                <AlertCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                <span className="font-body text-[11px] text-red-700">{importError}</span>
+              </div>
+            )}
+
+            <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+              {snapshot.trainingSchedule.workouts
+                .filter(w => w.status === 'completed' || w.actual_duration_minutes !== null)
+                .slice(-15)
+                .reverse()
+                .map((w, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      w.intensity_zone === 'red' ? 'bg-red-400' :
+                      w.intensity_zone === 'yellow' ? 'bg-[#F7C843]' :
+                      'bg-[#2A1F4A] dark:bg-[#B8A9E5]'
+                    }`} />
+                    <span className="font-body text-[11px] text-gray-400 w-20 flex-shrink-0">{w.scheduled_date}</span>
+                    <span className="font-body text-[11px] text-gray-700 dark:text-gray-200 flex-1 truncate">{w.name}</span>
+                    <span className="font-body text-[10px] text-gray-500 flex-shrink-0">{w.actual_duration_minutes ?? w.estimated_duration_minutes ?? 0}min</span>
+                    {w.tss !== null && (
+                      <span className="font-body text-[10px] text-gray-500 flex-shrink-0">{w.tss} TSS</span>
+                    )}
+                  </div>
+                ))}
+            </div>
           </div>
         </Section>
       ) : null}
