@@ -125,7 +125,7 @@ export function PerformanceChart({ history, windowDays = 90, predictedHistory = 
   }, [data]);
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+    <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white">Impulse–Response Model</h3>
