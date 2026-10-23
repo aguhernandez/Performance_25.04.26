@@ -9,7 +9,7 @@ import {
   courseFlat, courseFromGPX, formatCyclingMessage, formatHMS, optimizeTimeTrial, simulateTimeTrial,
   type Course, type TTInput, type TTResult, type PlanMode,
 } from '../../lib/engine/cyclingEngine';
-import { useAthleteCpModel } from '../../hooks/useAthleteCpModel';
+import { useAthleteCpModel, type AthleteCpData } from '../../hooks/useAthleteCpModel';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 type SaveFn = (kind: 'cycling_tt', name: string, params: Record<string, unknown>, result: Record<string, unknown> | null) => Promise<void>;
@@ -34,10 +34,11 @@ function Card({ label, value, sub }: { label: string; value: string; sub?: strin
   </div>;
 }
 
-export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: { athlete: Athlete; sessions: Session[]; athleteEmail: string; onSave: SaveFn }) {
+export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave, sharedCpData, onRefreshHub }: { sharedCpData?: AthleteCpData; onRefreshHub?: () => Promise<void>; athlete: Athlete; sessions: Session[]; athleteEmail: string; onSave: SaveFn }) {
   const { lang } = useLanguage();
   const es = lang === 'es';
-  const cpData = useAthleteCpModel(athlete);
+  const localCpData = useAthleteCpModel(athlete);
+  const cpData = sharedCpData ?? localCpData;
   const [course, setCourse] = useState<Course | null>(null);
   const [courseName, setCourseName] = useState('');
   const [distance, setDistance] = useState(40);
@@ -77,6 +78,7 @@ export function CyclingTtSimulator({ athlete, sessions, athleteEmail, onSave }: 
     setSyncing(true);
     setSyncMessage('');
     try {
+      if (onRefreshHub) { await onRefreshHub(); setSyncMessage(es ? 'Calendario actualizado. Las series de potencia disponibles se analizan automáticamente.' : 'Calendar refreshed. Available power streams are analyzed automatically.'); return; }
       const { data: profile, error: profileError } = await (supabase as any)
         .from('profiles')
         .select('hub_planner_token, hub_connection_active')

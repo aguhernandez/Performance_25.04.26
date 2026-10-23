@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Athlete } from '../../../lib/database.types';
+import { runBannisterModel } from '../../../lib/engine/bannisterModel';
+import { computeSessionImpulse, resolveThresholds } from '../../../lib/engine/impulse';
+import type { Athlete, Session } from '../../../lib/database.types';
 import { loadDailyLoad, loadDailyState } from '../../../lib/engine/loadPersistence';
 import { loadActivityMmp, loadActivityMetrics, loadActivityDurability, loadWeeklyLoad, type ActivityMmpRow, type ActivityMetricsRow, type ActivityDurabilityRow, type WeeklyLoadRow } from '../../../lib/engine/cpPersistence';
 import { addDays, daysBetween, toISODate, weekStartISO } from './shared';
@@ -149,13 +151,14 @@ function aggregateQuality(qualities: string[]): 'measured' | 'modelled' | 'estim
   return 'estimated';
 }
 
-export function usePerformanceData(athlete: Athlete | null): PerformanceData {
-  const [dailyLoad, setDailyLoad] = useState<Awaited<ReturnType<typeof loadDailyLoad>>>([]);
-  const [dailyState, setDailyState] = useState<Awaited<ReturnType<typeof loadDailyState>>>([]);
-  const [mmp, setMmp] = useState<ActivityMmpRow[]>([]);
-  const [metrics, setMetrics] = useState<ActivityMetricsRow[]>([]);
-  const [durability, setDurability] = useState<ActivityDurabilityRow[]>([]);
-  const [weeklyLoad, setWeeklyLoad] = useState<WeeklyLoadRow[]>([]);
+export interface LivePerformanceInput { sessions: Session[]; mmpRows?: ActivityMmpRow[]; metrics?: ActivityMetricsRow[]; durability?: ActivityDurabilityRow[] }
+export function usePerformanceData(athlete: Athlete | null, live?: LivePerformanceInput): PerformanceData {
+  const [storedDailyLoad, setDailyLoad] = useState<Awaited<ReturnType<typeof loadDailyLoad>>>([]);
+  const [storedDailyState, setDailyState] = useState<Awaited<ReturnType<typeof loadDailyState>>>([]);
+  const [storedMmp, setMmp] = useState<ActivityMmpRow[]>([]);
+  const [storedMetrics, setMetrics] = useState<ActivityMetricsRow[]>([]);
+  const [storedDurability, setDurability] = useState<ActivityDurabilityRow[]>([]);
+  const [storedWeeklyLoad, setWeeklyLoad] = useState<WeeklyLoadRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -205,6 +208,16 @@ export function usePerformanceData(athlete: Athlete | null): PerformanceData {
     return () => { cancelled = true; };
   }, [athlete?.id, tick]);
 
+  const dailyLoad = useMemo(() => {
+    if (!live || !athlete) return storedDailyLoad;
+    const thresholds = resolveThresholds(athlete);
+    return live.sessions.map(session => computeSessionImpulse(session, thresholds));
+  }, [live?.sessions, athlete, storedDailyLoad]);
+  const dailyState = useMemo(() => live && athlete ? runBannisterModel(live.sessions, athlete, { includeStrength: true }).history : storedDailyState, [live?.sessions, athlete, storedDailyState]);
+  const mmp = useMemo(() => [...storedMmp, ...(live?.mmpRows ?? [])], [storedMmp, live?.mmpRows]);
+  const metrics = useMemo(() => [...storedMetrics, ...(live?.metrics ?? [])], [storedMetrics, live?.metrics]);
+  const durability = useMemo(() => [...storedDurability, ...(live?.durability ?? [])], [storedDurability, live?.durability]);
+  const weeklyLoad = live ? [] : storedWeeklyLoad;
   return useMemo(() => {
     const today = toISODate(new Date());
 
@@ -401,8 +414,8 @@ export function usePerformanceData(athlete: Athlete | null): PerformanceData {
       durability: durabilityWindows,
       efMovingAvg: movingAvg(efByWeek),
       decouplingMovingAvg: movingAvg(decByWeek),
-      loading,
-      error,
+      loading: live ? false : loading,
+      error: live ? null : error,
     };
-  }, [dailyLoad, dailyState, mmp, metrics, durability, weeklyLoad, athlete, loading, error]);
+  }, [dailyLoad, dailyState, mmp, metrics, durability, weeklyLoad, athlete, loading, error, live]);
 }

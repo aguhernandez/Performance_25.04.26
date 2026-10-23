@@ -29,6 +29,10 @@ export interface HubBiologicalPassport {
   active_passport: {
     vo2max: number | null;
     ftp_watts: number | null;
+    critical_power?: number | null;
+    weight_kg?: number | null;
+    lean_mass_kg?: number | null;
+    running_threshold_pace?: string | null;
     lt1_power: number | null;
     lt2_power: number | null;
     lt1_hr: number | null;
@@ -91,6 +95,7 @@ export interface HubWellnessData {
     checkin_date: string;
     fatigue: number | null;
     sleep_quality: number | null;
+    sleep_hours?: number | null;
     hrv: number | null;
     resting_hr: number | null;
     stress: number | null;
@@ -102,6 +107,7 @@ export interface HubWellnessData {
   averages: {
     fatigue: number | null;
     sleep_quality: number | null;
+    sleep_hours?: number | null;
     hrv: number | null;
     resting_hr: number | null;
     stress: number | null;
@@ -111,6 +117,7 @@ export interface HubWellnessData {
     checkin_date: string;
     fatigue: number | null;
     sleep_quality: number | null;
+    sleep_hours?: number | null;
     hrv: number | null;
     resting_hr: number | null;
     general_wellbeing: number | null;
@@ -120,6 +127,7 @@ export interface HubWellnessData {
 export interface HubAnthropometry {
   measurements: Array<{
     measured_at: string;
+    height_cm?: number | null;
     method: string | null;
     weight_kg: number | null;
     fat_pct: number | null;
@@ -340,7 +348,12 @@ export interface HubPowerStream {
   sport: string | null;
   series: {
     time_s: number[];
-    watts: (number | null)[];
+    watts: (number | null)[] | null;
+    cadence?: (number | null)[];
+    speed?: (number | null)[];
+    altitude?: (number | null)[];
+    distance?: (number | null)[];
+    latlng?: number[][];
     hr?: (number | null)[];
   } | null;
 }
@@ -350,10 +363,8 @@ export async function fetchPowerStream(
   athleteEmail: string,
   activityId: string
 ): Promise<HubPowerStream> {
-  return hubFetch<HubPowerStream>('/power-stream', token, {
-    athlete_email: athleteEmail,
-    activity_id: activityId,
-  });
+  const { fetchHubStream } = await import('./hubContext');
+  return fetchHubStream(token, athleteEmail, activityId);
 }
 
 export async function fetchActivityPowerStreams(
@@ -362,9 +373,12 @@ export async function fetchActivityPowerStreams(
   dateFrom: string,
   dateTo: string
 ): Promise<HubPowerStream[]> {
-  return hubFetch<{ activities: HubPowerStream[] }>('/power-streams', token, {
-    athlete_email: athleteEmail,
-    date_from: dateFrom,
-    date_to: dateTo,
-  }).then(r => r.activities ?? []);
+  const { fetchHubContext, fetchHubStream, sportType } = await import('./hubContext');
+  const context = await fetchHubContext(token, athleteEmail);
+  const activities = (context.data.external ?? []).filter(a =>
+    a.local_date >= dateFrom && a.local_date <= dateTo && a.has_power && sportType(a.sport_type) === 'cycling'
+  );
+  const streams: HubPowerStream[] = [];
+  for (const activity of activities) streams.push(await fetchHubStream(token, athleteEmail, activity.id));
+  return streams;
 }

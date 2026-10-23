@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Save, Trash2, Play, AlertTriangle, Info, XCircle, CheckCircle2, Timer,
 } from 'lucide-react';
-import type { Athlete, Session } from '../../lib/database.types';
+import type { Athlete, Session, LabTest } from '../../lib/database.types';
 import {
   simulateRace, simulateInverse, simulateAltitude, simulateAltitudeBlock,
   formatPace, formatTime, formatEngineMessage,
@@ -12,6 +12,7 @@ import {
 } from '../../lib/engine/simulationEngine';
 import { useSimulationProfile, useRaceScenarios } from '../../hooks/useSimulation';
 import { useLanguage } from '../../contexts/LanguageContext';
+import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 import { CyclingTtSimulator } from './CyclingTtSimulator';
 
 type Tool = 'race' | 'inverse' | 'altitude' | 'block' | 'cycling';
@@ -595,9 +596,9 @@ function BlockSimulator({ profile, lang, onSave }: {
 
 // ───────────────────────── Main view ─────────────────────────
 
-export function SimulatorView({ athlete, sessions, athleteEmail }: { athlete: Athlete; sessions: Session[]; athleteEmail: string }) {
+export function SimulatorView({ athlete, sessions, athleteEmail, cpData, onRefreshHub, labTests }: { labTests?: LabTest[]; athlete: Athlete; sessions: Session[]; athleteEmail: string; cpData?: AthleteCpData; onRefreshHub?: () => Promise<void> }) {
   const { lang } = useLanguage();
-  const { profile, labTest, loading: profileLoading } = useSimulationProfile(athlete);
+  const { profile, labTest, loading: profileLoading } = useSimulationProfile(athlete, labTests);
   const { scenarios, loading: scenLoading, error: scenarioError, save, remove } = useRaceScenarios(athlete.id);
   const [tool, setTool] = useState<Tool>('race');
 
@@ -645,7 +646,7 @@ export function SimulatorView({ athlete, sessions, athleteEmail }: { athlete: At
           {tool === 'inverse' && <InverseSimulator profile={profile} lang={lang} onSave={save} />}
           {tool === 'altitude' && <AltitudeSimulator profile={profile} lang={lang} onSave={save} />}
           {tool === 'block' && <BlockSimulator profile={profile} lang={lang} onSave={save} />}
-          {tool === 'cycling' && <CyclingTtSimulator athlete={athlete} sessions={sessions} athleteEmail={athleteEmail} onSave={save} />}
+          {tool === 'cycling' && <CyclingTtSimulator sharedCpData={cpData} onRefreshHub={onRefreshHub} athlete={athlete} sessions={sessions} athleteEmail={athleteEmail} onSave={save} />}
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">

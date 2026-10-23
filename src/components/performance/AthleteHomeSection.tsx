@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link2, Pencil } from 'lucide-react';
 import type { Athlete } from '../../lib/database.types';
-import { usePerformanceData } from '../analytics/performance/usePerformanceData';
+import { usePerformanceData, type LivePerformanceInput } from '../analytics/performance/usePerformanceData';
 import { PmcChart } from '../analytics/performance/PmcChart';
 import { WeeklyImpulseChart } from '../analytics/performance/WeeklyImpulseChart';
 import { PdcChart } from '../analytics/performance/PdcChart';
@@ -185,12 +185,13 @@ function ThresholdsTauEditor({ athlete, canEdit, onSave }: {
   );
 }
 
-export function AthleteHomeSection({ athlete, coachAssigned, onUpdateAthlete }: {
+export function AthleteHomeSection({ athlete, coachAssigned, onUpdateAthlete, live }: {
+  live?: LivePerformanceInput;
   athlete: Athlete;
   coachAssigned: boolean;
   onUpdateAthlete: (updates: Record<string, number | null>) => Promise<void>;
 }) {
-  const data = usePerformanceData(athlete);
+  const data = usePerformanceData(athlete, live);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Connect-your-data banner: no session day in the last 14 days.

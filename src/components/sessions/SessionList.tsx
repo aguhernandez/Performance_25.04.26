@@ -1,3 +1,5 @@
+import { HubPlanCalendar } from './HubPlanCalendar';
+import type { HubContextResponse } from '../../lib/hub/hubContext';
 import { useState } from 'react';
 import { Trash2, Plus, ChevronDown, ChevronUp, Activity, Dumbbell, MoreHorizontal, Bike, Waves } from 'lucide-react';
 import type { Session, Athlete, SessionType } from '../../lib/database.types';
@@ -8,6 +10,7 @@ import { ActivityDetail } from './ActivityDetail';
 import type { SessionFilterState } from './SessionFilters';
 
 interface SessionListProps {
+  hubContext?: HubContextResponse;
   sessions: Session[];
   athlete: Athlete;
   onAdd: (session: SessionInsert) => Promise<void>;
@@ -23,7 +26,7 @@ const TYPE_CONFIG: Record<SessionType, { icon: React.ElementType; color: string;
   other: { icon: MoreHorizontal, color: '#94a3b8', label: 'Other' },
 };
 
-export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListProps) {
+export function SessionList({ sessions, athlete, onAdd, onDelete, hubContext }: SessionListProps) {
   const [showForm, setShowForm] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -52,6 +55,7 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
 
   return (
     <div className="space-y-4">
+      {hubContext && <HubPlanCalendar context={hubContext} />}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">Training Sessions</h2>
@@ -145,7 +149,8 @@ export function SessionList({ sessions, athlete, onAdd, onDelete }: SessionListP
                   </button>
                   <button
                     onClick={() => handleDelete(session.id)}
-                    disabled={deletingId === session.id}
+                    disabled={deletingId === session.id || !!session.raw_data?.hub_readonly}
+                    title={session.raw_data?.hub_readonly ? "Gestionar esta actividad en Hub" : undefined}
                     className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors disabled:opacity-40"
                   >
                     <Trash2 className="w-4 h-4" />

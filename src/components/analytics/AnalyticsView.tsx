@@ -3,6 +3,7 @@ import type { Session, Athlete, LabTest } from '../../lib/database.types';
 import type { EngineOutput } from '../../lib/engine/types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { PowerDurationView } from './PowerDurationView';
+import type { LivePerformanceInput } from './performance/usePerformanceData';
 import { PerformanceView } from './performance/PerformanceView';
 import { FitnessSignatureView } from './FitnessSignatureView';
 import { ImpulseLoadView } from './ImpulseLoadView';
@@ -12,6 +13,7 @@ import { ZonesDecouplingView } from './ZonesDecouplingView';
 import type { AthleteCpData } from '../../hooks/useAthleteCpModel';
 
 interface Props {
+  live?: LivePerformanceInput;
   sessions: Session[];
   athlete: Athlete;
   labTests: LabTest[];
@@ -30,7 +32,7 @@ type AnalyticsTab =
   | 'benchmarks'
   | 'zones';
 
-export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coachAssigned = false, onUpdateAthlete }: Props) {
+export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coachAssigned = false, onUpdateAthlete, live }: Props) {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('pdc');
   const { t } = useLanguage();
 
@@ -79,6 +81,7 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coa
       <div>
         {activeTab === 'performance' && (
           <PerformanceView
+            live={live}
             athlete={athlete}
             coachAssigned={coachAssigned}
             onUpdateAthlete={onUpdateAthlete ?? (async () => {})}

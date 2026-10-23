@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { HubActivityDetail } from './HubActivityDetail';
 import { supabase } from '../../lib/supabase';
 import { fetchPowerStream, type HubPowerStream } from '../../lib/hub/hubApiService';
 import { cleanPowerStream } from '../../lib/engine/powerAnalysis';
@@ -48,7 +49,7 @@ function Chip({ label, value, warn }: { label: string; value: string; warn?: boo
  * activity_metrics, and an on-demand W'bal chart fetched from the power
  * stream (downsampled to 1 point / 5 s, never stored).
  */
-export function ActivityDetail({ session, athlete }: { session: Session; athlete: Athlete }) {
+function StoredActivityDetail({ session, athlete }: { session: Session; athlete: Athlete }) {
   const [metrics, setMetrics] = useState<MetricsRow | null>(null);
   const [metricsLoaded, setMetricsLoaded] = useState(false);
   const [cp, setCp] = useState<number | null>(null);
@@ -128,8 +129,8 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
       }
       const stream: HubPowerStream = await fetchPowerStream(
         profile.hub_planner_token,
-        session.athlete_id ? (athlete.email ?? '') : '',
-        session.id
+        String(session.raw_data?.hub_email ?? ''),
+        String(session.raw_data?.hub_activity_id ?? session.id)
       );
       if (!stream?.series?.watts?.length) {
         setWbalState('no-stream');
@@ -300,4 +301,8 @@ export function ActivityDetail({ session, athlete }: { session: Session; athlete
       </div>
     </div>
   );
+}
+
+export function ActivityDetail(props: { session: Session; athlete: Athlete }) {
+  return props.session.raw_data?.hub_readonly ? <HubActivityDetail session={props.session} /> : <StoredActivityDetail {...props} />;
 }
