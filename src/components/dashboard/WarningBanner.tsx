@@ -1,4 +1,4 @@
-import { AlertTriangle, TrendingDown, Zap, MinusCircle, X } from 'lucide-react';
+import { AlertTriangle, TrendingDown, Zap, MinusCircle, Activity, X } from 'lucide-react';
 import { useState } from 'react';
 import type { EngineWarning } from '../../lib/engine/types';
 
@@ -35,6 +35,34 @@ const WARNING_CONFIG = {
     iconColor: 'text-[#2A1F4A] dark:text-[#B8A9E5]',
     badgeColor: 'bg-[#2A1F4A]/10 text-[#2A1F4A] dark:bg-[#B8A9E5]/10 dark:text-[#B8A9E5]',
   },
+  nutrition_deficit: {
+    icon: TrendingDown,
+    borderColor: 'border-orange-500/30',
+    bgColor: 'bg-orange-500/5',
+    iconColor: 'text-orange-500',
+    badgeColor: 'bg-orange-500/10 text-orange-600',
+  },
+  nutrition_excess: {
+    icon: Zap,
+    borderColor: 'border-sky-500/30',
+    bgColor: 'bg-sky-500/5',
+    iconColor: 'text-sky-600',
+    badgeColor: 'bg-sky-500/10 text-sky-700',
+  },
+  hrv_suppression: {
+    icon: Activity,
+    borderColor: 'border-rose-500/30',
+    bgColor: 'bg-rose-500/5',
+    iconColor: 'text-rose-500',
+    badgeColor: 'bg-rose-500/10 text-rose-600',
+  },
+  compartment_imbalance: {
+    icon: Activity,
+    borderColor: 'border-cyan-500/30',
+    bgColor: 'bg-cyan-500/5',
+    iconColor: 'text-cyan-600',
+    badgeColor: 'bg-cyan-500/10 text-cyan-700',
+  },
 };
 
 const SEVERITY_LABELS: Record<string, string> = {
@@ -53,7 +81,7 @@ export function WarningBanner({ warnings }: WarningBannerProps) {
   return (
     <div className="space-y-2">
       {visible.map((warning) => {
-        const config = WARNING_CONFIG[warning.type];
+        const config = WARNING_CONFIG[warning.type] ?? WARNING_CONFIG.compartment_imbalance;
         const Icon = config.icon;
         const key = `${warning.type}-${warning.value}`;
         return (
