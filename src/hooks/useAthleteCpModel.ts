@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Athlete } from '../lib/database.types';
-import { loadActivityMmp, fitAthleteCpModel } from '../lib/engine/cpPersistence';
+import { loadActivityMmp } from '../lib/engine/cpPersistence';
 import { computeCpModel, type CpModelResult } from '../lib/engine/cpModel';
 import { extractMMPFromRows } from '../lib/engine/powerDurationCurve';
 
@@ -14,8 +14,9 @@ export interface AthleteCpData {
   refresh: () => void;
 }
 
-export function useAthleteCpModel(athlete: Athlete | null): AthleteCpData {
+export function useAthleteCpModel(athlete: Athlete | null, hubRows?: AthleteCpData['mmpRows']): AthleteCpData {
   const [rows, setRows] = useState<AthleteCpData['mmpRows']>([]);
+  const [loadedOwner, setLoadedOwner] = useState<string | null>(null);
   const [metrics1s, setMetrics1s] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export function useAthleteCpModel(athlete: Athlete | null): AthleteCpData {
       try {
         const mmp = await loadActivityMmp(athlete.id, 365);
         if (cancelled) return;
+        setLoadedOwner(athlete.id);
         setRows(mmp.map(r => ({
           duration_s: r.duration_s,
           watts: r.watts,
@@ -65,23 +67,24 @@ export function useAthleteCpModel(athlete: Athlete | null): AthleteCpData {
     return () => { cancelled = true; };
   }, [athlete?.id, tick]);
 
+  const combinedRows = useMemo(() => [...(loadedOwner === athlete?.id ? rows : []), ...(hubRows ?? [])], [rows, hubRows, loadedOwner, athlete?.id]);
   const cpModel = useMemo(() => {
     if (!athlete) return null;
     const labCp = athlete.cp_watts || athlete.ftp_watts || null;
     return computeCpModel({
       athlete,
-      mmpWattsByDuration: rows.map(r => ({
+      mmpWattsByDuration: combinedRows.map(r => ({
         durationS: r.duration_s,
         watts: r.watts,
         date: r.date,
         activityId: r.activity_id,
       })),
       labCp,
-      best1sWatts: metrics1s,
+      best1sWatts: Math.max(loadedOwner === athlete.id ? metrics1s ?? 0 : 0, ...combinedRows.filter(r => r.duration_s === 1).map(r => r.watts)) || null,
     });
-  }, [athlete, rows, metrics1s]);
+  }, [athlete, combinedRows, metrics1s, loadedOwner]);
 
-  return { cpModel, mmpRows: rows, loading, error, refresh };
+  return { cpModel, mmpRows: combinedRows, loading, error, refresh };
 }
 
 export function useMmpProfile(mmpRows: AthleteCpData['mmpRows']) {

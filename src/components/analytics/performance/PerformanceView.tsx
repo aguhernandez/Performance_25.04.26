@@ -1,5 +1,5 @@
 import type { Athlete } from '../../../lib/database.types';
-import { usePerformanceData } from './usePerformanceData';
+import { usePerformanceData, type LivePerformanceInput } from './usePerformanceData';
 import { PmcChart } from './PmcChart';
 import { PdcChart } from './PdcChart';
 import { WeeklyImpulseChart } from './WeeklyImpulseChart';
@@ -8,12 +8,13 @@ import { EfficiencyChart } from './EfficiencyChart';
 import { AthleteHomeSection } from '../../performance/AthleteHomeSection';
 import { EmptyState } from './shared';
 
-export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
+export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete, live }: {
+  live?: LivePerformanceInput;
   athlete: Athlete;
   coachAssigned: boolean;
   onUpdateAthlete: (updates: Record<string, number | null>) => Promise<void>;
 }) {
-  const data = usePerformanceData(athlete);
+  const data = usePerformanceData(athlete, live);
 
   if (data.loading) {
     return (
@@ -38,11 +39,11 @@ export function PerformanceView({ athlete, coachAssigned, onUpdateAthlete }: {
       <div>
         <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-white">Performance</h2>
         <p className="font-body text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
-          Persistent model history — impulse, fitness, power and efficiency from stored daily and stream data
+          Historial de rendimiento: calendario realizado, carga, potencia y eficiencia según los datos disponibles
         </p>
       </div>
 
-      <AthleteHomeSection athlete={athlete} coachAssigned={coachAssigned} onUpdateAthlete={onUpdateAthlete} />
+      <AthleteHomeSection live={live} athlete={athlete} coachAssigned={coachAssigned} onUpdateAthlete={onUpdateAthlete} />
 
       <PmcChart days={data.pmcDays} pmcStart={data.pmcStart} historyIncomplete={data.historyIncomplete} />
 

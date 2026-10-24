@@ -26,6 +26,7 @@ export function HrvView({ hrvLogs, athlete, onAdd, onDelete }: HrvViewProps) {
   const analysis = analyzeHrv(hrvLogs.map(h => ({
     date: h.log_date,
     rmssd: h.rmssd,
+    hrv_ms: h.hrv_ms,
     sdnn: h.sdnn,
     hrv_score: h.hrv_score,
     morning_hr: h.morning_hr,
@@ -85,7 +86,7 @@ export function HrvView({ hrvLogs, athlete, onAdd, onDelete }: HrvViewProps) {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase mb-1">{t('baseline28d')}</p>
             <p className="text-[22px] font-bold font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{analysis.baseline}</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{t('rmssdMs')}</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{'HRV (ms)' }</p>
           </div>
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
@@ -93,7 +94,7 @@ export function HrvView({ hrvLogs, athlete, onAdd, onDelete }: HrvViewProps) {
             <p className="text-[22px] font-bold font-mono" style={{ color: analysis.isSuppressed ? '#ef4444' : '#2A1F4A' }}>
               {analysis.current ?? '—'}
             </p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{t('rmssdMs')}</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{'HRV (ms)' }</p>
           </div>
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
@@ -225,6 +226,7 @@ export function HrvView({ hrvLogs, athlete, onAdd, onDelete }: HrvViewProps) {
                 {log.morning_hr && ` · Morning HR: ${log.morning_hr}bpm`}
               </p>
             </div>
+            {log.hrv_ms != null && <div><p className="text-[10px] text-gray-500">Hub HRV (ms)</p><p className="text-[16px] font-mono">{log.hrv_ms}</p></div>}
             {log.rmssd && (
               <div className="text-right">
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">{t('rmssd')}</p>
@@ -242,7 +244,7 @@ export function HrvView({ hrvLogs, athlete, onAdd, onDelete }: HrvViewProps) {
             {log.notes && (
               <p className="text-[11px] text-gray-500 dark:text-gray-400 max-w-[120px] truncate">{log.notes}</p>
             )}
-            <button onClick={() => onDelete(log.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors ml-2">
+            <button disabled={log.id.startsWith('hub:')} title={log.id.startsWith('hub:') ? 'Gestionar este registro en Hub' : undefined} onClick={() => onDelete(log.id)} className="text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors ml-2">
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>

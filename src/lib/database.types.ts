@@ -260,6 +260,8 @@ export interface PerformanceSnapshotInsert {
 }
 
 export interface HrvLog {
+  /** Generic Hub HRV in milliseconds; not labelled as RMSSD. */
+  hrv_ms?: number | null;
   id: string;
   athlete_id: string;
   log_date: string;

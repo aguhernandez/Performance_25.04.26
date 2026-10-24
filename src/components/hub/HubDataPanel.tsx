@@ -290,10 +290,10 @@ export function HubDataPanel({ hubConnected, snapshot, loading, error, athleteEm
       ) : null}
 
       {snapshot.trainingSchedule?.workouts?.length ? (
-        <Section title="Entrenamientos del Hub" icon={<Calendar className="w-3.5 h-3.5" />}>
+        <Section title="Entrenamientos realizados en Hub" icon={<Calendar className="w-3.5 h-3.5" />}>
           <div className="space-y-3">
             <p className="font-body text-[11px] text-gray-500 dark:text-gray-400">
-              {snapshot.trainingSchedule.workouts.filter(w => w.status === 'completed' || w.actual_duration_minutes !== null).length} entrenamientos realizados sincronizados automáticamente desde el Hub.
+              {snapshot.trainingSchedule.workouts.filter(w => w.status === 'completed' || w.actual_duration_minutes !== null).length} entrenamientos realizados consultados desde el Hub.
             </p>
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
               {snapshot.trainingSchedule.workouts

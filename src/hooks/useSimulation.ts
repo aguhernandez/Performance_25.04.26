@@ -57,7 +57,7 @@ export function buildPhysioProfile(athlete: Athlete | null, lab: LabTest | null)
   return profile;
 }
 
-export function useSimulationProfile(athlete: Athlete | null) {
+export function useSimulationProfile(athlete: Athlete | null, availableLabs?: LabTest[]) {
   const [labTest, setLabTest] = useState<LabTest | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -84,8 +84,9 @@ export function useSimulationProfile(athlete: Athlete | null) {
     return () => { cancelled = true; };
   }, [athlete?.id]);
 
-  const profile = buildPhysioProfile(athlete, labTest);
-  return { profile, labTest, loading };
+  const selectedTest = availableLabs ? [...availableLabs].sort((a, b) => b.test_date.localeCompare(a.test_date))[0] ?? null : labTest;
+  const profile = buildPhysioProfile(athlete, selectedTest);
+  return { profile, labTest: selectedTest, loading: availableLabs ? false : loading };
 }
 
 export function useRaceScenarios(athleteId: string | null | undefined) {

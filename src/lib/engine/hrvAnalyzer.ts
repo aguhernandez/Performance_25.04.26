@@ -1,4 +1,5 @@
 export interface HrvDataPoint {
+  hrv_ms?: number | null;
   date: string;
   rmssd?: number | null;
   sdnn?: number | null;
@@ -18,7 +19,10 @@ export interface HrvAnalysis {
 }
 
 export function analyzeHrv(hrv_logs: HrvDataPoint[]): HrvAnalysis {
-  const sorted = [...hrv_logs]
+  // Analyze a homogeneous measurement series. Never mix scores or RMSSD with generic VFC.
+  const latest = [...hrv_logs].filter(h => (h.rmssd ?? h.hrv_ms ?? 0) > 0).sort((a, b) => b.date.localeCompare(a.date))[0];
+  const useRmssd = latest?.rmssd != null && latest.rmssd > 0;
+  const sorted = hrv_logs.map(h => ({ ...h, rmssd: useRmssd ? h.rmssd : h.hrv_ms }))
     .filter(h => h.rmssd !== null && h.rmssd !== undefined && h.rmssd > 0)
     .sort((a, b) => a.date.localeCompare(b.date));
 

@@ -11,9 +11,9 @@ import type {
 } from '../../lib/database.types';
 import type { RosterRow } from '../../lib/rosterAlerts';
 import { useEngine } from '../../hooks/useEngine';
-import { hubWorkoutsToSessions } from '../../lib/hub/hubImport';
+import { useHubWorkspace } from '../../hooks/useHubWorkspace';
 import { useAthleteCpModel } from '../../hooks/useAthleteCpModel';
-import type { HubSnapshot } from '../../hooks/useHubData';
+import { EMPTY_HUB_SNAPSHOT, type HubSnapshot } from '../../hooks/useHubData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { PerformanceView } from '../analytics/performance/PerformanceView';
 import { AnalyticsView } from '../analytics/AnalyticsView';
@@ -33,10 +33,11 @@ import {
 type WorkspaceTab = 'dashboard' | 'performance' | 'analytics' | 'sessions' | 'lab' | 'nutrition' | 'hrv' | 'profile' | 'simulator';
 
 /** Full coach workspace for an assigned athlete; uses the same athlete views and tools. */
-export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected, hubSnapshot, hubLoading, hubError, onRefreshHub }: {
+export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected, hubSnapshot, hubLoading, hubError, onRefreshHub, hubToken }: {
   row: RosterRow;
   onBack: () => void;
   coachId: string;
+  hubToken?: string;
   hubConnected: boolean;
   hubSnapshot: HubSnapshot;
   hubLoading: boolean;
@@ -59,14 +60,16 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
   const [error, setError] = useState<string | null>(null);
   const [hubSyncMessage, setHubSyncMessage] = useState<string | null>(null);
   const refreshRequestedRef = useRef(false);
-  const importedForAthleteRef = useRef<string | null>(null);
+
 
   useEffect(() => {
     setActiveTab('dashboard');
     refreshRequestedRef.current = false;
-    importedForAthleteRef.current = null;
+
     setHubSyncMessage(null);
   }, [row.athlete_id]);
+
+  useEffect(() => { refreshRequestedRef.current = false; }, [hubToken]);
 
   const reloadRelatedData = useCallback(async () => {
     const [sessionsRes, labsRes, nutritionRes, hrvRes, racesRes, blocksRes, healthRes, profileRes] = await Promise.all([
@@ -89,7 +92,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     setRaceSchedule((racesRes.data ?? []) as RaceScheduleEntry[]);
     setTrainingBlocks((blocksRes.data ?? []) as TrainingBlock[]);
     setHealthHistory((healthRes.data ?? []) as HealthHistoryEntry[]);
-    setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? '');
+    setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? athlete?.user_id ?? '');
   }, [row.athlete_id, athlete?.user_id]);
 
   useEffect(() => {
@@ -97,6 +100,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     setLoading(true);
     setError(null);
     setAthlete(null);
+    setAthleteEmail('');
     (async () => {
       const { data, error: loadError } = await supabase
         .from('athletes')
@@ -128,7 +132,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
       setRaceSchedule((racesRes.data ?? []) as RaceScheduleEntry[]);
       setTrainingBlocks((blocksRes.data ?? []) as TrainingBlock[]);
       setHealthHistory((healthRes.data ?? []) as HealthHistoryEntry[]);
-      setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? '');
+      setAthleteEmail((profileRes.data as { email?: string } | null)?.email ?? selectedAthlete.user_id);
       setLoading(false);
     })().catch(err => {
       if (!cancelled) {
@@ -152,48 +156,19 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
   }, [athlete, reloadRelatedData]);
 
   useEffect(() => {
-    if (!athleteEmail || !hubConnected || refreshRequestedRef.current) return;
+    if (loading || athlete?.id !== row.athlete_id || !athleteEmail || !hubConnected || refreshRequestedRef.current) return;
     refreshRequestedRef.current = true;
-    setHubSyncMessage(es ? 'Sincronizando entrenamientos del Hub…' : 'Syncing Hub training…');
+    setHubSyncMessage(es ? 'Consultando calendario realizado y contexto del Hub.' : 'Reading completed Hub calendar and context.');
     void onRefreshHub(athleteEmail);
-  }, [athleteEmail, hubConnected, onRefreshHub, es]);
+  }, [athleteEmail, hubConnected, onRefreshHub, es, loading, athlete?.id, row.athlete_id]);
 
-  useEffect(() => {
-    const schedule = hubSnapshot.trainingSchedule;
-    const hubProfileEmail = hubSnapshot.athleteProfile?.athlete.email;
-    if (!athlete || !athleteEmail || hubProfileEmail !== athleteEmail || !schedule || importedForAthleteRef.current === athlete.id) return;
-
-    const existingIds = new Set(
-      sessions.map(session => {
-        const raw = session.raw_data;
-        return raw && typeof raw.hub_workout_id === 'string' ? raw.hub_workout_id : null;
-      }).filter((id): id is string => id !== null)
-    );
-    const newWorkouts = schedule.workouts.filter(workout =>
-      (workout.status === 'completed' || workout.status === 'done' || workout.actual_duration_minutes !== null) &&
-      !existingIds.has(workout.id)
-    );
-
-    importedForAthleteRef.current = athlete.id;
-    if (newWorkouts.length === 0) {
-      setHubSyncMessage(es ? 'Entrenamientos del Hub ya sincronizados.' : 'Hub training is already synchronized.');
-      return;
-    }
-
-    const importedSessions = hubWorkoutsToSessions(newWorkouts, athlete.id);
-    void addSessions(importedSessions)
-      .then(() => setHubSyncMessage(es ? `${newWorkouts.length} entrenamientos del Hub añadidos a las sesiones.` : `${newWorkouts.length} Hub workouts added to sessions.`))
-      .catch(() => {
-        importedForAthleteRef.current = null;
-        setHubSyncMessage(es ? 'No se pudieron sincronizar los entrenamientos del Hub.' : 'Hub training could not be synchronized.');
-      });
-  }, [athlete, athleteEmail, hubConnected, hubSnapshot, sessions, addSessions, es]);
-
-  const cpData = useAthleteCpModel(athlete);
+  const selectedSnapshot = (hubSnapshot.athleteProfile?.athlete.id === athlete?.user_id || hubSnapshot.athleteProfile?.athlete.email.toLowerCase() === athleteEmail.toLowerCase()) ? hubSnapshot : EMPTY_HUB_SNAPSHOT;
+  const workspace = useHubWorkspace(athlete, sessions, nutritionLogs, hrvLogs, labTests, selectedSnapshot, hubToken);
+  const cpData = useAthleteCpModel(workspace.athlete, workspace.mmpRows);
   const cpModelOverride = cpData.cpModel?.status === 'ok'
     ? { cpWatts: cpData.cpModel.cp, confidence: cpData.cpModel.confidence }
     : undefined;
-  const engine = useEngine(athlete, sessions, { cpModel: cpModelOverride });
+  const engine = useEngine(workspace.athlete, workspace.sessions, { cpModel: cpModelOverride });
 
   const handleUpdate = useCallback(async (rawUpdates: Partial<Athlete> & { effective_from_override?: string }) => {
     if (!athlete) return;
@@ -319,7 +294,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
     { id: 'simulator', label: es ? 'Simulador' : 'Simulator', icon: Zap },
   ];
 
-  if (loading) {
+  if (loading || (athlete && athlete.id !== row.athlete_id)) {
     return <WorkspaceMessage onBack={onBack} message={es ? 'Cargando datos del atleta…' : 'Loading athlete data…'} isSpanish={es} />;
   }
   if (error || !athlete) {
@@ -360,15 +335,16 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
       </div>
 
       <div key={activeTab}>
+      {workspace.powerError && <p role="alert" className="text-sm text-amber-700">{workspace.powerError}</p>}
       {activeTab === 'dashboard' && engine && (
         <DashboardView
           engine={engine}
-          athlete={athlete}
-          sessions={sessions}
-          nutritionLogs={nutritionLogs}
+          athlete={workspace.athlete ?? athlete}
+          sessions={workspace.sessions}
+          nutritionLogs={workspace.nutritionLogs}
           userId={coachId}
           hubConnected={hubConnected}
-          hubSnapshot={hubSnapshot}
+          hubSnapshot={selectedSnapshot}
           hubLoading={hubLoading}
           hubError={hubError}
           athleteEmail={athleteEmail || null}
@@ -379,19 +355,19 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
         <p className="mt-3 font-body text-[11px] text-gray-500 dark:text-gray-400">{hubSyncMessage}</p>
       )}
       {activeTab === 'dashboard' && !engine && <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">Performance model is not available yet.</div>}
-      {activeTab === 'performance' && <PerformanceView athlete={athlete} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
-      {activeTab === 'analytics' && <AnalyticsView sessions={sessions} athlete={athlete} labTests={labTests} engine={engine} cpData={cpData} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
-      {activeTab === 'sessions' && <SessionList sessions={sessions} athlete={athlete} onAdd={addSession} onDelete={deleteSession} />}
-      {activeTab === 'lab' && <LabView labTests={labTests} athlete={athlete} onAdd={addLabTest} />}
-      {activeTab === 'nutrition' && <NutritionView logs={nutritionLogs} athlete={athlete} onAdd={addNutrition} />}
-      {activeTab === 'hrv' && <HrvView hrvLogs={hrvLogs} athlete={athlete} onAdd={addHrvLog} onDelete={deleteHrvLog} />}
+      {activeTab === 'performance' && <PerformanceView live={selectedSnapshot.context ? workspace : undefined} athlete={workspace.athlete ?? athlete} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
+      {activeTab === 'analytics' && <AnalyticsView live={selectedSnapshot.context ? workspace : undefined} sessions={workspace.sessions} athlete={workspace.athlete ?? athlete} labTests={workspace.labTests} engine={engine} cpData={cpData} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
+      {activeTab === 'sessions' && <SessionList hubContext={selectedSnapshot.context} sessions={workspace.sessions} athlete={workspace.athlete ?? athlete} onAdd={addSession} onDelete={deleteSession} />}
+      {activeTab === 'lab' && <LabView labTests={workspace.labTests} athlete={workspace.athlete ?? athlete} onAdd={addLabTest} />}
+      {activeTab === 'nutrition' && <NutritionView logs={workspace.nutritionLogs} athlete={workspace.athlete ?? athlete} onAdd={addNutrition} />}
+      {activeTab === 'hrv' && <HrvView hrvLogs={workspace.hrvLogs} athlete={workspace.athlete ?? athlete} onAdd={addHrvLog} onDelete={deleteHrvLog} />}
       {activeTab === 'profile' && (
         <AthleteProfile
-          athlete={athlete}
+          athlete={workspace.athlete ?? athlete}
           userId={athlete.user_id}
           onSave={async () => { throw new Error('Athlete profile is already created.'); }}
           onUpdate={handleUpdate}
-          sessions={sessions}
+          sessions={workspace.sessions}
           raceSchedule={raceSchedule}
           trainingBlocks={trainingBlocks}
           healthHistory={healthHistory}
@@ -405,7 +381,7 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
           onAddSession={addSessions}
         />
       )}
-      {activeTab === 'simulator' && <SimulatorView athlete={athlete} sessions={sessions} athleteEmail={athleteEmail} />}
+      {activeTab === 'simulator' && <SimulatorView labTests={workspace.labTests} cpData={cpData} onRefreshHub={() => onRefreshHub(athleteEmail)} athlete={workspace.athlete ?? athlete} sessions={workspace.sessions} athleteEmail={athleteEmail} />}
       </div>
     </div>
   );

@@ -15,7 +15,8 @@ import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { HrvView } from './components/hrv/HrvView';
 import { SettingsView } from './components/settings/SettingsView';
-import { useHubData } from './hooks/useHubData';
+import { useHubData, EMPTY_HUB_SNAPSHOT } from './hooks/useHubData';
+import { useHubWorkspace } from './hooks/useHubWorkspace';
 import { useAthleteCpModel } from './hooks/useAthleteCpModel';
 import { useCoachAssignment } from './hooks/useCoachAssignment';
 import type { ThresholdOverrides } from './lib/engine/impulse';
@@ -111,7 +112,21 @@ function AppContent() {
     refetch,
   } = useAthleteData(user?.id ?? null, thresholdOverridesRef);
 
-  const cpData = useAthleteCpModel(athlete);
+  const {
+    hubConnected,
+    snapshot: hubSnapshot,
+    loading: hubLoading,
+    error: hubError,
+    refresh: refreshHub,
+    tokenConfig: hubToken,
+  } = useHubData(profile?.id);
+
+  const ownSnapshot = hubSnapshot.athleteProfile?.athlete.email?.toLowerCase() === user?.email?.toLowerCase() ? hubSnapshot : EMPTY_HUB_SNAPSHOT;
+  const workspace = useHubWorkspace(athlete, sessions, nutritionLogs, hrvLogs, labTests, ownSnapshot, hubToken?.token);
+  useEffect(() => {
+    if (profile?.role === 'athlete' && user?.email && hubConnected) void refreshHub(user.email);
+  }, [profile?.role, user?.email, hubConnected, refreshHub]);
+  const cpData = useAthleteCpModel(workspace.athlete, workspace.mmpRows);
 
   const cpModelOverride =
     cpData.cpModel && cpData.cpModel.status === 'ok'
@@ -124,18 +139,11 @@ function AppContent() {
   );
   thresholdOverridesRef.current = thresholdOverridesWithCp;
 
-  const engine = useEngine(athlete, sessions, { cpModel: cpModelOverride });
+  const engine = useEngine(workspace.athlete, workspace.sessions, { cpModel: cpModelOverride });
 
   // Athlete home: thresholds/tau are read-only when a coach is assigned.
   const coachAssigned = useCoachAssignment(user?.id ?? null);
 
-  const {
-    hubConnected,
-    snapshot: hubSnapshot,
-    loading: hubLoading,
-    error: hubError,
-    refresh: refreshHub,
-  } = useHubData(profile?.id);
 
   // Pull threshold values from the active Hub passport when it loads
   const passport = hubSnapshot.biologicalPassport?.active_passport ?? null;
@@ -193,6 +201,7 @@ function AppContent() {
               <CoachAthletePerformanceView
                 row={rosterAthlete}
                 coachId={user?.id ?? profile?.hub_user_id ?? ''}
+                hubToken={hubToken?.token}
                 hubConnected={hubConnected}
                 hubSnapshot={hubSnapshot}
                 hubLoading={hubLoading}
@@ -205,6 +214,8 @@ function AppContent() {
                 role={role}
                 onOpenAthlete={setRosterAthlete}
                 athleteNames={{}}
+                coachHubId={profile?.hub_user_id ?? user?.id}
+                coachEmail={user?.email}
               />
             )}
           </div>
@@ -239,12 +250,13 @@ function AppContent() {
 
       <main className="pt-16 lg:pt-16 lg:pl-20 min-h-screen w-full">
         <div className="p-6 w-full max-w-[1400px]">
+          {(hubError || workspace.powerError) && <p role="alert" className="mb-4 text-sm text-amber-700">{hubError || workspace.powerError}</p>}
           {activeView === 'dashboard' && athlete && (
             <DashboardView
               engine={engine}
-              athlete={athlete}
-              sessions={sessions}
-              nutritionLogs={nutritionLogs}
+              athlete={workspace.athlete ?? athlete}
+              sessions={workspace.sessions}
+              nutritionLogs={workspace.nutritionLogs}
               userId={user?.id ?? ''}
               hubConnected={hubConnected}
               hubSnapshot={hubSnapshot}
@@ -256,9 +268,9 @@ function AppContent() {
           )}
 
           {activeView === 'sessions' && athlete && (
-            <SessionList
-              sessions={sessions}
-              athlete={athlete}
+            <SessionList hubContext={ownSnapshot.context}
+              sessions={workspace.sessions}
+              athlete={workspace.athlete ?? athlete}
               onAdd={addSession}
               onDelete={deleteSession}
             />
@@ -266,25 +278,25 @@ function AppContent() {
 
           {activeView === 'lab' && athlete && (
             <LabView
-              labTests={labTests}
-              athlete={athlete}
+              labTests={workspace.labTests}
+              athlete={workspace.athlete ?? athlete}
               onAdd={addLabTest}
             />
           )}
 
           {activeView === 'nutrition' && athlete && (
             <NutritionView
-              logs={nutritionLogs}
-              athlete={athlete}
+              logs={workspace.nutritionLogs}
+              athlete={workspace.athlete ?? athlete}
               onAdd={refetch}
             />
           )}
 
           {activeView === 'analytics' && athlete && (
-            <AnalyticsView
-              sessions={sessions}
-              athlete={athlete}
-              labTests={labTests}
+            <AnalyticsView live={ownSnapshot.context ? workspace : undefined}
+              sessions={workspace.sessions}
+              athlete={workspace.athlete ?? athlete}
+              labTests={workspace.labTests}
               engine={engine}
               cpData={cpData}
               coachAssigned={coachAssigned}
@@ -294,15 +306,15 @@ function AppContent() {
 
           {activeView === 'hrv' && athlete && (
             <HrvView
-              hrvLogs={hrvLogs}
-              athlete={athlete}
+              hrvLogs={workspace.hrvLogs}
+              athlete={workspace.athlete ?? athlete}
               onAdd={addHrvLog}
               onDelete={deleteHrvLog}
             />
           )}
 
           {activeView === 'simulator' && athlete && (
-            <SimulatorView athlete={athlete} sessions={sessions} athleteEmail={user?.email ?? ''} />
+            <SimulatorView labTests={workspace.labTests} cpData={cpData} onRefreshHub={() => refreshHub(user?.email ?? '')} athlete={workspace.athlete ?? athlete} sessions={workspace.sessions} athleteEmail={user?.email ?? ''} />
           )}
 
           {activeView === 'settings' && (
@@ -311,11 +323,11 @@ function AppContent() {
 
           {activeView === 'profile' && (
             <AthleteProfile
-              athlete={athlete}
+              athlete={workspace.athlete ?? athlete}
               userId={user?.id ?? ''}
               onSave={createAthlete}
               onUpdate={updateAthlete}
-              sessions={sessions}
+              sessions={workspace.sessions}
               raceSchedule={raceSchedule}
               trainingBlocks={trainingBlocks}
               healthHistory={healthHistory}

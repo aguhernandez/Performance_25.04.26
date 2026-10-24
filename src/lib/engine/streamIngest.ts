@@ -58,7 +58,7 @@ export async function ingestPowerStreams(
   if (streams.length === 0) return result;
 
   const fingerprints = await loadExistingFingerprints(athlete.id);
-  const sessionById = new Map(sessions.map(s => [s.id, s]));
+  const sessionById = new Map(sessions.flatMap(s => [[s.id, s] as const, ...(typeof s.raw_data?.hub_activity_id === 'string' ? [[s.raw_data.hub_activity_id, s] as const] : [])]));
   const mmpRows: ActivityMmpRow[] = [];
   const metricsRows: ActivityMetricsRow[] = [];
   const durabilityAllRows: ActivityDurabilityRow[] = [];
@@ -77,7 +77,7 @@ export async function ingestPowerStreams(
     }
 
     const fp = fingerprint(stream);
-    if (fingerprints.get(hub.activity_id) === fp) {
+    if (fingerprints.get(session.id) === fp) {
       result.skipped++;
       continue;
     }
@@ -98,7 +98,7 @@ export async function ingestPowerStreams(
     const mmp = computeMeanMaxPower(clean);
     for (const pt of mmp) {
       mmpRows.push({
-        activity_id: hub.activity_id,
+        activity_id: session.id,
         athlete_id: athlete.id,
         date: session.session_date,
         duration_s: pt.durationS,
@@ -122,7 +122,7 @@ export async function ingestPowerStreams(
     let durabilityRows: ActivityDurabilityRow[] = [];
     const thresholds = thresholdsForDate?.(session.session_date) ?? null;
     if (thresholds && thresholds.cpWatts > 0) {
-      durabilityRows = computeDurabilityRows(clean, hub.activity_id, athlete.id, session.session_date);
+      durabilityRows = computeDurabilityRows(clean, session.id, athlete.id, session.session_date);
       result.durabilityRows += durabilityRows.length;
       if (thresholds.wPrimeJ && thresholds.wPrimeJ > 0) {
         const wbal = computeWbalSummary(clean, thresholds.cpWatts, thresholds.wPrimeJ);
@@ -134,7 +134,7 @@ export async function ingestPowerStreams(
     }
 
     metricsRows.push({
-      activity_id: hub.activity_id,
+      activity_id: session.id,
       athlete_id: athlete.id,
       date: session.session_date,
       avg_power_watts: stats.avgWatts,
