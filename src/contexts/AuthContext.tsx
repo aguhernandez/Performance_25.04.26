@@ -72,6 +72,19 @@ function extractUserFromPayload(payload: Record<string, unknown>): HubUser | nul
   };
 }
 
+const SSO_EXCHANGE_URL = 'https://ngkcbygyoobqhlmlnuvl.supabase.co/functions/v1/exchange-satellite-code';
+
+async function exchangeSatelliteCode(code: string): Promise<string> {
+  const response = await fetch(SSO_EXCHANGE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+  const data = await response.json();
+  if (!response.ok || !data?.token) throw new Error(data?.error || 'Could not exchange Hub SSO code');
+  return data.token as string;
+}
+
 interface AuthContextType {
   user: HubUser | null;
   profile: Profile | null;
@@ -109,12 +122,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkHubAuth = async () => {
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenFromUrl = urlParams.get('session_token');
-
-      if (tokenFromUrl) {
-        localStorage.setItem(SESSION_TOKEN_KEY, tokenFromUrl);
-        window.history.replaceState({}, '', window.location.href.split('?')[0]);
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const code = hashParams.get('sso_code');
+      if (code) {
+        window.history.replaceState({}, '', \`${window.location.pathname}${window.location.search}\`);
+        localStorage.setItem(SESSION_TOKEN_KEY, await exchangeSatelliteCode(code));
       }
 
       const token = localStorage.getItem(SESSION_TOKEN_KEY);
