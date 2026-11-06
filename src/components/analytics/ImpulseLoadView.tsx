@@ -66,8 +66,8 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
         w = { total: 0, byType: {} };
         weeklyMap.set(weekStart, w);
       }
-      w.total += row.impulse;
-      w.byType[row.sport] = (w.byType[row.sport] ?? 0) + row.impulse;
+      w.total += row.impulse ?? 0;
+      w.byType[row.sport] = (w.byType[row.sport] ?? 0) + (row.impulse ?? 0);
     }
     return Array.from(weeklyMap.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
@@ -88,10 +88,14 @@ export function ImpulseLoadView({ sessions, athlete }: Props) {
     const map = new Map<string, number>();
     for (const row of rows) {
       if (row.sport === 'strength' && !includeStrength) continue;
-      map.set(row.sport, (map.get(row.sport) ?? 0) + row.impulse);
+      map.set(row.sport, (map.get(row.sport) ?? 0) + (row.impulse ?? 0));
     }
     return map;
   }, [rows, includeStrength]);
+
+  if (rows.some(row => row.impulse === null)) {
+    return <div className="rounded-xl border border-amber-300 p-4 text-sm text-amber-800">Impulse v1: faltan datos en una o más sesiones. Las cargas y comparaciones no están disponibles hasta completar los datos.</div>;
+  }
 
   return (
     <div className="space-y-6">

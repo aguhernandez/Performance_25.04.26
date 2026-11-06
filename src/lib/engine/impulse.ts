@@ -1,3 +1,4 @@
+import { calculateImpulse, IMPULSE_ALGORITHM_VERSION, type ImpulseStatus, type ImpulseMethod } from './impulseV1';
 import type { Athlete, Session } from '../database.types';
 
 export type IntensitySource = 'power' | 'hr' | 'pace' | 'rpe' | 'default';
@@ -6,13 +7,19 @@ export type ImpulseQuality = 'measured' | 'estimated';
 export interface ImpulseRow {
   date: string;
   sport: string;
-  impulse: number;
+  impulse: number | null;
   intensitySource: IntensitySource;
   quality: ImpulseQuality;
+  status?: ImpulseStatus;
+  method?: ImpulseMethod | null;
+  algorithmVersion?: string;
+  provenance?: string;
+  reason?: string;
 }
 
 export interface ImpulseThresholds {
   cpWatts: number;
+  ftpWatts?: number | null;
   lt2Hr: number;
   maxHr: number;
   restingHr: number;
@@ -24,7 +31,7 @@ export interface ImpulseThresholds {
 export const DEFAULT_RPE = 6;
 export const IF_MIN = 0;
 export const IF_MAX = 1.5;
-export const FORMULA_VERSION = 1;
+export const FORMULA_VERSION = 2;
 
 export const DEFAULT_TAU_FITNESS = 42;
 export const DEFAULT_TAU_FATIGUE = 7;
@@ -145,6 +152,7 @@ export function resolveThresholds(
 
   return {
     cpWatts,
+    ftpWatts: athlete.ftp_watts > 0 ? athlete.ftp_watts : null,
     lt2Hr,
     maxHr: athlete.max_hr || 185,
     restingHr: athlete.resting_hr ?? 60,
@@ -155,78 +163,43 @@ export function resolveThresholds(
   };
 }
 
-export function computeSessionImpulse(
-  session: Session,
-  thresholds: ImpulseThresholds
-): ImpulseRow {  const base: ImpulseRow = {
-    date: session.session_date,
-    sport: session.session_type,
-    impulse: 0,
-    intensitySource: 'default',
-    quality: 'estimated',
-  };
-
-  if (session.duration_min <= 0) return base;
-
-  const np = session.normalized_power_watts ?? session.avg_power_watts ?? null;
-  const isEnduranceType =
-    session.session_type === 'endurance' || session.session_type === 'cycling';
-
-  if (isEnduranceType && np !== null && thresholds.cpWatts > 0) {
-    const { if: intensity } = powerBasedIf(np, thresholds.cpWatts);
-    return {
-      ...base,
-      impulse: impulseFromIf(session.duration_min, intensity),
-      intensitySource: 'power',
-      quality: 'measured',
-    };
+export function computeSessionImpulse(session: Session, thresholds: ImpulseThresholds): ImpulseRow {
+  const raw = session.raw_data ?? {};
+  const canonical = raw.impulse_result as Record<string, unknown> | undefined;
+  const state = canonical?.status ?? raw.impulse_status;
+  const version = canonical?.algorithmVersion ?? canonical?.algorithm_version ?? raw.impulse_algorithm_version;
+  const value = canonical?.impulse ?? raw.actual_impulse;
+  const method = canonical?.method ?? raw.impulse_method;
+  const known = ['calculated', 'estimated', 'manual', 'insufficient'].includes(String(state));
+  const source = String(raw.hub_source ?? (raw.hub_readonly ? 'hub' : 'performance'));
+  const calculationContext = canonical?.calculation_context ?? raw.calculation_context;
+  if (canonical?.source_kind !== 'performance_local' && (calculationContext === 'actual') && version === IMPULSE_ALGORITHM_VERSION && known && (state === 'insufficient' || (typeof value === 'number' && Number.isFinite(value) && value >= 0))) {
+    return { date: session.session_date, sport: session.session_type, impulse: state === 'insufficient' ? null : typeof value === 'number' ? value : null,
+      intensitySource: 'default', quality: state === 'calculated' ? 'measured' : 'estimated', status: state as ImpulseStatus,
+      method: (method ?? null) as ImpulseMethod | null, algorithmVersion: IMPULSE_ALGORITHM_VERSION, provenance: String(canonical?.source_kind ?? source), reason: typeof canonical?.reason === 'string' ? canonical.reason : undefined };
   }
-
-  if (
-    session.session_type === 'running' &&
-    session.distance_km !== null &&
-    session.distance_km > 0 &&
-    thresholds.thresholdSpeedKmh
-  ) {
-    const { if: intensity } = paceBasedIf(
-      session.distance_km,
-      session.duration_min,
-      thresholds.thresholdSpeedKmh
-    );
-    return {
-      ...base,
-      impulse: impulseFromIf(session.duration_min, intensity),
-      intensitySource: 'pace',
-      quality: 'measured',
-    };
+  const subSport = (session.sub_sport ?? '').toLowerCase();
+  const sport = subSport.includes('swim') || subSport.includes('nataci') ? 'swimming'
+    : session.session_type === 'running' ? 'running'
+    : session.session_type === 'cycling' || (session.session_type === 'endurance' && (session.normalized_power_watts != null || session.avg_power_watts != null)) ? 'cycling' : null;
+  const number = (x: unknown): number | null => typeof x === 'number' && Number.isFinite(x) ? x : null;
+  const manual = number(raw.manual_impulse);
+  if (manual !== null && manual >= 0) {
+    const result = calculateImpulse({ sport: sport ?? 'cycling', durationMinutes: session.duration_min, manualImpulse: manual });
+    return { date: session.session_date, sport: session.session_type, impulse: result.impulse,
+      intensitySource: 'default', quality: 'estimated', status: result.status, method: result.method,
+      algorithmVersion: result.algorithmVersion, provenance: source, reason: result.reason };
   }
-
-  const isAerobicType = isEnduranceType || session.session_type === 'running';
-  if (
-    isAerobicType &&
-    session.avg_hr !== null &&
-    session.avg_hr > thresholds.restingHr
-  ) {
-    const { if: intensity } = hrBasedIf(
-      session.avg_hr,
-      thresholds.restingHr,
-      thresholds.lt2Hr
-    );
-    return {
-      ...base,
-      impulse: impulseFromIf(session.duration_min, intensity),
-      intensitySource: 'hr',
-      quality: 'measured',
-    };
-  }
-
-  const { if: intensity, source, quality } = srpeBasedIf(session.rpe);
-  return {
-    ...base,
-    impulse: impulseFromIf(session.duration_min, intensity),
-    intensitySource: source,
-    quality,
-  };
+  const avgPace = number(raw.avg_pace_per_km) ?? (session.distance_km && session.distance_km > 0 ? session.duration_min / session.distance_km : null);
+  const thresholdPace = number(raw.threshold_pace_per_km) ?? (sport === 'running' && thresholds.thresholdSpeedKmh ? 60 / thresholds.thresholdSpeedKmh : null);
+  const result = sport ? calculateImpulse({ sport, durationMinutes: session.duration_min,
+    normalizedPowerWatts: session.normalized_power_watts, avgPowerWatts: session.avg_power_watts,
+    ftp: thresholds.ftpWatts, avgPacePerKm: avgPace, adjustedPacePerKm: number(raw.adjusted_pace_per_km),
+    thresholdPacePerKm: thresholdPace, manualImpulse: number(raw.manual_impulse) })
+    : { impulse: null, status: 'insufficient' as const, method: null, algorithmVersion: IMPULSE_ALGORITHM_VERSION, reason: 'Sport or impulse data unavailable' };
+  return { date: session.session_date, sport: session.session_type, impulse: result.impulse,
+    intensitySource: sport === 'cycling' ? 'power' : sport ? 'pace' : 'default', quality: result.status === 'calculated' ? 'measured' : 'estimated',
+    status: result.status, method: result.method, algorithmVersion: result.algorithmVersion, provenance: source, reason: result.reason };
 }
 
 export function computeSessionImpulseFor(
@@ -253,9 +226,9 @@ export function computeSessionImpulseFor(
     altitude_m_env: null,
     training_intention: null,
     zone_distribution: null,
-    raw_data: null,
+    raw_data: sessionLike.raw_data ?? null,
     strength_exercises: null,
-    sub_sport: null,
+    sub_sport: sessionLike.sub_sport ?? null,
     sport_specific_data: null,
     created_at: '',
   } as unknown as Session;
@@ -325,7 +298,7 @@ export function computeSessionImpulseRowsWithHistory(
 ): ImpulseRow[] {
   const sorted = [...historyRows].sort((a, b) => a.effective_from.localeCompare(b.effective_from));
   return sessions.map(session => {
-    const { thresholds, quality } = thresholdsForDate(athlete, session.session_date, sorted);
+    const { thresholds } = thresholdsForDate(athlete, session.session_date, sorted);
     const row = computeSessionImpulse(session, thresholds);
     // Session-level quality reflects threshold provenance; source-level
     // quality (measured power/HR vs estimated sRPE) is kept from the row.
@@ -349,10 +322,11 @@ export function groupByDay(rows: ImpulseRow[]): Map<string, DailyTotal> {
       entry = { date: row.date, totalImpulse: 0, enduranceImpulse: 0, strengthImpulse: 0, rows: [] };
       map.set(row.date, entry);
     }
+    entry.rows.push(row);
+    if (row.impulse === null) continue;
     entry.totalImpulse += row.impulse;
     if (row.sport === 'strength') entry.strengthImpulse += row.impulse;
     else entry.enduranceImpulse += row.impulse;
-    entry.rows.push(row);
   }
   return map;
 }
@@ -369,13 +343,10 @@ export interface AthleteTauRefs {
   tau_fatigue?: number | null;
 }
 
-export function athleteTau(athlete: AthleteTauRefs): { tauFitness: number; tauFatigue: number } {
-  return {
-    tauFitness: clampTau(athlete.tau_fitness ?? DEFAULT_TAU_FITNESS, TAU_FITNESS_MIN, TAU_FITNESS_MAX),
-    tauFatigue: clampTau(athlete.tau_fatigue ?? DEFAULT_TAU_FATIGUE, TAU_FATIGUE_MIN, TAU_FATIGUE_MAX),
-  };
+export function athleteTau(_athlete: AthleteTauRefs): { tauFitness: number; tauFatigue: number } {
+  return { tauFitness: DEFAULT_TAU_FITNESS, tauFatigue: DEFAULT_TAU_FATIGUE };
 }
 
-function clampTau(value: number, min: number, max: number): number {
+export function clampTau(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }

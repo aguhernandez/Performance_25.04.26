@@ -1,3 +1,4 @@
+import { computeSessionImpulse, resolveThresholds } from '../../lib/engine/impulse';
 import { HubPlanCalendar } from './HubPlanCalendar';
 import type { HubContextResponse } from '../../lib/hub/hubContext';
 import { useState } from 'react';
@@ -133,7 +134,7 @@ export function SessionList({ sessions, athlete, onAdd, onDelete, hubContext }: 
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <div className="text-right">
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono uppercase">Impulse</p>
-                    <p className="text-[13px] font-bold font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{session.impulse.toFixed(3)}</p>
+                    <p className="text-[13px] font-bold font-mono text-[#2A1F4A] dark:text-[#B8A9E5]">{(() => { const value = computeSessionImpulse(session, resolveThresholds(athlete)); return value.impulse === null ? '—' : value.impulse.toFixed(2); })()}</p>
                   </div>
                   {session.rpe && (
                     <div className="text-right">

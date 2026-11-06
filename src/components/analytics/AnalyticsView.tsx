@@ -81,7 +81,7 @@ export function AnalyticsView({ sessions, athlete, labTests, engine, cpData, coa
       <div>
         {activeTab === 'performance' && (
           <PerformanceView
-            live={live}
+            live={live ?? { sessions }}
             athlete={athlete}
             coachAssigned={coachAssigned}
             onUpdateAthlete={onUpdateAthlete ?? (async () => {})}

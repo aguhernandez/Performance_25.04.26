@@ -355,8 +355,8 @@ export function CoachAthletePerformanceView({ row, onBack, coachId, hubConnected
         <p className="mt-3 font-body text-[11px] text-gray-500 dark:text-gray-400">{hubSyncMessage}</p>
       )}
       {activeTab === 'dashboard' && !engine && <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">Performance model is not available yet.</div>}
-      {activeTab === 'performance' && <PerformanceView live={selectedSnapshot.context ? workspace : undefined} athlete={workspace.athlete ?? athlete} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
-      {activeTab === 'analytics' && <AnalyticsView live={selectedSnapshot.context ? workspace : undefined} sessions={workspace.sessions} athlete={workspace.athlete ?? athlete} labTests={workspace.labTests} engine={engine} cpData={cpData} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
+      {activeTab === 'performance' && <PerformanceView live={workspace} athlete={workspace.athlete ?? athlete} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
+      {activeTab === 'analytics' && <AnalyticsView live={workspace} sessions={workspace.sessions} athlete={workspace.athlete ?? athlete} labTests={workspace.labTests} engine={engine} cpData={cpData} coachAssigned onUpdateAthlete={handlePerformanceUpdate} />}
       {activeTab === 'sessions' && <SessionList hubContext={selectedSnapshot.context} sessions={workspace.sessions} athlete={workspace.athlete ?? athlete} onAdd={addSession} onDelete={deleteSession} />}
       {activeTab === 'lab' && <LabView labTests={workspace.labTests} athlete={workspace.athlete ?? athlete} onAdd={addLabTest} />}
       {activeTab === 'nutrition' && <NutritionView logs={workspace.nutritionLogs} athlete={workspace.athlete ?? athlete} onAdd={addNutrition} />}

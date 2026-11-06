@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import type { SessionInsert, StrengthExercise, SessionType, TrainingIntention, ZoneDistribution } from '../../lib/database.types';
 import { computeSessionImpulseFor } from '../../lib/engine/impulse';
-import { calculateBeachVolleyballImpulse } from '../../lib/engine/beachVolleyCalculator';
 import type { Athlete } from '../../lib/database.types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -68,6 +67,7 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
   const [normalizedPower, setNormalizedPower] = useState('');
   const [avgHr, setAvgHr] = useState('');
   const [rpe, setRpe] = useState('');
+  const [manualImpulse, setManualImpulse] = useState('');
   const [distanceKm, setDistanceKm] = useState('');
   const [elevationM, setElevationM] = useState('');
   const [notes, setNotes] = useState('');
@@ -147,7 +147,7 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
         elevation_m: elevationM ? parseInt(elevationM) : undefined,
         strength_exercises: type === 'strength' ? strengthExercises : undefined,
         impulse: 0,
-        raw_data: bvRaw ? { beachVolleyball: bvRaw } : undefined,
+        raw_data: { ...(bvRaw ? { beachVolleyball: bvRaw } : {}), ...(manualImpulse !== '' ? { manual_impulse: Number(manualImpulse) } : {}) },
         training_intention: trainingIntention || undefined,
         temperature_c: temperatureC ? parseFloat(temperatureC) : undefined,
         humidity_pct: humidityPct ? parseInt(humidityPct) : undefined,
@@ -157,20 +157,9 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
         zone_distribution: zoneDistribution,
       };
 
-      let impulse = 0;
-      if (type === 'beach_volleyball' && bvRaw) {
-        const result = calculateBeachVolleyballImpulse(
-          { ...bvRaw, avgHr: avgHr ? parseInt(avgHr) : undefined, rpe: rpe ? parseInt(rpe) : undefined },
-          {
-            maxHr: athlete.max_hr,
-            restingHr: athlete.resting_hr,
-            jumpHeightCmBaseline: 35,
-          }
-        );
-        impulse = result.total;
-      } else {
-        impulse = computeSessionImpulseFor(draftSession, athlete).impulse;
-      }
+      const computed = computeSessionImpulseFor(draftSession, athlete);
+      const impulse = computed.impulse ?? 0; // Legacy NOT NULL column; status in raw_data is authoritative.
+      draftSession.raw_data = { ...draftSession.raw_data, impulse_result: { impulse: computed.impulse, status: computed.status, method: computed.method, algorithm_version: computed.algorithmVersion, calculation_context: 'actual', reason: computed.reason, source_kind: 'performance_local' } };
 
       await onSubmit({ ...draftSession, impulse });
     } catch (err) {
@@ -247,6 +236,11 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
             className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#F7C843]"
           />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="manual-impulse" className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">Impulse manual (opcional)</label>
+        <input id="manual-impulse" type="number" min="0" step="any" value={manualImpulse} onChange={e => setManualImpulse(e.target.value)} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px]" />
       </div>
 
       {isEnduranceLike && (
@@ -440,7 +434,12 @@ export function SessionForm({ athleteId, athlete, onSubmit, onCancel }: SessionF
             ))}
           </div>
 
-          {isEnduranceLike && (
+          <div>
+        <label htmlFor="manual-impulse" className="block text-[11px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">Impulse manual (opcional)</label>
+        <input id="manual-impulse" type="number" min="0" step="any" value={manualImpulse} onChange={e => setManualImpulse(e.target.value)} className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-[13px]" />
+      </div>
+
+      {isEnduranceLike && (
             <>
               <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 pt-1">{t('zoneDistribution')}</p>
               <div className="grid grid-cols-5 gap-2">

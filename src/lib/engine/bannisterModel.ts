@@ -1,13 +1,11 @@
 import type { Athlete, Session } from '../database.types';
 import type { EngineOutput, BannisterState, AdaptationTrend, SportBreakdown, TauParameters, DailyBannisterResult } from './types';
-import { computeWarnings, computeRecommendations } from './warningLogic';
 import {
   buildCompartmentTau,
   runMultiCompartmentModel,
   getCurrentMultiCompartmentState,
   sessionToCompartmentImpulse,
 } from './multiCompartmentModel';
-import { generatePredictiveCurve } from './predictiveModel';
 import {
   computeSessionImpulse,
   groupByDay,
@@ -43,7 +41,7 @@ export function runBannisterModel(
   const tau = athleteTau(athlete);
   if (sessions.length === 0) return { history: [], tau };
 
-  const thresholds = resolveThresholds(athlete, context.cpModel);
+  const thresholds = resolveThresholds(athlete);
   const rows = sessions.map(s => computeSessionImpulse(s, thresholds));
   const daily = groupByDay(rows);
 
@@ -57,32 +55,25 @@ export function runBannisterModel(
   const cursor = new Date(firstDate);
   while (cursor <= endDate) {
     allDates.push(cursor.toISOString().split('T')[0]);
-    cursor.setDate(cursor.getDate() + 1);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
-  const limitedDates = allDates.slice(-READ_WINDOW_DAYS);
+  const limitedDates = allDates;
 
-  const seedDates = limitedDates.slice(0, SEED_WINDOW_DAYS);
-  const seedSum = seedDates.reduce(
-    (sum, d) => sum + (daily.get(d) ? effectiveDailyImpulse(daily.get(d)!, context.includeStrength) : 0),
-    0
-  );
-  const meanDailyImpulse = seedDates.length > 0 ? seedSum / seedDates.length : 0;
-
-  let fitness = context.startFitness ?? meanDailyImpulse;
-  let fatigue = context.startFatigue ?? meanDailyImpulse;
+  let fitness = context.startFitness ?? 0;
+  let fatigue = context.startFatigue ?? 0;
 
   const history: DailyEngineDay[] = [];
-  const warmUpCutoff = limitedDates.length - WARM_UP_DAYS;
+  const warmUpCutoff = WARM_UP_DAYS;
 
-  for (let i = SEED_WINDOW_DAYS; i < limitedDates.length; i++) {
+  for (let i = 0; i < limitedDates.length; i++) {
     const date = limitedDates[i];
     const day = daily.get(date);
+    if (day?.rows.some(row => row.status === 'insufficient')) break;
     const dayImpulse = day ? effectiveDailyImpulse(day, context.includeStrength) : 0;
 
     fitness = fitness + (dayImpulse - fitness) * (1 - Math.exp(-1 / tau.tauFitness));
     fatigue = fatigue + (dayImpulse - fatigue) * (1 - Math.exp(-1 / tau.tauFatigue));
 
-    const rampStart = Math.max(0, i - 7);
     const rampFitness = history.length >= 7
       ? history[history.length - 7].fitness
       : fitness;
@@ -133,23 +124,23 @@ export function computeEngineOutput(
 
   const compartmentTau = buildCompartmentTau(profile);
 
-  const thresholds = resolveThresholds(athlete, context.cpModel);
+  const thresholds = resolveThresholds(athlete);
   const compartmentPoints = sessions.map(s => {
     const row = computeSessionImpulse(s, thresholds);
-    const comp = sessionToCompartmentImpulse(row.sport, row.impulse, undefined);
+    const comp = sessionToCompartmentImpulse(row.sport, row.impulse ?? 0, undefined);
     return { date: row.date, ...comp };
   });
 
   const compartmentHistory = runMultiCompartmentModel(compartmentPoints, compartmentTau, READ_WINDOW_DAYS);
   const multiCompartment = getCurrentMultiCompartmentState(compartmentHistory, compartmentTau, profile);
 
-  const warnings = computeWarnings(currentState, history, multiCompartment);
-  const recommendations = computeRecommendations(currentState, history, multiCompartment, profile);
+  const warnings: EngineOutput['warnings'] = [];
+  const recommendations: EngineOutput['recommendations'] = [];
   const adaptationTrend = computeAdaptationTrend(history);
-  const baselinePerformance = computeBaseline(history);
-  const predictedPerformance = computePredicted(currentState.form, baselinePerformance);
-  const performanceIndex = baselinePerformance > 0 ? (predictedPerformance / baselinePerformance) * 100 : 100;
-  const predictedHistory = generatePredictiveCurve(history, tau, 28);
+  const predictedPerformance = 0;
+  const baselinePerformance = 0;
+  const performanceIndex = 0;
+  const predictedHistory: EngineOutput['predictedHistory'] = [];
   const sportBreakdown = computeSportBreakdown(sessions, thresholds);
 
   return {
@@ -191,22 +182,11 @@ function computeAdaptationTrend(history: DailyEngineDay[]): AdaptationTrend {
   return { direction, fitnessChangeRate: r4(fitnessChangeRate), fatigueChangeRate: r4(fatigueChangeRate), weeklyTrend: r2(weeklyTrend), label };
 }
 
-function computeBaseline(history: DailyEngineDay[]): number {
-  if (history.length < 30) return history.length > 0 ? avg(history.map(d => d.fitness)) : 1;
-  const sorted = [...history].sort((a, b) => b.fitness - a.fitness);
-  return avg(sorted.slice(0, Math.max(1, Math.floor(sorted.length * 0.1))).map(d => d.fitness));
-}
-
-function computePredicted(form: number, baseline: number): number {
-  if (baseline <= 0) return 0;
-  return baseline * (1 + (form / baseline) * 0.3);
-}
-
 function computeSportBreakdown(sessions: Session[], thresholds: ReturnType<typeof resolveThresholds>): SportBreakdown {
   const rows = sessions.map(s => computeSessionImpulse(s, thresholds));
   const entry = (sport: string) => {
     const f = rows.filter(r => r.sport === sport);
-    const t = f.reduce((sum, r) => sum + r.impulse, 0);
+    const t = f.reduce((sum, r) => sum + (r.impulse ?? 0), 0);
     return { sessions: f.length, totalImpulse: r3(t), avgImpulse: f.length > 0 ? r3(t / f.length) : 0 };
   };
   return {

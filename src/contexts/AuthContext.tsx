@@ -125,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const hashParams = new URLSearchParams(window.location.hash.slice(1));
       const code = hashParams.get('sso_code');
       if (code) {
-        window.history.replaceState({}, '', \`${window.location.pathname}${window.location.search}\`);
+        window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}`);
         localStorage.setItem(SESSION_TOKEN_KEY, await exchangeSatelliteCode(code));
       }
 

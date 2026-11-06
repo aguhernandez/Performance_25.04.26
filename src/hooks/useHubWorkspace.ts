@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Athlete, Session, NutritionLog, HrvLog, LabTest } from '../lib/database.types';
 import type { HubSnapshot } from './useHubData';
+import { registerPersistenceWorkspace, requestFullRecompute } from '../lib/engine/loadPersistence';
 import { mergeHubWorkspace, fetchHubStream } from '../lib/hub/hubContext';
 import { cleanPowerStream, computeMeanMaxPower, computePowerStats, computePerRideMetrics } from '../lib/engine/powerAnalysis';
 import { computeDurabilityRows } from '../lib/engine/wbal';
@@ -8,6 +9,14 @@ import type { ActivityMmpRow, ActivityMetricsRow, ActivityDurabilityRow } from '
 
 export function useHubWorkspace(athlete: Athlete | null, sessions: Session[], nutrition: NutritionLog[], hrv: HrvLog[], labs: LabTest[], snapshot: HubSnapshot, token?: string) {
   const workspace = useMemo(() => mergeHubWorkspace(athlete, sessions, nutrition, hrv, labs, snapshot), [athlete, sessions, nutrition, hrv, labs, snapshot]);
+  useEffect(() => {
+    if (!snapshot.context || !workspace.athlete) return;
+    const errors = snapshot.context.errors;
+    if (['external', 'executed', 'completed', 'strength', 'strengthLogs', 'extra'].some(key => errors[key])) return;
+    const unregister = registerPersistenceWorkspace(workspace.athlete, workspace.sessions);
+    requestFullRecompute(workspace.athlete, { onError: err => console.error('workspace recompute failed', err) });
+    return unregister;
+  }, [snapshot.context, workspace.athlete, workspace.sessions]);
   const [power, setPower] = useState<{ owner: string; rows: ActivityMmpRow[]; metrics: ActivityMetricsRow[]; durability: ActivityDurabilityRow[]; error: string | null } | null>(null);
   useEffect(() => {
     let cancelled = false;

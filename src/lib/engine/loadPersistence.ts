@@ -1,4 +1,8 @@
+import { runBannisterModel } from './bannisterModel';
 import { supabase } from '../supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+// The generated schema omits cache tables; use the existing unparameterized client only here.
+const cacheDb = supabase as unknown as SupabaseClient;
 import type { Athlete, Session } from '../database.types';
 import type { ImpulseRow } from './impulse';
 import {
@@ -6,8 +10,6 @@ import {
   computeSessionImpulse,
   computeSessionImpulseRowsWithHistory,
   groupByDay,
-  effectiveDailyImpulse,
-  athleteTau,
   resolveThresholds,
   type ThresholdOverrides,
   type ThresholdHistoryEntry,
@@ -19,6 +21,16 @@ const BATCH_SIZE = 500;
 export const READ_WINDOW_DAYS = 365;
 const EPSILON = 1e-6;
 const DEBOUNCE_MS = 3000;
+
+// A connected Hub workspace supplies the same merged activities and profile to
+// the dashboard and the derived cache; the registry never stores credentials.
+const connectedWorkspaces = new Map<string, { athlete: Athlete; sessions: Session[] }>();
+export function registerPersistenceWorkspace(athlete: Athlete, sessions: Session[]): () => void {
+  const workspace = { athlete, sessions };
+  connectedWorkspaces.set(athlete.id, workspace);
+  return () => { if (connectedWorkspaces.get(athlete.id) === workspace) connectedWorkspaces.delete(athlete.id); };
+}
+
 
 export interface DailyLoadMeta {
   cp_source: string;
@@ -66,16 +78,18 @@ export function rowsToDailyLoad(
   rows: ImpulseRow[],
   meta?: DailyLoadMeta
 ): DailyLoadRow[] {
-  return rows.map(r => ({
+  return rows.map(r => {
+    if (r.impulse === null) throw new Error('Cannot persist an insufficient Impulse as zero');
+    return ({
     athlete_id: athleteId,
     date: r.date,
     sport: r.sport,
-    impulse: round4(r.impulse),
+    impulse: round4(r.impulse ?? 0),
     intensity_source: r.intensitySource,
     quality: r.quality,
     formula_version: FORMULA_VERSION,
-    meta: meta ?? null,
-  }));
+    meta: { ...meta, algorithm_version: r.algorithmVersion ?? null, method: r.method ?? null, status: r.status ?? null, provenance: r.provenance ?? null, reason: r.reason ?? null } as DailyLoadMeta,
+  }); });
 }
 
 export function historyToDailyState(
@@ -100,11 +114,12 @@ export async function loadDailyLoad(
   since.setDate(since.getDate() - windowDays);
   const sinceStr = since.toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const { data, error } = await cacheDb
     .from('daily_load')
     .select('*')
     .eq('athlete_id', athleteId)
     .gte('date', sinceStr)
+    .eq('formula_version', FORMULA_VERSION)
     .order('date', { ascending: true });
 
   if (error) throw error;
@@ -119,11 +134,12 @@ export async function loadDailyState(
   since.setDate(since.getDate() - windowDays);
   const sinceStr = since.toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const { data, error } = await cacheDb
     .from('daily_state')
     .select('*')
     .eq('athlete_id', athleteId)
     .gte('date', sinceStr)
+    .eq('formula_version', FORMULA_VERSION)
     .order('date', { ascending: true });
 
   if (error) throw error;
@@ -139,7 +155,7 @@ export async function saveDailyImpulse(
   const payload = rowsToDailyLoad(athleteId, rows, meta);
   for (let i = 0; i < payload.length; i += BATCH_SIZE) {
     const chunk = payload.slice(i, i + BATCH_SIZE);
-    const { error } = await supabase
+    const { error } = await cacheDb
       .from('daily_load')
       .upsert(chunk, { onConflict: 'athlete_id,date,sport' });
     if (error) throw error;
@@ -154,7 +170,7 @@ export async function saveDailyState(
   const payload = historyToDailyState(athleteId, history);
   for (let i = 0; i < payload.length; i += BATCH_SIZE) {
     const chunk = payload.slice(i, i + BATCH_SIZE);
-    const { error } = await supabase
+    const { error } = await cacheDb
       .from('daily_state')
       .upsert(chunk, { onConflict: 'athlete_id,date' });
     if (error) throw error;
@@ -181,7 +197,7 @@ export async function loadThresholdsForDate(
   athleteId: string,
   date: string
 ): Promise<EffectiveThresholds | null> {
-  const { data, error } = await supabase
+  const { data, error } = await cacheDb
     .from('athlete_thresholds')
     .select('*')
     .eq('athlete_id', athleteId)
@@ -226,7 +242,7 @@ export async function seedThresholdsFromProfile(
   athlete: Athlete,
   firstSessionDate: string
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await cacheDb
     .from('athlete_thresholds')
     .upsert(thresholdRowFromAthlete(athlete, firstSessionDate, 'profile'), {
       onConflict: 'athlete_id,effective_from',
@@ -243,7 +259,7 @@ export async function insertThresholdRow(
   effectiveFrom: string,
   source: 'profile' | 'passport' | 'model' | 'lab' = 'profile'
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await cacheDb
     .from('athlete_thresholds')
     .upsert(thresholdRowFromAthlete(athlete, effectiveFrom, source), {
       onConflict: 'athlete_id,effective_from',
@@ -270,12 +286,12 @@ function metaFromResolution(
   };
 }
 
-function hasHistoryRows(rows: ThresholdHistoryEntry[]): boolean {
+export function hasHistoryRows(rows: ThresholdHistoryEntry[]): boolean {
   return rows.length > 0;
 }
 
 /** Calendar rows using date-aware threshold history for each session. */
-function buildCalendarRowsWithHistory(
+export function buildCalendarRowsWithHistory(
   athlete: Athlete,
   sessions: Session[],
   historyRows: ThresholdHistoryEntry[],
@@ -362,67 +378,10 @@ export function computeCalendarHistory(
   overrides?: ThresholdOverrides,
   historyRows: ThresholdHistoryEntry[] = []
 ): DailyBannisterResult[] {
-  const tau = athleteTau(athlete);
-  if (sessions.length === 0) return [];
+  // Use the same 42/7 recurrence and inputs as the dashboard.
+  void overrides; void historyRows;
+  return runBannisterModel(sessions, athlete, { includeStrength: true }).history;
 
-  const today = new Date().toISOString().split('T')[0];
-  const dates = [...new Set(sessions.map(s => s.session_date))].sort();
-  const firstDate = dates[0];
-
-  const rows = hasHistoryRows(historyRows)
-    ? buildCalendarRowsWithHistory(athlete, sessions, historyRows, firstDate, today)
-    : buildCalendarRows(athlete, sessions, overrides, firstDate, today);
-  const daily = groupByDay(rows);
-
-  const allDates: string[] = [];
-  const cursor = new Date(firstDate);
-  const end = new Date(today);
-  while (cursor <= end) {
-    allDates.push(cursor.toISOString().split('T')[0]);
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  // 28-day seed: mean daily impulse of the first 28 calendar days
-  const seedDates = allDates.slice(0, 28);
-  const seedSum = seedDates.reduce(
-    (sum, d) => sum + (daily.get(d) ? effectiveDailyImpulse(daily.get(d)!, true) : 0),
-    0
-  );
-  const meanDailyImpulse = seedDates.length > 0 ? seedSum / seedDates.length : 0;
-
-  let fitness = meanDailyImpulse;
-  let fatigue = meanDailyImpulse;
-
-  const history: DailyBannisterResult[] = [];
-  const warmUpCutoff = allDates.length - 120;
-
-  for (let i = 0; i < allDates.length; i++) {
-    const date = allDates[i];
-    const day = daily.get(date);
-    const dayImpulse = day ? effectiveDailyImpulse(day, true) : 0;
-
-    fitness = fitness + (dayImpulse - fitness) * (1 - Math.exp(-1 / tau.tauFitness));
-    fatigue = fatigue + (dayImpulse - fatigue) * (1 - Math.exp(-1 / tau.tauFatigue));
-
-    const rampStart = Math.max(0, i - 7);
-    const rampFitness = history.length >= 7 ? history[rampStart].fitness : fitness;
-
-    history.push({
-      date,
-      fitness: round4(fitness),
-      fatigue: round4(fatigue),
-      form: round4(fitness - fatigue),
-      recoveryRatio: round4(fitness > 0 ? fatigue / fitness : 0),
-      impulse: round4(dayImpulse),
-      tauFitness: tau.tauFitness,
-      tauFatigue: tau.tauFatigue,
-      rampRate: round4(fitness - rampFitness),
-      isWarmUp: i < warmUpCutoff,
-      formulaVersion: FORMULA_VERSION,
-    });
-  }
-
-  return history;
 }
 
 export interface PersistenceResult {
@@ -493,7 +452,7 @@ export function computeFosterWeeks(dailyTotalByDate: Map<string, number>): Foste
 function dailyTotalsFromCalendar(rows: ImpulseRow[]): Map<string, number> {
   const daily = new Map<string, number>();
   for (const row of rows) {
-    daily.set(row.date, (daily.get(row.date) ?? 0) + row.impulse);
+    daily.set(row.date, (daily.get(row.date) ?? 0) + (row.impulse ?? 0));
   }
   return daily;
 }
@@ -520,7 +479,7 @@ function numChanged(a: number, b: number): boolean {
   return Math.abs(a - b) > EPSILON;
 }
 
-function loadRowChanged(existing: DailyLoadRow, candidate: DailyLoadRow): boolean {
+export function loadRowChanged(existing: DailyLoadRow, candidate: DailyLoadRow): boolean {
   if (existing.intensity_source !== candidate.intensity_source) return true;
   if (existing.quality !== candidate.quality) return true;
   if (existing.formula_version !== candidate.formula_version) return true;
@@ -530,7 +489,7 @@ function loadRowChanged(existing: DailyLoadRow, candidate: DailyLoadRow): boolea
   return false;
 }
 
-function stateRowChanged(existing: DailyStateRow, candidate: DailyStateRow): boolean {
+export function stateRowChanged(existing: DailyStateRow, candidate: DailyStateRow): boolean {
   if (existing.formula_version !== candidate.formula_version) return true;
   if (numChanged(Number(existing.fitness), candidate.fitness)) return true;
   if (numChanged(Number(existing.fatigue), candidate.fatigue)) return true;
@@ -541,19 +500,19 @@ function stateRowChanged(existing: DailyStateRow, candidate: DailyStateRow): boo
 async function upsertRows<T>(table: string, rows: T[], conflict: string): Promise<void> {
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
-    const { error } = await supabase.from(table).upsert(chunk, { onConflict: conflict });
+    const { error } = await cacheDb.from(table).upsert(chunk, { onConflict: conflict });
     if (error) throw error;
   }
 }
 
-function dayBefore(dateStr: string): string {
+export function dayBefore(dateStr: string): string {
   const d = new Date(dateStr);
   d.setDate(d.getDate() - 1);
   return d.toISOString().split('T')[0];
 }
 
-async function fetchSessionsFrom(athleteId: string, fromDate: string): Promise<Session[]> {
-  const { data, error } = await supabase
+export async function fetchSessionsFrom(athleteId: string, fromDate: string): Promise<Session[]> {
+  const { data, error } = await cacheDb
     .from('sessions')
     .select('*')
     .eq('athlete_id', athleteId)
@@ -564,7 +523,7 @@ async function fetchSessionsFrom(athleteId: string, fromDate: string): Promise<S
 }
 
 async function fetchSessionsAll(athleteId: string): Promise<Session[]> {
-  const { data, error } = await supabase
+  const { data, error } = await cacheDb
     .from('sessions')
     .select('*')
     .eq('athlete_id', athleteId)
@@ -574,8 +533,8 @@ async function fetchSessionsAll(athleteId: string): Promise<Session[]> {
 }
 
 /** Load the full threshold history once per recompute (small table). */
-async function fetchThresholdHistory(athleteId: string): Promise<ThresholdHistoryEntry[]> {
-  const { data, error } = await supabase
+export async function fetchThresholdHistory(athleteId: string): Promise<ThresholdHistoryEntry[]> {
+  const { data, error } = await cacheDb
     .from('athlete_thresholds')
     .select('id, effective_from, cp_watts, hr_lt2_bpm, threshold_speed_kmh, source')
     .eq('athlete_id', athleteId)
@@ -656,7 +615,7 @@ async function runRecompute(job: PendingRecompute): Promise<void> {
     const result =
       job.mode === 'full'
         ? await persistDailyImpulse(job.athlete)
-        : await persistFrom(job.athlete, job.earliestDate!);
+        : await persistDailyImpulse(job.athlete);
     job.onDone?.(result);
   } catch (err) {
     console.error('recompute failed', err);
@@ -704,124 +663,8 @@ export function requestFullRecompute(
  * earliestAffectedDate (or the 28-day seed when absent), recompute
  * [earliestAffectedDate, today], diff-write only changed rows.
  */
-async function persistFrom(
-  athlete: Athlete,
-  earliestAffected: string
-): Promise<PersistenceResult> {
-  const today = new Date().toISOString().split('T')[0];
-  const tau = athleteTau(athlete);
-  const historyRows = await fetchThresholdHistory(athlete.id);
-
-  const anchorDate = dayBefore(earliestAffected);
-  const { data: anchorRow } = await supabase
-    .from('daily_state')
-    .select('date, fitness, fatigue')
-    .eq('athlete_id', athlete.id)
-    .eq('date', anchorDate)
-    .maybeSingle();
-
-  const sessions = await fetchSessionsFrom(athlete.id, earliestAffected);
-  const rows = buildCalendarRows(athlete, sessions, undefined, earliestAffected, today, historyRows);
-  const daily = groupByDay(rows);
-  const sports = [...new Set(sessions.map(s => s.session_type))];
-
-  let fitness: number;
-  let fatigue: number;
-  if (anchorRow) {
-    fitness = Number(anchorRow.fitness);
-    fatigue = Number(anchorRow.fatigue);
-  } else {
-    // No anchor: seed from the first 28 days of the recomputed range.
-    const gridDates: string[] = [];
-    const cursor = new Date(earliestAffected);
-    const end = new Date(today);
-    while (cursor <= end) {
-      gridDates.push(cursor.toISOString().split('T')[0]);
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    const seedDates = gridDates.slice(0, 28);
-    const seedSum = seedDates.reduce(
-      (sum, d) => sum + (daily.get(d) ? effectiveDailyImpulse(daily.get(d)!, true) : 0),
-      0
-    );
-    fitness = seedDates.length > 0 ? seedSum / seedDates.length : 0;
-    fatigue = fitness;
-  }
-
-  // Read existing rows for the range in ONE query each, then diff-write.
-  const { data: existingLoad } = await supabase
-    .from('daily_load')
-    .select('date, sport, impulse, intensity_source, quality, formula_version')
-    .eq('athlete_id', athlete.id)
-    .gte('date', earliestAffected)
-    .lte('date', today);
-  const existingLoadMap = new Map<string, DailyLoadRow>();
-  for (const r of (existingLoad ?? []) as DailyLoadRow[]) {
-    existingLoadMap.set(`${r.date}|${r.sport}`, r);
-  }
-
-  const { data: existingState } = await supabase
-    .from('daily_state')
-    .select('date, fitness, fatigue, form, formula_version')
-    .eq('athlete_id', athlete.id)
-    .gte('date', earliestAffected)
-    .lte('date', today);
-  const existingStateMap = new Map<string, DailyStateRow>();
-  for (const r of (existingState ?? []) as DailyStateRow[]) {
-    existingStateMap.set(r.date, r);
-  }
-
-  const meta = metaFromResolution(
-    resolveThresholds(athlete).resolution,
-    historyRows.length > 0 ? historyRows[historyRows.length - 1].rowId : null
-  );
-  const loadWrites: DailyLoadRow[] = [];
-  const stateWrites: DailyStateRow[] = [];
-
-  const cursor = new Date(earliestAffected);
-  const end = new Date(today);
-  while (cursor <= end) {
-    const date = cursor.toISOString().split('T')[0];
-
-    const day = daily.get(date);
-    const dayRows = day ? day.rows : restDayRows(date, sports);
-    for (const row of dayRows) {
-      const candidate = rowsToDailyLoad(athlete.id, [row], meta)[0];
-      const existing = existingLoadMap.get(`${date}|${row.sport}`);
-      if (!existing || loadRowChanged(existing, candidate)) {
-        loadWrites.push(candidate);
-      }
-    }
-
-    const dayImpulse = day ? effectiveDailyImpulse(day, true) : 0;
-    fitness = fitness + (dayImpulse - fitness) * (1 - Math.exp(-1 / tau.tauFitness));
-    fatigue = fatigue + (dayImpulse - fatigue) * (1 - Math.exp(-1 / tau.tauFatigue));
-
-    const candidate: DailyStateRow = {
-      athlete_id: athlete.id,
-      date,
-      fitness: round4(fitness),
-      fatigue: round4(fatigue),
-      form: round4(fitness - fatigue),
-      formula_version: FORMULA_VERSION,
-    };
-    const existing = existingStateMap.get(date);
-    if (!existing || stateRowChanged(existing, candidate)) {
-      stateWrites.push(candidate);
-    }
-
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  await upsertRows('daily_load', loadWrites, 'athlete_id,date,sport');
-  await upsertRows('daily_state', stateWrites, 'athlete_id,date');
-  await persistWeeklyLoad(athlete.id, dailyTotalsFromCalendar(rows));
-
-  return {
-    dailyLoadCount: loadWrites.length,
-    dailyStateCount: stateWrites.length,
-    lastDate: today,
-  };
+export async function persistFrom(athlete: Athlete, _earliestAffected: string): Promise<PersistenceResult> {
+  return persistDailyImpulse(athlete);
 }
 
 /**
@@ -834,37 +677,45 @@ export async function persistDailyImpulse(
   sessions?: Session[],
   overrides?: ThresholdOverrides
 ): Promise<PersistenceResult> {
-  const today = new Date().toISOString().split('T')[0];
-  const allSessions = sessions ?? (await fetchSessionsAll(athlete.id));
-  const historyRows = await fetchThresholdHistory(athlete.id);
-
-  if (allSessions.length === 0) {
-    return { dailyLoadCount: 0, dailyStateCount: 0, lastDate: '' };
-  }
-
-  const dates = [...new Set(allSessions.map(s => s.session_date))].sort();
-  const firstDate = dates[0];
-
-  const rows = hasHistoryRows(historyRows)
-    ? buildCalendarRowsWithHistory(athlete, allSessions, historyRows, firstDate, today)
-    : buildCalendarRows(athlete, allSessions, overrides, firstDate, today);
-  const meta = metaFromResolution(
-    resolveThresholds(athlete, overrides).resolution,
-    historyRows.length > 0 ? historyRows[historyRows.length - 1].rowId : null
-  );
-  const loadPayload = rows.map(r => rowsToDailyLoad(athlete.id, [r], meta)[0]);
-  await upsertRows('daily_load', loadPayload, 'athlete_id,date,sport');
-
+  const today = new Date().toISOString().slice(0, 10);
+  const connected = connectedWorkspaces.get(athlete.id);
+  const allSessions = sessions ?? connected?.sessions ?? (await fetchSessionsAll(athlete.id));
+  athlete = connected?.athlete ?? athlete;
   const history = computeCalendarHistory(athlete, allSessions, overrides);
+  const lastValidDate = history[history.length - 1]?.date ?? null;
+  const firstDate = allSessions.map(session => session.session_date).sort()[0];
+  const rows = firstDate && lastValidDate
+    ? buildCalendarRows(athlete, allSessions, undefined, firstDate, lastValidDate)
+    : [];
+  const meta = metaFromResolution(resolveThresholds(athlete).resolution);
+  const grouped = new Map<string, ImpulseRow[]>();
+  for (const row of rows) {
+    if (row.impulse === null) continue;
+    const key = `${row.date}:${row.sport}`;
+    grouped.set(key, [...(grouped.get(key) ?? []), row]);
+  }
+  const loadPayload = [...grouped.values()].map(group => {
+    const total = group.reduce((sum, row) => sum + (row.impulse ?? 0), 0);
+    const payload = rowsToDailyLoad(athlete.id, [{ ...group[0], impulse: total }], meta)[0];
+    payload.meta = { ...payload.meta, inputs: group.map(row => ({
+      impulse: row.impulse, algorithm_version: row.algorithmVersion, method: row.method,
+      status: row.status, provenance: row.provenance, reason: row.reason,
+    })) } as DailyLoadMeta;
+    return payload;
+  });
+  // These tables are derived caches. Remove stale rows, including values beyond an
+  // incomplete session, before rebuilding them with the current algorithm.
+  for (const table of ['daily_load', 'daily_state', 'weekly_load']) {
+    const { error } = await cacheDb.from(table).delete().eq('athlete_id', athlete.id);
+    if (error) throw error;
+  }
+  await upsertRows('daily_load', loadPayload, 'athlete_id,date,sport');
   const statePayload = historyToDailyState(athlete.id, history);
   await upsertRows('daily_state', statePayload, 'athlete_id,date');
   await persistWeeklyLoad(athlete.id, dailyTotalsFromCalendar(rows));
+  return { dailyLoadCount: loadPayload.length, dailyStateCount: statePayload.length,
+    lastDate: lastValidDate ?? (allSessions.length ? '' : today) };
 
-  return {
-    dailyLoadCount: loadPayload.length,
-    dailyStateCount: statePayload.length,
-    lastDate: history.length > 0 ? history[history.length - 1].date : today,
-  };
 }
 
 /**
@@ -872,45 +723,14 @@ export async function persistDailyImpulse(
  * extend the grid with zero-impulse days so decay continues on rest days
  * without re-reading sessions.
  */
-export async function rollForwardDailyState(
-  athleteId: string,
-  lastStateDate: string
-): Promise<number> {
-  const today = new Date().toISOString().split('T')[0];
+export async function rollForwardDailyState(athleteId: string, lastStateDate: string): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
   if (!lastStateDate || lastStateDate >= today) return 0;
-
-  const { data: lastRow } = await supabase
-    .from('daily_state')
-    .select('fitness, fatigue')
-    .eq('athlete_id', athleteId)
-    .eq('date', lastStateDate)
-    .maybeSingle();
-
-  let fitness = Number(lastRow?.fitness ?? 0);
-  let fatigue = Number(lastRow?.fatigue ?? 0);
-  const { tauFitness, tauFatigue } = athleteTau({});
-
-  const rows: DailyStateRow[] = [];
-  const cursor = new Date(lastStateDate);
-  cursor.setDate(cursor.getDate() + 1);
-  const end = new Date(today);
-  while (cursor <= end) {
-    const date = cursor.toISOString().split('T')[0];
-    fitness = fitness + (0 - fitness) * (1 - Math.exp(-1 / tauFitness));
-    fatigue = fatigue + (0 - fatigue) * (1 - Math.exp(-1 / tauFatigue));
-    rows.push({
-      athlete_id: athleteId,
-      date,
-      fitness: round4(fitness),
-      fatigue: round4(fatigue),
-      form: round4(fitness - fatigue),
-      formula_version: FORMULA_VERSION,
-    });
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  await upsertRows('daily_state', rows, 'athlete_id,date');
-  return rows.length;
+  const { data, error } = await cacheDb.from('athletes').select('*').eq('id', athleteId).maybeSingle();
+  if (error) throw error;
+  if (!data) return 0;
+  const result = await persistDailyImpulse(data as Athlete);
+  return result.dailyStateCount;
 }
 
 /**

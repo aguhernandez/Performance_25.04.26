@@ -16,6 +16,7 @@ import { ExportPanel } from '../export/ExportPanel';
 import { SharePanel } from '../share/SharePanel';
 import { HubDataPanel } from '../hub/HubDataPanel';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { computeDailyImpulseRows } from '../../lib/engine/impulse';
 import { analyzeNutritionCompliance } from '../../lib/engine/nutritionAnalyzer';
 import type { HubSnapshot } from '../../hooks/useHubData';
 
@@ -57,11 +58,15 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
     );
   }
 
-  const { current, history, warnings, recommendations, adaptationTrend, performanceIndex, baselinePerformance, predictedPerformance, multiCompartment, compartmentHistory, predictedHistory, sportBreakdown } = engine;
+  const { current, history, warnings, recommendations, adaptationTrend, performanceIndex, baselinePerformance, compartmentHistory, predictedHistory, sportBreakdown } = engine;
 
-  const recentSessions = sessions.slice(0, 7);
-  const totalLoad = recentSessions.reduce((sum, s) => sum + s.impulse, 0);
-  const avgImpulse = recentSessions.length > 0 ? totalLoad / recentSessions.length : 0;
+  const today = new Date().toISOString().slice(0, 10);
+  const missingImpulse = computeDailyImpulseRows(sessions, athlete).filter(row => row.date <= today && row.status === 'insufficient');
+  const currentAvailable = history.length > 0 && missingImpulse.length === 0;
+  const cutoff = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
+  const recentSessions = sessions.filter(s => s.session_date >= cutoff && s.session_date <= today);
+  const recentLoads = computeDailyImpulseRows(recentSessions, athlete);
+  const avgImpulse = recentLoads.length ? recentLoads.reduce((sum, row) => sum + (row.impulse ?? 0), 0) / recentLoads.length : 0;
   const alertCount = warnings.length + recommendations.filter(r => r.priority === 'high').length;
 
   const handleTabClick = (e: React.MouseEvent, tabId: Tab) => {
@@ -75,23 +80,24 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
       case 'overview':
         return (
           <div className="space-y-4">
+            {missingImpulse.length > 0 && <p className="text-sm text-amber-700">Impulse v1: {missingImpulse.length} session(s) have insufficient data. Curves stop before the first incomplete session.</p>}
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <PerformanceChart history={history} windowDays={90} predictedHistory={predictedHistory} />
               </div>
               <div>
-                <FormGauge state={current} />
+                {currentAvailable ? <FormGauge state={current} /> : <div className="rounded-xl border border-gray-200 p-4 text-sm text-gray-500">Estado actual no disponible: falta Impulse en sesiones anteriores.</div>}
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <AdaptationTrend
+                {currentAvailable && <AdaptationTrend
                   trend={adaptationTrend}
                   tau={current.tau}
                   performanceIndex={performanceIndex}
                   baselinePerformance={baselinePerformance}
-                />
+                />}
               </div>
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                 <h3 className="text-[13px] font-semibold text-gray-900 dark:text-white mb-3">{t('athleteProfileCard')}</h3>
@@ -115,7 +121,7 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-mono tracking-widest mb-2">{t('sevenDayImpulse')}</p>
                   <div className="flex items-end gap-1">
                     <span className="text-[22px] font-bold text-[#2A1F4A] dark:text-[#B8A9E5] tabular-nums font-mono">
-                      {avgImpulse.toFixed(3)}
+                      {recentLoads.some(row => row.impulse === null) ? '—' : avgImpulse.toFixed(2)}
                     </span>
                     <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{t('auSession')}</span>
                   </div>
@@ -137,7 +143,7 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
                   { label: t('tauFitness'), value: `${current.tau.tauFitness}d`, desc: t('longTermAdaptation'), color: 'var(--chart-fitness)' },
                   { label: t('tauFatigue'), value: `${current.tau.tauFatigue}d`, desc: t('shortTermStress'), color: 'var(--chart-fatigue)' },
                   { label: t('recoveryRatio'), value: `${(current.recoveryRatio * 100).toFixed(0)}%`, desc: t('fatFitRatio'), color: current.recoveryRatio > 1.2 ? 'var(--chart-fatigue)' : 'var(--chart-form)' },
-                  { label: t('predictedPerf'), value: predictedPerformance.toFixed(2), desc: t('relativeBaseline'), color: 'var(--chart-fitness)' },
+                  { label: t('predictedPerf'), value: '—', desc: 'Not available', color: 'var(--chart-fitness)' },
                   { label: t('sessions90d'), value: sessions.filter(s => {
                     const d = new Date(s.session_date);
                     const cutoff = new Date();
@@ -157,10 +163,10 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
         );
 
       case 'compartments':
-        return <CompartmentsPanel history={compartmentHistory} />;
+        return currentAvailable ? <CompartmentsPanel history={compartmentHistory} /> : <p>Datos insuficientes para calcular los compartimentos.</p>;
 
       case 'load':
-        return <LoadHeatmap sessions={sessions} />;
+        return currentAvailable ? <LoadHeatmap sessions={sessions.map((session, index) => ({ ...session, impulse: computeDailyImpulseRows(sessions, athlete)[index].impulse ?? 0 }))} /> : <p>Datos insuficientes para mostrar la carga.</p>;
 
       case 'analytics':
         return (
@@ -170,10 +176,10 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
               compliance={analyzeNutritionCompliance(nutritionLogs, athlete.weight_kg ?? 75, athlete.lean_mass_kg ?? (athlete.weight_kg ?? 75) * 0.85)}
               weightKg={athlete.weight_kg ?? 75}
             />
-            <SportTrendsPanel
-              sessions={sessions}
+            {currentAvailable ? <SportTrendsPanel
+              sessions={sessions.map((session, index) => ({ ...session, impulse: computeDailyImpulseRows(sessions, athlete)[index].impulse ?? 0 }))}
               sportBreakdown={sportBreakdown}
-            />
+            /> : <p>Datos insuficientes para mostrar la carga por deporte.</p>}
           </div>
         );
 
@@ -208,31 +214,29 @@ export function DashboardView({ engine, athlete, sessions, nutritionLogs, userId
       <div className="grid grid-cols-4 gap-3">
         <MetricCard
           label={t('fitness')}
-          value={current.fitness}
+          value={currentAvailable ? current.fitness : '—'}
           subtext={`τ₁ = ${current.tau.tauFitness}d`}
           accent="var(--chart-fitness)"
           icon={<Activity className="w-4 h-4" />}
         />
         <MetricCard
           label={t('fatigue')}
-          value={current.fatigue}
+          value={currentAvailable ? current.fatigue : '—'}
           subtext={`τ₂ = ${current.tau.tauFatigue}d`}
           accent="var(--chart-fatigue)"
           icon={<Dumbbell className="w-4 h-4" />}
         />
         <MetricCard
           label={t('form')}
-          value={current.form >= 0 ? `+${current.form.toFixed(2)}` : current.form.toFixed(2)}
+          value={!currentAvailable ? '—' : current.form >= 0 ? `+${current.form.toFixed(2)}` : current.form.toFixed(2)}
           subtext={t('fitnessMinus')}
           accent={current.form >= 0 ? 'var(--chart-fitness)' : 'var(--chart-fatigue)'}
         />
         <MetricCard
           label={t('perfIndex')}
-          value={performanceIndex}
-          unit="pts"
-          subtext={`${t('baseline')}: ${baselinePerformance.toFixed(2)}`}
+          value="—"
+          subtext="Not available"
           accent="var(--chart-fitness)"
-          trend={performanceIndex - 100}
         />
       </div>
 

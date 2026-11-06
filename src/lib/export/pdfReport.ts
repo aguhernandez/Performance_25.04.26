@@ -22,7 +22,7 @@ function sparkline(history: DailyBannisterResult[], key: 'fitness' | 'fatigue' |
 }
 
 function buildHtml(engine: EngineOutput, athlete: Athlete, sessions: Session[], nutritionLogs: NutritionLog[]): string {
-  const { current, history, warnings, recommendations, multiCompartment, sportBreakdown, performanceIndex, baselinePerformance, adaptationTrend } = engine;
+  const { current, history, warnings, recommendations, multiCompartment, sportBreakdown, adaptationTrend } = engine;
 
   const recentSessions = [...sessions].sort((a, b) => b.session_date.localeCompare(a.session_date)).slice(0, 10);
 
@@ -135,8 +135,8 @@ function buildHtml(engine: EngineOutput, athlete: Athlete, sessions: Session[], 
       </div>
       <div class="metric-card">
         <div class="metric-label">Performance Index</div>
-        <div class="metric-value" style="color:#0f172a">${performanceIndex}</div>
-        <div class="metric-sub">Baseline: ${baselinePerformance.toFixed(2)}</div>
+        <div class="metric-value" style="color:#0f172a">—</div>
+        <div class="metric-sub">Not available</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Recovery Ratio</div>

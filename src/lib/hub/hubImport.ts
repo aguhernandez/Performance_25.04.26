@@ -23,18 +23,9 @@ function mapSport(sport: string | null | undefined): SessionType {
   return SPORT_MAP[lower] ?? 'endurance';
 }
 
-function workoutTypeToTss(workout: HubTrainingSchedule['workouts'][number]): number {
-  if (workout.tss !== null && workout.tss > 0) return workout.tss;
-  const dur = workout.actual_duration_minutes ?? workout.estimated_duration_minutes ?? 0;
-  const intensityGuess =
-    workout.intensity_zone === 'red' ? 1.1 :
-    workout.intensity_zone === 'yellow' ? 0.85 : 0.7;
-  return (dur / 60) * intensityGuess * intensityGuess * 100;
-}
-
 /**
  * Convert Hub training schedule workouts into local SessionInsert rows.
- * Each workout becomes one session with an impulse estimate from TSS.
+ * Only completed workouts are imported; load is calculated from supported Impulse v1 inputs.
  */
 export function hubWorkoutsToSessions(
   workouts: HubTrainingSchedule['workouts'],
@@ -44,7 +35,7 @@ export function hubWorkoutsToSessions(
     .filter(w => w.status === 'completed' || w.status === 'done' || w.actual_duration_minutes !== null)
     .map(w => {
       const duration = w.actual_duration_minutes ?? w.estimated_duration_minutes ?? 0;
-      const tss = workoutTypeToTss(w);
+      const tss = 0;
       return {
         athlete_id: athleteId,
         session_date: w.scheduled_date,

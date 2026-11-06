@@ -25,6 +25,7 @@ export function sportType(value: unknown): Session['session_type'] {
   const sport = String(value ?? '').toLowerCase().replace(/[ _-]/g, '');
   if (['ride', 'virtualride', 'ebikeride', 'cycling', 'bike', 'mountainbike', 'gravelride'].includes(sport)) return 'cycling';
   if (['run', 'virtualrun', 'trailrun', 'running', 'trailrunning'].includes(sport)) return 'running';
+  if (['swim', 'swimming', 'openwaterswim'].includes(sport)) return 'endurance';
   if (['strength', 'gym', 'weighttraining', 'strengthtraining', 'crossfit'].includes(sport)) return 'strength';
   if (sport === 'yoga' || sport === 'other') return 'other';
   return 'endurance';
@@ -88,7 +89,7 @@ export function hubSessions(context: HubContextResponse, athleteId: string): Ses
   for (const w of d.completed ?? []) {
     const s = baseSession(`completed:${w.id}`, athleteId, date(w.scheduled_date), w.workout_name, w.sport);
     Object.assign(s, { duration_min: (num(w.duration_seconds) ?? 0) / 60, rpe: num(w.rpe), notes: w.notes ?? 'Fuente: Hub / registro manual' });
-    s.raw_data = { hub_readonly: true, hub_workout_id: w.id, hub_planned_workout_id: w.planned_workout_id, hub_time_in_zones: w.time_in_zones, hub_intervals: w.intervals, hub_wellness: w.wellness };
+    s.raw_data = { hub_readonly: true, impulse_result: w.impulse_result, actual_impulse: w.actual_impulse, impulse_status: w.impulse_status, impulse_method: w.impulse_method, impulse_algorithm_version: w.impulse_algorithm_version, hub_workout_id: w.id, hub_planned_workout_id: w.planned_workout_id, hub_time_in_zones: w.time_in_zones, hub_intervals: w.intervals, hub_wellness: w.wellness };
     if (w.time_in_zones && typeof w.time_in_zones === 'object') s.zone_distribution = { z1_min: (num(w.time_in_zones.z1) ?? 0) / 60, z2_min: (num(w.time_in_zones.z2) ?? 0) / 60, z3_min: (num(w.time_in_zones.z3) ?? 0) / 60, z4_min: (num(w.time_in_zones.z4) ?? 0) / 60, z5_min: (num(w.time_in_zones.z5) ?? 0) / 60 };
     // Suppress only an explicit link, never two unrelated sessions on the same date.
     if (!(d.external ?? []).some(a => a.imported_to_training_log_id === w.id || (w.planned_workout_id && a.planned_workout_id === w.planned_workout_id))) sessions.push(s);

@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+const dataDb = supabase as unknown as SupabaseClient;
 import type { Athlete, Session, LabTest, NutritionLog, HrvLog, HrvLogInsert, TrainingBlock, TrainingBlockInsert, RaceScheduleEntry, RaceScheduleInsert, HealthHistoryEntry, HealthHistoryInsert } from '../lib/database.types';
 import {
-  persistDailyImpulse,
   rollForwardDailyState,
   requestRecompute,
   requestFullRecompute,
   seedThresholdsFromProfile,
   insertThresholdRow,
 } from '../lib/engine/loadPersistence';
-import type { ThresholdOverrides } from '../lib/engine/impulse';
+import { FORMULA_VERSION, type ThresholdOverrides } from '../lib/engine/impulse';
 
 export interface AthleteDataState {
   athlete: Athlete | null;
@@ -41,24 +42,7 @@ export function useAthleteData(
     error: null,
   });
 
-  const readOverrides = useCallback(
-    () => (thresholdOverridesRef ? thresholdOverridesRef.current : undefined),
-    [thresholdOverridesRef]
-  );
-
-  const runPersistence = useCallback(async (athlete: Athlete) => {
-    try {
-      const { data: sessions, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('athlete_id', athlete.id)
-        .order('session_date', { ascending: true });
-      if (error) throw error;
-      await persistDailyImpulse(athlete, (sessions ?? []) as Session[], readOverrides());
-    } catch (err) {
-      console.error('daily persistence failed', err);
-    }
-  }, [readOverrides]);
+  void thresholdOverridesRef;
 
   /** Delta recompute from the earliest affected session date (coalesced 3 s). */
   const queueDelta = useCallback(
@@ -79,7 +63,7 @@ export function useAthleteData(
   /** Seed the threshold history once from the profile, effective from the first session. */
   const ensureThresholdSeed = useCallback(async (athlete: Athlete, firstSessionDate: string) => {
     try {
-      const { data: existing } = await supabase
+      const { data: existing } = await dataDb
         .from('athlete_thresholds')
         .select('id')
         .eq('athlete_id', athlete.id)
@@ -113,7 +97,7 @@ export function useAthleteData(
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
-    const { data: athleteData, error: athleteError } = await supabase
+    const { data: athleteData, error: athleteError } = await dataDb
       .from('athletes')
       .select('*')
       .eq('user_id', userId)
@@ -130,24 +114,26 @@ export function useAthleteData(
     }
 
     const [sessionsRes, labRes, nutritionRes, hrvRes, blocksRes, racesRes, healthRes] = await Promise.all([
-      supabase.from('sessions').select('*').eq('athlete_id', athleteData.id).order('session_date', { ascending: false }).limit(365),
-      supabase.from('lab_tests').select('*').eq('athlete_id', athleteData.id).order('test_date', { ascending: false }),
-      supabase.from('nutrition_logs').select('*').eq('athlete_id', athleteData.id).order('log_date', { ascending: false }).limit(90),
-      supabase.from('hrv_logs').select('*').eq('athlete_id', athleteData.id).order('log_date', { ascending: false }).limit(90),
-      supabase.from('training_blocks').select('*').eq('athlete_id', athleteData.id).order('start_date', { ascending: false }),
-      supabase.from('race_schedule').select('*').eq('athlete_id', athleteData.id).order('race_date', { ascending: true }),
-      supabase.from('athlete_health_history').select('*').eq('athlete_id', athleteData.id).order('event_date', { ascending: false }),
+      dataDb.from('sessions').select('*').eq('athlete_id', athleteData.id).order('session_date', { ascending: false }),
+      dataDb.from('lab_tests').select('*').eq('athlete_id', athleteData.id).order('test_date', { ascending: false }),
+      dataDb.from('nutrition_logs').select('*').eq('athlete_id', athleteData.id).order('log_date', { ascending: false }).limit(90),
+      dataDb.from('hrv_logs').select('*').eq('athlete_id', athleteData.id).order('log_date', { ascending: false }).limit(90),
+      dataDb.from('training_blocks').select('*').eq('athlete_id', athleteData.id).order('start_date', { ascending: false }),
+      dataDb.from('race_schedule').select('*').eq('athlete_id', athleteData.id).order('race_date', { ascending: true }),
+      dataDb.from('athlete_health_history').select('*').eq('athlete_id', athleteData.id).order('event_date', { ascending: false }),
     ]);
 
-    const { data: lastState } = await supabase
+    const { data: lastState } = await dataDb
       .from('daily_state')
-      .select('date')
+      .select('date, formula_version')
       .eq('athlete_id', athleteData.id)
       .order('date', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (lastState && lastState.date) {
+    if (!lastState || lastState.formula_version !== FORMULA_VERSION) {
+      requestFullRecompute(athleteData as Athlete, { onError: err => console.error('full recompute failed', err) });
+    } else if (lastState.date) {
       try {
         await rollForwardDailyState(athleteData.id, lastState.date);
       } catch (err) {
@@ -175,7 +161,7 @@ export function useAthleteData(
 
   const createAthlete = useCallback(async (data: Omit<import('../lib/database.types').AthleteInsert, 'user_id'>) => {
     if (!userId) return null;
-    const { data: created, error } = await supabase
+    const { data: created, error } = await dataDb
       .from('athletes')
       .insert({ ...data, user_id: userId })
       .select()
@@ -198,7 +184,7 @@ export function useAthleteData(
       (updates.tau_fitness !== undefined && updates.tau_fitness !== prev.tau_fitness) ||
       (updates.tau_fatigue !== undefined && updates.tau_fatigue !== prev.tau_fatigue);
 
-    const { error } = await supabase
+    const { error } = await dataDb
       .from('athletes')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', prev.id);
@@ -228,7 +214,7 @@ export function useAthleteData(
   }, [state.athlete, loadAll, queueDelta, queueFull]);
 
   const addSession = useCallback(async (session: import('../lib/database.types').SessionInsert) => {
-    const { data, error } = await supabase
+    const { data, error } = await dataDb
       .from('sessions')
       .insert(session)
       .select()
@@ -246,7 +232,7 @@ export function useAthleteData(
   const addSessions = useCallback(async (sessions: import('../lib/database.types').SessionInsert[]) => {
     const CHUNK = 50;
     for (let i = 0; i < sessions.length; i += CHUNK) {
-      const { error } = await supabase.from('sessions').insert(sessions.slice(i, i + CHUNK));
+      const { error } = await dataDb.from('sessions').insert(sessions.slice(i, i + CHUNK));
       if (error) throw error;
     }
     await loadAll();
@@ -262,20 +248,20 @@ export function useAthleteData(
   }, [loadAll, state.athlete, queueDelta]);
 
   const deleteSession = useCallback(async (id: string) => {
-    const { data: existing } = await supabase
+    const { data: existing } = await dataDb
       .from('sessions')
       .select('session_date')
       .eq('id', id)
       .maybeSingle();
     const deletedDate = (existing as { session_date: string } | null)?.session_date ?? null;
-    const { error } = await supabase.from('sessions').delete().eq('id', id);
+    const { error } = await dataDb.from('sessions').delete().eq('id', id);
     if (error) throw error;
     await loadAll();
     if (state.athlete) queueDelta(state.athlete, deletedDate);
   }, [loadAll, state.athlete, queueDelta]);
 
   const addLabTest = useCallback(async (test: import('../lib/database.types').LabTestInsert) => {
-    const { data, error } = await supabase
+    const { data, error } = await dataDb
       .from('lab_tests')
       .insert(test)
       .select()
@@ -286,59 +272,59 @@ export function useAthleteData(
   }, [loadAll]);
 
   const addHrvLog = useCallback(async (log: HrvLogInsert) => {
-    const { data, error } = await supabase.from('hrv_logs').insert(log).select().single();
+    const { data, error } = await dataDb.from('hrv_logs').insert(log).select().single();
     if (error) throw error;
     await loadAll();
     return data;
   }, [loadAll]);
 
   const deleteHrvLog = useCallback(async (id: string) => {
-    const { error } = await supabase.from('hrv_logs').delete().eq('id', id);
+    const { error } = await dataDb.from('hrv_logs').delete().eq('id', id);
     if (error) throw error;
     await loadAll();
   }, [loadAll]);
 
   const addTrainingBlock = useCallback(async (block: TrainingBlockInsert) => {
-    const { data, error } = await supabase.from('training_blocks').insert(block).select().single();
+    const { data, error } = await dataDb.from('training_blocks').insert(block).select().single();
     if (error) throw error;
     await loadAll();
     return data;
   }, [loadAll]);
 
   const deleteTrainingBlock = useCallback(async (id: string) => {
-    const { error } = await supabase.from('training_blocks').delete().eq('id', id);
+    const { error } = await dataDb.from('training_blocks').delete().eq('id', id);
     if (error) throw error;
     await loadAll();
   }, [loadAll]);
 
   const addRace = useCallback(async (race: RaceScheduleInsert) => {
-    const { data, error } = await supabase.from('race_schedule').insert(race).select().single();
+    const { data, error } = await dataDb.from('race_schedule').insert(race).select().single();
     if (error) throw error;
     await loadAll();
     return data;
   }, [loadAll]);
 
   const updateRace = useCallback(async (id: string, updates: Partial<RaceScheduleEntry>) => {
-    const { error } = await supabase.from('race_schedule').update(updates).eq('id', id);
+    const { error } = await dataDb.from('race_schedule').update(updates).eq('id', id);
     if (error) throw error;
     await loadAll();
   }, [loadAll]);
 
   const deleteRace = useCallback(async (id: string) => {
-    const { error } = await supabase.from('race_schedule').delete().eq('id', id);
+    const { error } = await dataDb.from('race_schedule').delete().eq('id', id);
     if (error) throw error;
     await loadAll();
   }, [loadAll]);
 
   const addHealthEvent = useCallback(async (event: HealthHistoryInsert) => {
-    const { data, error } = await supabase.from('athlete_health_history').insert(event).select().single();
+    const { data, error } = await dataDb.from('athlete_health_history').insert(event).select().single();
     if (error) throw error;
     await loadAll();
     return data;
   }, [loadAll]);
 
   const deleteHealthEvent = useCallback(async (id: string) => {
-    const { error } = await supabase.from('athlete_health_history').delete().eq('id', id);
+    const { error } = await dataDb.from('athlete_health_history').delete().eq('id', id);
     if (error) throw error;
     await loadAll();
   }, [loadAll]);
